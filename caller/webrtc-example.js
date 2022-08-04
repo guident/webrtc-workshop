@@ -28,7 +28,9 @@ websocketConnection.onerror = function(evt) {
 var pc = null;
 var localMediaStreams = null;
 
-var remoteVideoStream = null;
+var remoteVideoStream2 = null;
+var remoteVideoStream2 = null;
+var remoteVideoStream3 = null;
 
 async function getLocalMediaStreams() {
         localMediaStreams = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
@@ -55,18 +57,22 @@ function onStartPressed() {
 
 		if ( ev.transceiver.mid == "1" ) {
                         //remoteVideoStream = new MediaStream([ev.streams[0].getAudioTracks()[0], ev.track]);
-                        remoteVideoStream = new MediaStream([ev.track]);
-                        console.log("New stream id: <<" + remoteVideoStream.id + ">> " + remoteVideoStream.getTracks().length);
-                        document.getElementById("videoStream").srcObject = remoteVideoStream;
+                        remoteVideoStream1 = new MediaStream([ev.track]);
+                        console.log("New stream id: <<" + remoteVideoStream1.id + ">> " + remoteVideoStream1.getTracks().length);
+                        document.getElementById("videoStream1").srcObject = remoteVideoStream1;
                 } 
 
-		/*
 		else if ( ev.transceiver.mid == "2" ) {
-                        this.secondVideoMediaStream = new MediaStream([ ev.track ]);
-                        console.log("New stream id: <<" + this.secondVideoMediaStream.id + ">> " + this.secondVideoMediaStream.getTracks().length);
-                        document.getElementById(this.remoteVideoId[1]).srcObject = this.secondVideoMediaStream;
+                        remoteVideoStream2 = new MediaStream([ ev.track ]);
+                        console.log("New stream id: <<" + remoteVideoStream2.id + ">> " + remoteVideoStream2.getTracks().length);
+                        document.getElementById("videoStream2").srcObject = remoteVideoStream2;
 		}
-		*/
+
+		else if ( ev.transceiver.mid == "3" ) {
+                        remoteVideoStream3 = new MediaStream([ ev.track ]);
+                        console.log("New stream id: <<" + remoteVideoStream3.id + ">> " + remoteVideoStream3.getTracks().length);
+                        document.getElementById("videoStream3").srcObject = remoteVideoStream3;
+		}
 	}
 
 
