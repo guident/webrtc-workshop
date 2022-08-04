@@ -30,6 +30,22 @@ var localMediaStreams = null;
 
 var remoteVideoStream = null;
 
+
+async function mikemadethis() {
+        localMediaStreams = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+
+	var tracks = localMediaStreams.getTracks();
+
+	tracks.forEach((track) => {
+		var trackSettings = track.getSettings();
+		console.log("ID: <<" + track.id + ">> Kind: <<" + track.kind + ">> Label: <<" + track.label + ">> DeviceId: <<" + trackSettings.deviceId + ">>");
+
+	});
+
+}
+
+
+
 async function getLocalMediaStreams() {
        	// localMediaStreams = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
 			var streamDevicesList = {}
@@ -43,7 +59,7 @@ async function getLocalMediaStreams() {
 				// streamDevicesList=devices
 				devices.forEach((device) => {
 				if(device.kind == "videoinput"){
-					console.log("<<device : "+device.kind+" << devideID: "+device.deviceId+" <<")
+					console.log("<<device: " + device.kind + ">> DeviceId: <<" + device.deviceId + ">>");
 					localMediaStreams = navigator.mediaDevices.getUserMedia({
 						video: {
 							deviceId: {
@@ -72,7 +88,8 @@ async function getLocalMediaStreams() {
 }
 
 
-getLocalMediaStreams();
+//getLocalMediaStreams();
+mikemadethis();
 
 
 const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}], 'bundlePolicy': 'max-bundle'};
