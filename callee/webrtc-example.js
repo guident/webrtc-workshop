@@ -116,11 +116,11 @@ function onOfferReceived(offer) {
 	}
 
 
-	localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
+	//localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
 	//localMediaStreams.getTracks().forEach(track => pc.addTrack(track, localMediaStreams));
-        pc.addTransceiver("video", { direction: "recvonly" } );
-	pc.addTransceiver("video", { direction: "recvonly" } );
-	pc.addTransceiver("video", { direction: "recvonly" } );
+        pc.addTransceiver("video", { direction: "sendrecv" } );
+	pc.addTransceiver("video", { direction: "sendonly" } );
+	pc.addTransceiver("video", { direction: "sendonly" } );
 
 	pc.onicecandidate = function(iceevt) {
 		if ( iceevt.candidate == null ) {
