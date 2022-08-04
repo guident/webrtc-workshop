@@ -37,6 +37,8 @@ async function getLocalMediaStreams() {
 	localAudioVideo = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
 	localVideo = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
 	localVideosecond = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
+
+	
 		
 }
 
@@ -85,7 +87,7 @@ function onOfferReceived(offer) {
 	}
 
 
-	localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
+	localAudioVideo.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
 	// localMediaStreams.getTracks().forEach(track => pc.addTrack(track, localMediaStreams));
     pc.addTransceiver("video", { direction: "sendonly" } );
 	pc.addTransceiver("video", { direction: "sendonly" } );
