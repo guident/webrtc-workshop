@@ -27,6 +27,9 @@ websocketConnection.onerror = function(evt) {
 
 var pc = null;
 var localMediaStreams = null;
+var localAudioVideo = null
+var localVideo = null
+var localVideoSecond = null
 
 var remoteVideoStream = null;
 
@@ -47,44 +50,11 @@ async function mikemadethis() {
 
 
 async function getLocalMediaStreams() {
-       	// localMediaStreams = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-			var streamDevicesList = {}
-		if (!navigator.mediaDevices?.enumerateDevices) {
-			console.log("enumerateDevices() not supported.");
-		  } else {
-			// List cameras and microphones.
-			navigator.mediaDevices.enumerateDevices()
-			  .then((devices) => {
-				
-				// streamDevicesList=devices
-				devices.forEach((device) => {
-				if(device.kind == "videoinput"){
-					console.log("<<device: " + device.kind + ">> DeviceId: <<" + device.deviceId + ">>");
-					localMediaStreams = navigator.mediaDevices.getUserMedia({
-						video: {
-							deviceId: {
-								exact: device.deviceId
-							}
-						}
-					})
-				}
-				});
-			  })
-			  .catch((err) => {
-				console.error(`${err.name}: ${err.message}`);
-			  });
-		  }
-		  
-		//   streamDevicesList.forEach((device) => {
-		// 	if(device.kind == "videoinput"){
-		// 	navigator.mediaDevices.getUserMedia({audio: true, video : {
-		// 		deviceId: {
-		// 			exact: device.deviceId
-		// 				}
-		// 			}
-		// 		})
-		//   	}
-		// })
+	localAudioVideo = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+	localVideo = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
+	localVideosecond = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
+	
+		
 }
 
 
@@ -133,11 +103,11 @@ function onOfferReceived(offer) {
 	}
 
 
-	//localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
-	//localMediaStreams.getTracks().forEach(track => pc.addTrack(track, localMediaStreams));
-        pc.addTransceiver("video", { direction: "sendrecv" } );
+	localAudioVideo.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
+	// localMediaStreams.getTracks().forEach(track => pc.addTrack(track, localMediaStreams));
+    pc.addTransceiver("video", { direction: "sendonly" } );
 	pc.addTransceiver("video", { direction: "sendonly" } );
-	pc.addTransceiver("video", { direction: "sendonly" } );
+	
 
 	pc.onicecandidate = function(iceevt) {
 		if ( iceevt.candidate == null ) {
