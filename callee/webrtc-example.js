@@ -50,9 +50,29 @@ async function mikemadethis() {
 
 
 async function getLocalMediaStreams() {
-	localAudioVideo = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-	localVideo = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
-	localVideosecond = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
+
+	await navigator.mediaDevices.getUserMedia({audio: true, video: true}).then(()=>{
+		navigator.mediaDevices.enumerateDevices().then((devices)=>{
+		devices.forEach((device)=>{
+			if(device.kind == "videoinput"){
+				navigator.mediaDevices.getUserMedia({
+												video: {
+												deviceId: {
+													exact: device.deviceId
+													}
+												}
+											})
+				  
+				console.log("<< Devide ID: "+device.deviceId+" << label: "+device.label)
+				}
+			})
+		})
+	})
+
+	// localAudioVideo = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+	// localVideo = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
+	// localVideosecond = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
+	 
 }
 
 
@@ -105,8 +125,9 @@ function onOfferReceived(offer) {
 	// localMediaStreams.getTracks().forEach(track => pc.addTrack(track, localMediaStreams));
         //pc.addTransceiver("video", { direction: "sendonly" } );
 	//pc.addTransceiver("video", { direction: "sendonly" } );
-	pc.addTransceiver(localVideo.getTracks()[0], {direction: "sendonly" });
-	pc.addTransceiver(localVideoSecond.getTracks()[0], {direction: "sendonly" });
+	// console.log(JSON.stringify(localAudioVideo))
+	localVideo.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendonly" }));
+	localVideosecond.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendonly" }));
 	
 
 	pc.onicecandidate = function(iceevt) {
