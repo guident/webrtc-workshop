@@ -44,14 +44,19 @@ async function mikemadethis() {
 		console.log("ID: <<" + track.id + ">> Kind: <<" + track.kind + ">> Label: <<" + track.label + ">> DeviceId: <<" + trackSettings.deviceId + ">>");
 
 	});
+}
 
+
+function showMediaStreams() {
+	console.log(JSON.stringify(localAudioVideo.getTracks()[0]));
+	console.log(JSON.stringify(localVideo.getTracks()));
+	console.log(JSON.stringify(localVideoSecond.getTracks()));
 }
 
 
 
 async function getLocalMediaStreams() {
-	localAudioStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false})
-	// console.log('localAudioStreams: '+localAudioStreams.getTracks().length)
+	localAudio = await navigator.mediaDevices.getUserMedia({audio:true, video:false})
 	await navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(()=>{
 		navigator.mediaDevices.enumerateDevices().then((devices)=>{
 		devices.forEach((device)=>{
