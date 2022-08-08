@@ -26,11 +26,10 @@ websocketConnection.onerror = function(evt) {
 
 
 var pc = null;
-var localMediaStreams = null;
-var localAudioVideo = null
-var localVideo = null
-var localAudio = null
-var localVideoSecond = null
+var localVideoStreams = [ ];
+var streamIdx = 0;
+var localAudioStream = null
+
 
 var remoteVideoStream = null;
 
@@ -51,17 +50,22 @@ async function mikemadethis() {
 
 
 async function getLocalMediaStreams() {
-	localAudio = await navigator.mediaDevices.getUserMedia({audio:true, video:false})
+	localAudioStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false})
+	// console.log('localAudioStreams: '+localAudioStreams.getTracks().length)
 	await navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(()=>{
 		navigator.mediaDevices.enumerateDevices().then((devices)=>{
 		devices.forEach((device)=>{
 			if(device.kind == "videoinput"){
-				localMediaStreams = navigator.mediaDevices.getUserMedia({
+				navigator.mediaDevices.getUserMedia({
 												video: {
 												deviceId: {
 													exact: device.deviceId
 													}
 												}
+											}).then( (data) => {
+												localVideoStreams[streamIdx++] = data;
+												console.log(data);
+												console.log(data.getTracks().length);
 											})
 				  
 				console.log("<< Devide ID: "+device.deviceId+" << label: "+device.label)
@@ -69,7 +73,7 @@ async function getLocalMediaStreams() {
 			})
 		})
 	})
-
+	// console.log(localVideoStreams)
 	// localAudioVideo = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
 	// localVideo = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
 	// localVideosecond = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
@@ -93,6 +97,14 @@ function onOfferReceived(offer) {
                 audio: true,
 	};
 
+	console.log("testuing ouit console.log")
+	/*
+	pc.addstream(function(){
+		var audio = document.createElement('audio')
+		audio.src = URL.createObjectURL()
+		document.body.appendChild(audio)
+	})
+	*/
 	pc.ontrack = function(ev) {
 
 		console.log("pc.ontrack(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> Streams Length: <<" + ev.streams.length + ">>" );
@@ -102,11 +114,13 @@ function onOfferReceived(offer) {
 		if ( ev.transceiver.mid == "0" ) {
 			if ( remoteVideoStream == null ) {
 				remoteVideoStream = new MediaStream([ ev.track ]);
-                        	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length + " New stream.");
+				pc.addTrack(ev.track, remoteVideoStream);
+                console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getAudioTracks().length + " New stream.");
 			} else {
 				pc.addTrack(ev.track, remoteMediaStream);
-                        	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
+                console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
 			}
+			document.getElementById("audioStream").srcObject = remoteVideoStream;
 		}
 
 		if ( ev.transceiver.mid == "1" ) {
@@ -117,12 +131,23 @@ function onOfferReceived(offer) {
 				remoteVideoStream.addTrack(ev.track);
                         	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
 			}
-                        document.getElementById("videoStream").srcObject = remoteVideoStream;
+                        document.getElementById("audioStream").srcObject = remoteVideoStream;
                 } 
 	}
 	
-	localAudio.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
-	localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track,  { direction: "sendonly" }));
+	localAudioStream.getTracks().forEach(track => {
+		pc.addTransceiver(track, { direction: "sendrecv" });
+		console.log("Ading track/transceiver to PC.");
+	});
+	
+	localVideoStreams[0].getTracks().forEach(track => {
+		pc.addTrack(track, localVideoStreams[0]);
+		pc.addTransceiver(track,  { direction: "sendonly" })
+	});
+	localVideoStreams[1].getTracks().forEach(track => {
+		pc.addTrack(track, localVideoStreams[1]);
+		pc.addTransceiver(track,  { direction: "sendonly" })
+	});
         //pc.addTransceiver("video", { direction: "sendonly" } );
 	//pc.addTransceiver("video", { direction: "sendonly" } );
 	// console.log(JSON.stringify(localAudioVideo))
@@ -146,6 +171,7 @@ function onOfferReceived(offer) {
 		console.log("onOfferReceived(): Creating local answe SDP.");
 		pc.createAnswer().then(function(description) {
 			console.log("onStartPressed(): Answer SDP has been created. Setting it as local descript tio the PC.");
+			console.log(JSON.stringify(description.sdp));
 			pc.setLocalDescription(description);
 		});
 	});
