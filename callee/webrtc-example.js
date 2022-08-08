@@ -44,15 +44,24 @@ async function mikemadethis() {
 		console.log("ID: <<" + track.id + ">> Kind: <<" + track.kind + ">> Label: <<" + track.label + ">> DeviceId: <<" + trackSettings.deviceId + ">>");
 
 	});
+}
 
+
+function showMediaStreams() {
+	console.log(JSON.stringify(localAudioVideo.getTracks()[0]));
+	console.log(JSON.stringify(localVideo.getTracks()));
+	console.log(JSON.stringify(localVideoSecond.getTracks()));
 }
 
 
 
 async function getLocalMediaStreams() {
 	localAudioVideo = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+	console.log(localAudioVideo.getTracks().length + " " + JSON.stringify(localAudioVideo.getTracks()[0]));
 	localVideo = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
-	localVideosecond = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
+	console.log(JSON.stringify(localVideo.getTracks()));
+	localVideoSecond = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
+	console.log(JSON.stringify(localVideoSecond.getTracks()));
 }
 
 
