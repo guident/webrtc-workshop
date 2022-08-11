@@ -102,6 +102,7 @@ function onStartPressed() {
 	if ( remoteControlDataChannel != null ) {
 		remoteControlDataChannel.onopen = function(event) {
 			console.log("dataChannel.onopen(): The data channel is now open.");
+			setTimeout(sendIndexThruDataChannel, 1000);
 		};
 		remoteControlDataChannel.onmessage = function(event) {
 			console.log("dataChannel.onmessage(): The data channel has received a message: <<" + event.data + ">>.");
@@ -156,3 +157,20 @@ function onAnswerReceived(answer) {
 		console.log("OK, done!");
 	});
 }
+
+
+
+var dcIndex = 0;
+
+
+function sendIndexThruDataChannel() {
+
+	remoteControlDataChannel.send("Message thru the data channel! " + dcIndex);
+
+	dcIndex++;
+
+	setTimeout(sendIndexThruDataChannel, 1000); 
+
+}
+
+
