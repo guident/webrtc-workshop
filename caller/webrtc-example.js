@@ -27,6 +27,10 @@ var remoteVideoStream1 = null;
 var remoteVideoStream2 = null;
 var remoteVideoStream3 = null;
 
+
+var remoteControlDataChannel = null;
+
+
 async function getLocalMediaStreams() {
         localMediaStreams = await navigator.mediaDevices.getUserMedia({audio: true, video: false});
 }
@@ -89,6 +93,35 @@ function onStartPressed() {
         pc.addTransceiver("video", { direction: "recvonly" } );
         pc.addTransceiver("video", { direction: "recvonly" } );
         pc.addTransceiver("video", { direction: "recvonly" } );
+
+
+
+
+	// data channel stuff
+	remoteControlDataChannel = pc.createDataChannel("foo");
+	if ( remoteControlDataChannel != null ) {
+		remoteControlDataChannel.onopen = function(event) {
+			console.log("dataChannel.onopen(): The data channel is now open.");
+		};
+		remoteControlDataChannel.onmessage = function(event) {
+			console.log("dataChannel.onmessage(): The data channel has received a message: <<" + event.data + ">>.");
+		};
+		remoteControlDataChannel.onclose = function(event) {
+			console.log("dataChannel.onclose(): The data channel is now closed.");
+			remoteControlDataChannel = null;
+		};
+		remoteControlDataChannel.onerror = function(event) {
+			console.error("dataChannel.onerror(): Oops, the data channel has generated an error.");
+			event.channel.onopen = null;
+			event.channel.onmessage = null;
+			event.channel.onclose = null;
+			event.channel.onerror = null;
+			remoteControlDataChannel = null;
+		};
+	}
+
+
+
 
 	// iceCandidate Discovery
 	pc.onicecandidate = function(iceevt) {

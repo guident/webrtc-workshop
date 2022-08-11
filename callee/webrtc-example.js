@@ -18,12 +18,20 @@ websocketConnection.onerror = function(evt) {
 }
 
 // ====================================================WebSocket_Connection=======================================================================================
+//
+
+
+
 
 var pc = null;
 var localVideoStreams = [ ];
 var streamIdx = 0;
 var localAudioStream = null
 var remoteVideoStream = null;
+
+
+var remoteControlDataChannel = null;
+
 
 async function mikemadethis() {
         localMediaStreams = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
@@ -112,6 +120,34 @@ function onOfferReceived(offer) {
                         document.getElementById("audioStream").srcObject = remoteVideoStream;
                 } 
 	}
+
+
+	pc.ondatachannel = function(ev) {
+
+		remoteControlDataChannel = ev.channel;
+
+		remoteControlDataChannel.onopen = function(event) {
+                        console.log("dataChannel.onopen(): The data channel is now open.");
+                };
+                remoteControlDataChannel.onmessage = function(event) {
+                        console.log("dataChannel.onmessage(): The data channel has received a message: <<" + event.data + ">>.");
+                };
+                remoteControlDataChannel.onclose = function(event) {
+                        console.log("dataChannel.onclose(): The data channel is now closed.");
+                        remoteControlDataChannel = null;
+                };
+                remoteControlDataChannel.onerror = function(event) {
+                        console.error("dataChannel.onerror(): Oops, the data channel has generated an error.");
+                        event.channel.onopen = null;
+                        event.channel.onmessage = null;
+                        event.channel.onclose = null;
+                        event.channel.onerror = null;
+                        remoteControlDataChannel = null;
+                };
+
+	};
+
+
 	
 	// Adding Transceivers for All the Streams
 	localAudioStream.getTracks().forEach(track => {
