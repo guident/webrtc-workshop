@@ -83,7 +83,9 @@ async function getLocalMediaStreams() {
 getLocalMediaStreams();
 //mikemadethis();
 
-const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}], 'bundlePolicy': 'max-bundle'};
+// const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}], 'bundlePolicy': 'max-bundle'};
+const configuration = {'iceServers': [{'urls': 'stun:stun.bluepepper.us:3478'}], 'bundlePolicy': 'max-bundle' };
+
 pc = new RTCPeerConnection(configuration);
 
 // onOfferRecieved from the Caller
