@@ -1,16 +1,10 @@
-
+// ====================================================WebSocket_Connection=======================================================================================
 var websocketConnection = new WebSocket("wss://guident.bluepepper.us:8848");
-
 websocketConnection.onopen = function(evt) {
   console.log("JsFiddleWssCallingExample::_onWssConnectionOpen(): CONNECTED!");
-  /* var msg = "This is the calling side." */
-  /* console.log("JsFiddleWssCallingExample::_onWssConnectionOpen(): Sending this to the callee side: " + msg + ".") */
-  /* websocketConnection.send(msg) */
 }
 
-
 websocketConnection.onmessage = function(evt) {
-
 	var obj = JSON.parse(evt.data);
 	onOfferReceived(obj.sdp);
 }
@@ -23,16 +17,13 @@ websocketConnection.onerror = function(evt) {
   console.log("JsFiddleWssCallingExample::_onWssConnectionError(): " + evt);
 }
 
-
+// ====================================================WebSocket_Connection=======================================================================================
 
 var pc = null;
 var localVideoStreams = [ ];
 var streamIdx = 0;
 var localAudioStream = null
-
-
 var remoteVideoStream = null;
-
 
 async function mikemadethis() {
         localMediaStreams = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
@@ -54,9 +45,9 @@ function showMediaStreams() {
 }
 
 
-
+// Get Multiple Streams and add to list
 async function getLocalMediaStreams() {
-	localAudio = await navigator.mediaDevices.getUserMedia({audio:true, video:false})
+	localAudioStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false})
 	await navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(()=>{
 		navigator.mediaDevices.enumerateDevices().then((devices)=>{
 		devices.forEach((device)=>{
@@ -78,44 +69,26 @@ async function getLocalMediaStreams() {
 			})
 		})
 	})
-	// console.log(localVideoStreams)
-	// localAudioVideo = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-	// localVideo = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
-	// localVideosecond = await navigator.mediaDevices.getUserMedia({audio:false, video:true})
-
 }
 
-
+// Async Function Call
 getLocalMediaStreams();
 //mikemadethis();
 
-
 const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}], 'bundlePolicy': 'max-bundle'};
-
 pc = new RTCPeerConnection(configuration);
 
-
+// onOfferRecieved from the Caller
 function onOfferReceived(offer) {
-
 	var constraints = {
                 video: true,
                 audio: true,
 	};
 
-	console.log("testuing ouit console.log")
-	/*
-	pc.addstream(function(){
-		var audio = document.createElement('audio')
-		audio.src = URL.createObjectURL()
-		document.body.appendChild(audio)
-	})
-	*/
+	console.log("testing out console.log")
 	pc.ontrack = function(ev) {
-
 		console.log("pc.ontrack(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> Streams Length: <<" + ev.streams.length + ">>" );
-
-		//console.log("pc.ontrack(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> Streams length: <<" + ev.streams.length + ">> Stream Id: <<" + ev.streams[0].id + ">> #Tracks in stream: <<" + ev.streams[0].getTracks().length + ">>" );
-
+		//remoteAudioStream::1
 		if ( ev.transceiver.mid == "0" ) {
 			if ( remoteVideoStream == null ) {
 				remoteVideoStream = new MediaStream([ ev.track ]);
@@ -127,7 +100,7 @@ function onOfferReceived(offer) {
 			}
 			document.getElementById("audioStream").srcObject = remoteVideoStream;
 		}
-
+		// remoteVideoStream::1  
 		if ( ev.transceiver.mid == "1" ) {
 			if ( remoteVideoStream == null ) {
 				remoteVideoStream = new MediaStream([ ev.track ]);
@@ -140,9 +113,10 @@ function onOfferReceived(offer) {
                 } 
 	}
 	
+	// Adding Transceivers for All the Streams
 	localAudioStream.getTracks().forEach(track => {
 		pc.addTransceiver(track, { direction: "sendrecv" });
-		console.log("Ading track/transceiver to PC.");
+		console.log("Adding track/transceiver to PC.");
 	});
 	
 	localVideoStreams[0].getTracks().forEach(track => {
@@ -153,13 +127,11 @@ function onOfferReceived(offer) {
 		pc.addTrack(track, localVideoStreams[1]);
 		pc.addTransceiver(track,  { direction: "sendonly" })
 	});
-        //pc.addTransceiver("video", { direction: "sendonly" } );
-	//pc.addTransceiver("video", { direction: "sendonly" } );
-	// console.log(JSON.stringify(localAudioVideo))
-	// localVideo.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendonly" }));
-	// localVideosecond.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendonly" }));
-	
-
+	localVideoStreams[2].getTracks().forEach(track => {
+		pc.addTrack(track, localVideoStreams[2]);
+		pc.addTransceiver(track,  { direction: "sendonly" })
+	});
+    
 	pc.onicecandidate = function(iceevt) {
 		if ( iceevt.candidate == null ) {
 			console.log("pc.onicecandidate(): Completed!");
@@ -183,18 +155,15 @@ function onOfferReceived(offer) {
 
 }
 
-
+// waitFunction
 function waitTwoSeconds() {
 	setTimeout(sendAnswerToCaller, 2000);
 }
 
-
+// Aswer After Offer recieved
 function sendAnswerToCaller() {
-
 	var msg = { sdp: pc.localDescription };
-
 	websocketConnection.send(JSON.stringify(msg));
-
 }
 
 
