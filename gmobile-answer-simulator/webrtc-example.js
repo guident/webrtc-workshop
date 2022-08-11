@@ -9,7 +9,6 @@ var myUsername = "gabriel";
 var myPassword = "whaddaya";
 var myEndpointId = "0";
 
-var myLocalDescription = null;
 
 var  localMessageSequence = 0;
 
@@ -121,8 +120,8 @@ function sendWssMessage(messageType, destinationId) {
                 msg.status = status;
         }
         if ( messageType == "engage-offer" || messageType == "engage-answer" ) {
-                if ( this.webrtcPeerConnection != null ) {
-                        msg.sessiondescription = myLocalDescription;
+                if ( pc != null ) {
+                        msg.sessiondescription = pc.localDescription;
                 }
         }
         msg.sequence = localMessageSequence++;
@@ -373,7 +372,6 @@ function waitTwoSeconds() {
 
 // Aswer After Offer recieved
 function sendAnswerToCaller() {
-	myLocalDescription = pc.localDescription;
 	sendWssMessage(GuidentMessageTypes.ENGAGE_ANSWER, peerConnectionId);
 }
 
