@@ -47,7 +47,8 @@ getLocalMediaStreams();
 function onStartPressed() {
 
 
-	const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}], 'bundlePolicy': 'max-bundle' };
+	//const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}], 'bundlePolicy': 'max-bundle' };
+	const configuration = {'iceServers': [{'urls': 'stun:stun.bluepepper.us:3478'}], 'bundlePolicy': 'max-bundle' };
 
 	pc = new RTCPeerConnection(configuration);
 
@@ -95,6 +96,7 @@ function onStartPressed() {
 
 
 	localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
+        pc.addTransceiver("video", { direction: "recvonly" } );
         pc.addTransceiver("video", { direction: "recvonly" } );
         pc.addTransceiver("video", { direction: "recvonly" } );
 
