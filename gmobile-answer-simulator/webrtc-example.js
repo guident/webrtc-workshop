@@ -223,7 +223,7 @@ function onDisengageRecieved() {
 	if ( remoteControlDataChannel != null ) {	
 		remoteControlDataChannel = null;
 	}
-	
+	remoteVideoStream = null;
 	pc.close();
 	console.log("onDisengageRecieved(): Disengaged from the remote vehicle successful.");
 }
