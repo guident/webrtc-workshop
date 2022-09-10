@@ -10,6 +10,19 @@ var myPassword = "whaddaya";
 var myEndpointId = "0";
 
 
+
+var statusNotifyTimer = setTimeout(onStatusNotifyTimerTimeout, 5000);
+
+
+function onStatusNotifyTimerTimeout() {
+	console.log("every 5 seconds");
+	if ( currentState == "connected" || currentState == "engaged" ) {
+		sendWssMessage(GuidentMessageTypes.NOTIFY)
+	}
+	statusNotifyTimer = setTimeout(onStatusNotifyTimerTimeout, 5000);
+}
+
+
 var  localMessageSequence = 0;
 
 /**
@@ -97,6 +110,8 @@ const GuidentCameraPositions = {
 
 
 
+var currentState = "disconnected"
+
 
 
 
@@ -112,12 +127,17 @@ function sendWssMessage(messageType, destinationId) {
         }
 
         if (msg.endpointId != null ) msg.endpointId = myEndpointId;
-        msg.endpointType = GuidentMsgEndpointTypes.VEHICLE;;
+        msg.endpointType = GuidentMsgEndpointTypes.VEHICLE;
         msg.name = myUsername;
         if ( messageType == "register" ) msg.credential = myPassword;
         if ( messageType == "notify" ) {
                 msg.eventType = "status";
-                msg.status = status;
+				var location = new Object();
+				msg.location = location;
+                msg.location.lat = 26.3834684;
+				msg.location.lng = -80.1001748;
+				msg.location.speed = 23.1;
+				msg.location.heading = 45.0;
         }
         if ( messageType == "engage-offer" || messageType == "engage-answer" ) {
                 if ( pc != null ) {
@@ -177,14 +197,35 @@ function onWssMessageReceived(msg) {
 	if ( msg.messageType == GuidentMessageTypes.NOTIFY && msg.eventType == GuidentMsgEventTypes.CONNECTED ) {
 		console.log("Connected to the server!!.");
 		myConnectionId = msg.connectionId;
+		currentState = "connected"
 		sendWssMessage(GuidentMessageTypes.REGISTER, null);
 	} else if ( msg.messageType == GuidentMessageTypes.ENGAGE_OFFER ) {
 		peerConnectionId = msg.peerConnectionId;
+		currentState = "engaging"
 		onOfferReceived(msg.sessiondescription);
 	} else if ( msg.messageType == GuidentMessageTypes.ENGAGE_ACK ) {
+		currentState = "engaged";
 		console.log("Got the ENGAGE ACK!!!!!");
+	} else if (msg.messageType == GuidentMessageTypes.DISENGAGE ) {
+		console.log("Got the DISENGAGE!!!!!");
+		currentState = "connected";
+		onDisengageRecieved();
 	}
 
+}
+
+function onDisengageRecieved() {
+	console.log("onDisengageRecieved()");
+	document.getElementById('audioStream').srcObject = null;
+	document.getElementById('videoStream').srcObject = null;
+
+	// remoteControlDataChannel.close();
+	if ( remoteControlDataChannel != null ) {	
+		remoteControlDataChannel = null;
+	}
+	
+	pc.close();
+	console.log("onDisengageRecieved(): Disengaged from the remote vehicle successful.");
 }
 
 
@@ -233,6 +274,7 @@ async function getLocalMediaStreams() {
 		navigator.mediaDevices.enumerateDevices().then((devices)=>{
 		devices.forEach((device)=>{
 			if(device.kind == "videoinput"){
+				console.log(device)
 				navigator.mediaDevices.getUserMedia({
 												video: {
 												deviceId: {
@@ -260,13 +302,13 @@ getLocalMediaStreams();
 const configuration = {'iceServers': [{'urls': 'stun:stun.bluepepper.us:3478'}], 'bundlePolicy': 'max-bundle'};
 
 
-pc = new RTCPeerConnection(configuration);
 
 // onOfferRecieved from the Caller
 function onOfferReceived(offer) {
 
-
 	console.log("testing out console.log")
+
+	pc = new RTCPeerConnection(configuration);
 
 	pc.ontrack = function(ev) {
 		console.log("pc.ontrack(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> Streams Length: <<" + ev.streams.length + ">>" );
@@ -277,22 +319,22 @@ function onOfferReceived(offer) {
 				pc.addTrack(ev.track, remoteVideoStream);
                 console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getAudioTracks().length + " New stream.");
 			} else {
-				pc.addTrack(ev.track, remoteMediaStream);
+				pc.addTrack(ev.track, remoteVideoStream);
                 console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
 			}
 			document.getElementById("audioStream").srcObject = remoteVideoStream;
 		}
 		// remoteVideoStream::1  
-		if ( ev.transceiver.mid == "1" ) {
-			if ( remoteVideoStream == null ) {
-				remoteVideoStream = new MediaStream([ ev.track ]);
-                        	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length + " New stream.");
-			} else {
-				remoteVideoStream.addTrack(ev.track);
-                        	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
-			}
-                        document.getElementById("audioStream").srcObject = remoteVideoStream;
-                } 
+	// 	if ( ev.transceiver.mid == "1" ) {
+	// 		if ( remoteVideoStream == null ) {
+	// 			remoteVideoStream = new MediaStream([ ev.track ]);
+    //                     	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length + " New stream.");
+	// 		} else {
+	// 			remoteVideoStream.addTrack(ev.track);
+    //                     	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
+	// 		}
+    //                     document.getElementById("audioStream").srcObject = remoteVideoStream;
+    //             } 
 	}
 
 
