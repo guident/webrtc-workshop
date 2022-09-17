@@ -11,16 +11,23 @@ var myEndpointId = "0";
 
 
 
+
 var statusNotifyTimer = setTimeout(onStatusNotifyTimerTimeout, 5000);
 
+var dataChannelObject = null;
 
 function onStatusNotifyTimerTimeout() {
 	console.log("every 5 seconds");
+	console.log("statusNotifyTimer():: dataChannelObject: <<" + dataChannelObject+ " >>.");
 	if ( currentState == "connected" || currentState == "engaged" ) {
+		
 		sendWssMessage(GuidentMessageTypes.NOTIFY)
 	}
 	statusNotifyTimer = setTimeout(onStatusNotifyTimerTimeout, 5000);
 }
+
+
+
 
 
 var  localMessageSequence = 0;
@@ -222,6 +229,10 @@ function onDisengageRecieved() {
 	// remoteControlDataChannel.close();
 	if ( remoteControlDataChannel != null ) {	
 		remoteControlDataChannel = null;
+		dataChannelObject.enabled = false;
+		responseObject.enabled = false;
+		responseObject.vehicleVelocity = 0.00;
+		responseObject.state = "UNKNOWN"
 	}
 	remoteVideoStream = null;
 	pc.close();
@@ -259,6 +270,69 @@ async function mikemadethis() {
 	});
 }
 
+//================================================================================================================================================================
+// response Objdect via dataChannel for the vehicle
+var responseObject = {
+	"enabled":    false,                //true or false
+	"override": false,                  //true or false;
+	"steeringAngle": 0.00,              // -1.00 to +1.00
+	"vehicleVelocity": 0.00,            // 0.00 to 60.00
+	"transmitTimestamp": 121,       // 64 bit timestamp
+	"state": "UNKNOWN"                  // either	"ENGAGED" or "ENGAGED_AND_ALARMED" or "REMOTE_CONTROL"
+
+}
+var statusNotifyTimer1second = setTimeout(onStatusNotifyTimerTimeout1second, 1000);
+function onStatusNotifyTimerTimeout1second() {
+
+	console.log("every 1 seconds");
+
+	if ( remoteControlDataChannel == null) {
+		statusNotifyTimer1second = setTimeout(onStatusNotifyTimerTimeout1second, 1000);
+		return;
+	}
+
+	if ( dataChannelObject.engaged) responseObject.state = "ENGAGED";
+
+	if ( dataChannelObject.enabled && !responseObject.enabled) {
+		//responseObject.enabled = true;
+		console.log("*******************************************************************************");
+		
+		responseObject.vehicleVelocity = 8.0
+	}
+	if ( !dataChannelObject.enabled && responseObject.enabled) {
+		//responseObject.enabled = false;
+		console.log("??????????????????????????????????????????????????????????????????");
+		//responseObject.state = "ENGAGED";
+		responseObject.vehicleVelocity = 0.0
+	}
+
+	if (dataChannelObject.enabled) {
+		responseObject.enabled = true;
+		responseObject.vehicleVelocity = responseObject.vehicleVelocity + (responseObject.vehicleVelocity * ((Math.floor(Math.random() * 200) - 100) / 500.00) );
+		responseObject.state = "REMOTE_CONTROL";
+	} else {
+		responseObject.enabled = false;
+		responseObject.vehicleVelocity = 0.0;
+	}
+	
+	responseObject.steeringAngle = dataChannelObject.steering;
+	responseObject.transmitTimestamp = Date.now();
+	
+
+	
+	if (remoteControlDataChannel != null) {
+		remoteControlDataChannel.send(JSON.stringify(responseObject));
+	}
+	
+	// console.log("statusNotifyTimer():: dataChannelObject: <<" + dataChannelObject+ " >>.");
+	// if ( currentState == "connected" || currentState == "engaged" ) {
+		
+	// 	sendWssMessage(GuidentMessageTypes.NOTIFY)
+	// }
+
+	statusNotifyTimer1second = setTimeout(onStatusNotifyTimerTimeout1second, 1000);
+}
+//================================================================================================================================================================
 
 function showMediaStreams() {
 	console.log(JSON.stringify(localAudioVideo.getTracks()[0]));
@@ -346,7 +420,8 @@ function onOfferReceived(offer) {
                         console.log("dataChannel.onopen(): The data channel is now open.");
                 };
                 remoteControlDataChannel.onmessage = function(event) {
-                        console.log("dataChannel.onmessage(): The data channel has received a message: <<" + event.data + ">>.");
+                        console.log("dataChannel.onmessage(): Message Recieved!! : <<" + event.data + ">>.");
+						dataChannelObject = JSON.parse(event.data);
                 };
                 remoteControlDataChannel.onclose = function(event) {
                         console.log("dataChannel.onclose(): The data channel is now closed.");
