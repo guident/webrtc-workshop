@@ -19,6 +19,5 @@ void GstEndpointStartState::onTimeout() {
 	GstWebRtcEndpointHub::Instance()->connectToServerAsync();
 	std::shared_ptr<GstEndpointConnectingState> newState = std::make_shared<GstEndpointConnectingState>();
 	GstWebRtcEndpointHub::Instance()->transition(newState);
-	GstWebRtcEndpointHub::Instance()->setTimer(10);
 }
 

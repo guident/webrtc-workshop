@@ -3,15 +3,30 @@
 #include <string>
 #include <memory>
 
+#include <glib.h>
+#include <glib-unix.h>
+#include <gst/gst.h>
 #include <libsoup/soup.h>
+#include <gst/sdp/sdp.h>
+
+#define GST_USE_UNSTABLE_API
+#include <gst/webrtc/webrtc.h>
 
 #define SERVERURL "wss://guident.bluepepper.us:8848"
+
 
 
 
 typedef void (*OSDTYPE)(SoupWebsocketConnection *, gpointer);
 typedef void (*OWMTYPE)(SoupWebsocketConnection *, SoupWebsocketDataType, GBytes *, gpointer);
 typedef void (*OWPTYPE)(SoupWebsocketConnection *, GBytes *, gpointer);
+
+typedef void (*ONNTYPE)(GstElement *, gpointer);
+typedef void (*OICTYPE)(GstElement *, guint, gchar *, gpointer);
+typedef void (*OIGSNTYPE)(GstElement *, GParamSpec *, gpointer);
+typedef void (*ONTTYPE)(GstElement *, GstWebRTCRTPTransceiver *, gpointer);
+typedef void (*OISTYPE)(GstElement *, GstPad *, GstElement *);
+typedef void (*ODISTYPE)(GstElement *, GstPad *, GstElement *);
 
 
 
@@ -25,6 +40,10 @@ class GstWebRtcEndpointHub {
 
 friend class GstEndpointStartState;
 friend class GstEndpointConnectingState;
+friend class GstEndpointConnectingState;
+friend class GstEndpointConnectedState;
+friend class GstEndpointEngagingState;
+friend class GstEndpointEngagedState;
 
 public:
 
@@ -41,38 +60,36 @@ public:
 
 	void cancelConnection();
 	void closeConnection();
+	void resetEverything();
 
 	void init();
 	void run();
 
-
-	void onTimeout();
-
-	/*
-        void onConnected();
-
-        void onOffer(std::string offerJson);
-
-        void onNegotiationNeeded();
-
-        void onIceGatheringStateNotify();
-
-        void onNewTransceiver();
-
-        void onIncomingStream();
-
+        void onNegotiationNeeded(GstElement * element, gpointer offerSdpFreeAfterUse);
+	void onIceCandidate(GstElement * webrtc, guint mlineindex, gchar * candidate, gpointer userData);
+        void onIceGatheringStateNotify(GstElement * webrtc, GParamSpec * pspec, gpointer userData);
+        void onNewTransceiver(GstElement * webrtc, GstWebRTCRTPTransceiver * trans, gpointer userData);
+        void onIncomingStream(GstElement * webrtc, GstPad * pad, GstElement * pipe);
+	void onDecodedIncomingStream(GstElement * decodebin, GstPad * pad, GstElement * pipe);
+	void onOfferSet(GstPromise * promise, gpointer userData);
+	void onAnswerCreated(GstPromise * promise, gpointer userData);
+	void onAnswerSet(GstPromise * promise, gpointer userData);
         void onDataChannel();
 
-        void onAnswerAck();
-
-        void onHangup();
-	*/
 
 private:
 
 	GstWebRtcEndpointHub();
 
 	void connectToServerAsync();
+
+	void sendSdpAnswerThroughWss(const char * sdp);
+
+	void constructWebRtcPipeline();
+
+	void startDroppingSomeFrames();
+	void stopDroppingFrames();
+	void forceIdrFrame();
 
 	void setTimer(unsigned long seconds);
 	void clearTimer();
@@ -89,6 +106,11 @@ private:
 	// wss stuff
 	SoupWebsocketConnection * websocketConnection;
 	SoupSession * preconnectSession;
+
+	// webrtc
+	GstElement * pipelineBinElement = NULL;
+	std::string engagementOfferSdp;
+	bool negotiationDone;
 
 	time_t lastPongReceived;
 	time_t connectionAttemptStartedAt;

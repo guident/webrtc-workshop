@@ -23,30 +23,14 @@ public:
 		Log::Inst().log("GstEndpointState::onConnected(): Not implemented!");
 	}
 
-	virtual void onOffer(std::string offerJson) {
-		Log::Inst().log("GstEndpointState::onOffer(): Not implemented!");
+	virtual void onOfferReceived() {
+		Log::Inst().log("GstEndpointState::onOfferReceived(): Not implemented!");
 	}
 
-	virtual void onNegotiationNeeded() {
-		Log::Inst().log("GstEndpointState::onNegotiationNeeded(): Not implemented!");
+	virtual void onEngaged() {
+		Log::Inst().log("GstEndpointState::onEngaged(): Not implemented!");
 	}
-
-	virtual void onIceGatheringStateNotify() {
-		Log::Inst().log("GstEndpointState::onIceGatheringStateNotify(): Not implemented!");
-	}
-
-	virtual void onNewTransceiver() {
-		Log::Inst().log("GstEndpointState::onNewTransceiver(): Not implemented!");
-	}
-
-	virtual void onIncomingStream() {
-		Log::Inst().log("GstEndpointState::onIncomingStream(): Not implemented!");
-	}
-
-	virtual void onDataChannel() {
-		Log::Inst().log("GstEndpointState::onDataChannel(): Not implemented!");
-	}
-
+		
 	virtual void onAnswerAck() {
 		Log::Inst().log("GstEndpointState::onAnswerAck(): Not implemented!");
 	}
