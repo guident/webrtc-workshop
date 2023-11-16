@@ -581,7 +581,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
 #define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload=111"
 #define RTP_CAPS_VP9 "application/x-rtp,media=video,encoding-name=VP9,payload=98"
-#define CAMERA_SERIAL_NUMBER "04120308"
+#define CAMERA_SERIAL_NUMBER "11120626"
 
 
 	//pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement stun-server=stun://stun.bluepepper.us:3478 " 
