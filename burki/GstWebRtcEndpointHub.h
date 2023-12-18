@@ -8,6 +8,7 @@
 #include <gst/gst.h>
 #include <libsoup/soup.h>
 #include <gst/sdp/sdp.h>
+#include <gtk/gtk.h>
 
 #define GST_USE_UNSTABLE_API
 #include <gst/webrtc/webrtc.h>
@@ -120,6 +121,14 @@ private:
 	unsigned long long deadlineTimerTicks;
 
 	bool __initialized;
+
+	GtkWidget * window;
+        GtkWidget * image;
+        GtkWidget * eventBox;
+        GtkWidget * grid;
+        GtkWidget * area;
+
+
 };
 
 }
