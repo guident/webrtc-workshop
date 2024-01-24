@@ -417,6 +417,69 @@ void GstWebRtcEndpointHub::onAnswerSet(GstPromise * promise, gpointer userData) 
 
 
 
+void GstWebRtcEndpointHub::onStreamStatusMessage(GstBus * bus, GstMessage * msg, gpointer userData) {
+
+	GstStreamStatusType type;
+	GstElement *owner;
+	const GValue *val;
+	//GstTask *task = NULL;
+
+	gst_message_parse_stream_status (msg, &type, &owner);
+
+	//val = gst_message_get_stream_status_object (message);
+
+	/* see if we know how to deal with this object */
+	/*
+	if (G_VALUE_TYPE (val) == GST_TYPE_TASK) {
+		task = g_value_get_object (val);
+	}
+	*/
+
+
+	if ( owner != NULL ) {
+		gchar * name = NULL;
+		name = gst_element_get_name(owner);
+		Log::Inst().log("GstWebRtcEndpointHub::onStreamStatusMessage(): Got a stream status message from <<%s>>, Type: <<%d>>", name ? name : "HUH", type);
+		g_free(name);
+	} else {
+		Log::Inst().log("GstWebRtcEndpointHub::onStreamStatusMessage(): Oops!!!");
+	}
+}
+
+
+void GstWebRtcEndpointHub::onErrorMessage(GstBus * bus, GstMessage * msg, gpointer userData) {
+
+	Log::Inst().log("GstWebRtcEndpointHub::onErrorMessage(): ERROR!!");
+
+	if ( GST_MESSAGE_TYPE(msg) == GST_MESSAGE_ERROR ) {
+
+		GError * err = NULL;
+		gchar * debugInfo = NULL;
+
+		gst_message_parse_error(msg, &err, &debugInfo);
+
+		Log::Inst().log("GstWebRtcEndpointHub::onErrorMessage(): Error <<%s>> from <<%s>>, Debug info: <<%s>>.", err->message, GST_OBJECT_NAME(msg->src), debugInfo ? debugInfo : "NO DEBUG INFO");
+
+		g_error_free(err);
+		g_free(debugInfo);
+
+	} else {
+		Log::Inst().log("GstWebRtcEndpointHub::onErrorMessage(): Oops, this should not happen!!");
+	}
+
+}
+
+
+void GstWebRtcEndpointHub::onEndOfStreamMessage(GstBus * bus, GstMessage * msg, gpointer userData) {
+
+	Log::Inst().log("GstWebRtcEndpointHub::onEndOfStreamMessage(): Got an end-of-stream  message. ");
+
+}
+
+
+
+
+
 
 
 //static void GstWebRtcEndpointHub::onIceCandidate(GstElement * webrtc G_GNUC_UNUSED, guint mlineindex, gchar * candidate, gpointer userData G_GNUC_UNUSED) {
@@ -585,7 +648,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
 
 	//pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement stun-server=stun://stun.bluepepper.us:3478 " 
-	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
+	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement stun-server=stun://stun.l.google.com:19302 " 
                 "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
                 "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
 		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
@@ -602,7 +665,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
 		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
 		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
-	*/
+		*/
 
 
 
@@ -671,6 +734,28 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
         /* Lifetime is the same as the pipeline itself */
         gst_object_unref (webrtcElement);
+
+
+
+
+	// bus messages
+
+	/* get the bus, we need to install a sync handler */
+	GstBus * pipelineBus = gst_pipeline_get_bus (GST_PIPELINE (pipelineBinElement));
+	gst_bus_enable_sync_message_emission (pipelineBus);
+	gst_bus_add_signal_watch (pipelineBus);
+
+	auto ossm = [](GstBus * bus, GstMessage * msg,  gpointer ptr){ GstWebRtcEndpointHub::Instance()->onStreamStatusMessage(bus, msg, ptr); };
+        g_signal_connect(pipelineBus, "sync-message::stream-status", G_CALLBACK((OSSMTYPE)ossm), NULL);
+
+	auto oem = [](GstBus * bus, GstMessage * msg,  gpointer ptr){ GstWebRtcEndpointHub::Instance()->onErrorMessage(bus, msg, ptr); };
+        g_signal_connect(pipelineBus, "message::error", G_CALLBACK((OEMTYPE)oem), NULL);
+
+	auto oeosm = [](GstBus * bus, GstMessage * msg,  gpointer ptr){ GstWebRtcEndpointHub::Instance()->onEndOfStreamMessage(bus, msg, ptr); };
+        g_signal_connect(pipelineBus, "message::eos", G_CALLBACK((OEOSMTYPE)oeosm), NULL);
+
+
+
 
 	Log::Inst().log("GstWebRtcEndpintHub::constructWebRtcPipeline(): Attempting to set pipeline to \"PLAYING\" state.");
         ret = gst_element_set_state (GST_ELEMENT (pipelineBinElement), GST_STATE_PLAYING);

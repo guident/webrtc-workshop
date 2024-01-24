@@ -7,7 +7,7 @@ using namespace guident;
 
 void GstEndpointEngagedState::onEnter() {
 	Log::Inst().log("ENTERING STATE %s", getStateName());
-	GstWebRtcEndpointHub::Instance()->setTimer(5);
+	//GstWebRtcEndpointHub::Instance()->setTimer(5);
 }
 
 void GstEndpointEngagedState::onExit() {

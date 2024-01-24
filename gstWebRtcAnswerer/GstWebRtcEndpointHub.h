@@ -29,6 +29,11 @@ typedef void (*OISTYPE)(GstElement *, GstPad *, GstElement *);
 typedef void (*ODISTYPE)(GstElement *, GstPad *, GstElement *);
 
 
+typedef void (*OSSMTYPE)(GstBus *, GstMessage *, gpointer);
+typedef void (*OEMTYPE)(GstBus *, GstMessage *, gpointer);
+typedef void (*OEOSMTYPE)(GstBus *, GstMessage *, gpointer);
+
+
 
 namespace guident {
 
@@ -75,6 +80,11 @@ public:
 	void onAnswerCreated(GstPromise * promise, gpointer userData);
 	void onAnswerSet(GstPromise * promise, gpointer userData);
         void onDataChannel();
+
+
+	void onStreamStatusMessage(GstBus * bus, GstMessage * msg, gpointer userData);
+	void onErrorMessage(GstBus * bus, GstMessage * msg, gpointer userData);
+	void onEndOfStreamMessage(GstBus * bus, GstMessage * msg, gpointer userData);
 
 
 private:
