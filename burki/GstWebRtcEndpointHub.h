@@ -8,6 +8,7 @@
 #include <gst/gst.h>
 #include <libsoup/soup.h>
 #include <gst/sdp/sdp.h>
+#include <gtk/gtk.h>
 
 #define GST_USE_UNSTABLE_API
 #include <gst/webrtc/webrtc.h>
@@ -27,11 +28,6 @@ typedef void (*OIGSNTYPE)(GstElement *, GParamSpec *, gpointer);
 typedef void (*ONTTYPE)(GstElement *, GstWebRTCRTPTransceiver *, gpointer);
 typedef void (*OISTYPE)(GstElement *, GstPad *, GstElement *);
 typedef void (*ODISTYPE)(GstElement *, GstPad *, GstElement *);
-
-
-typedef void (*OSSMTYPE)(GstBus *, GstMessage *, gpointer);
-typedef void (*OEMTYPE)(GstBus *, GstMessage *, gpointer);
-typedef void (*OEOSMTYPE)(GstBus *, GstMessage *, gpointer);
 
 
 
@@ -82,11 +78,6 @@ public:
         void onDataChannel();
 
 
-	void onStreamStatusMessage(GstBus * bus, GstMessage * msg, gpointer userData);
-	void onErrorMessage(GstBus * bus, GstMessage * msg, gpointer userData);
-	void onEndOfStreamMessage(GstBus * bus, GstMessage * msg, gpointer userData);
-
-
 private:
 
 	GstWebRtcEndpointHub();
@@ -130,6 +121,14 @@ private:
 	unsigned long long deadlineTimerTicks;
 
 	bool __initialized;
+
+	GtkWidget * window;
+        GtkWidget * image;
+        GtkWidget * eventBox;
+        GtkWidget * grid;
+        GtkWidget * area;
+
+
 };
 
 }
