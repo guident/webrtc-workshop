@@ -23,7 +23,7 @@ void GstEndpointEngagedState::onTimeout() {
 		case 0:
 			tt = 5;
 			Log::Inst().log("GstEndpointEngagedState::onTimeout() 0: Dropping some frames.");
-			GstWebRtcEndpointHub::Instance()->startDroppingSomeFrames();
+			GstWebRtcEndpointHub::Instance()->restartCamera();
 			break;
 		case 1:
 			tt = 10;

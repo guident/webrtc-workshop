@@ -648,7 +648,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
 
 	//pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement stun-server=stun://stun.bluepepper.us:3478 " 
-	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement stun-server=stun://stun.l.google.com:19302 " 
+	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
                 "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
                 "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
 		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
@@ -663,7 +663,8 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
                 "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
 		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1080,framerate=30/1\" conversion-element=3 ! "
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
-		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
+		//" nvv4l2vp9enc name=encoder iframeinterval=25 idrinterval=25 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
+		" nvv4l2vp9enc name=encoder ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
 		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
 		*/
 
@@ -801,6 +802,13 @@ void GstWebRtcEndpointHub::stopDroppingFrames() {
 
         g_object_set (G_OBJECT (dropFramesElement), "drop-probability", 0.00, NULL);
 	*/
+
+}
+
+
+void GstWebRtcEndpointHub::restartCamera() {
+
+	// hi andy!
 
 }
 
