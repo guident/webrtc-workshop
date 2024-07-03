@@ -1,15 +1,16 @@
+import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-media-negotiator";
 import { GuidentRmccEndpoint } from "./new-locator-api";
-
 
 
 
 export class endpoint {
 
     myep: any = null;
+    protected mypcnm: GuidentPeerConnectionMediaNegotiator;
     private endpointType: string = "";
     private bindingsHaveBeenSet: boolean = false; 
 
-    constructor(t: string) {
+    constructor(t: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
 
         this.endpointType = t;
 
@@ -22,7 +23,7 @@ export class endpoint {
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiOCIsImZpcnN0X25hbWUiOiJEYXZpZCIsImxhc3RfbmFtZSI6IlZlZ2EgU290b2xvbmdvIiwiYXZhdGFyIjpudWxsLCJjcmVhdGVkX2F0IjoiMjAyMy0wMi0yM1QxNzoxNzo1NC44MDBaIn0sImdlbmVyYXRlZF9hdCI6IjIwMjQtMDYtMjBUMjA6Mjg6MDkuNzcyWiIsImlhdCI6MTcxODkxNTI4OSwiZXhwIjoxNzE4OTIyNDg5fQ.CbgoD4gBBhBrFavzFSLrSb3vaeLfqbLCdw7GmDUee1s"
         );
 
-       // this.setBindings();
+        this.mypcnm = pcnm;
     }
 
     getEndpointType(): string {
@@ -51,7 +52,8 @@ export class endpoint {
 
 
     start(): void {
-        this.setBindings();    // this kinds sux but i think it will be ok
+        console.log("endpoint::start(): The media negotiator is type: <<%s>>", this.mypcnm.getType());
+        this.setBindings();    // this kinda sux but i think it will be ok
         this.myep.start();
     }
 

@@ -1,10 +1,12 @@
 import { endpoint } from "./endpoint";
+import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-media-negotiator";
 
 
 export class GuidentCraigEndpoint extends endpoint {
 
-  constructor() { 
-    super("CRAIG");
+  constructor(pcnm: GuidentPeerConnectionMediaNegotiator) { 
+    super("CRAIG", pcnm);
+    
   }
 
 

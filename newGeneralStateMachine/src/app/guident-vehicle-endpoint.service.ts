@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { endpoint } from './services/endpoint';
+import { GuidentVtuPeerConnectionMediaNegotiator } from './services/guident-vtu-peer-connection-media-negotiator';
 
 @Injectable({
   providedIn: 'root'
@@ -8,9 +9,9 @@ export class GuidentVehicleEndpointService extends endpoint {
 
 
   private vehicle31ConnectionId: string = "";
-
+  
   constructor() { 
-    super("VEHICLE");
+    super("VEHICLE", new GuidentVtuPeerConnectionMediaNegotiator());
   }
 
 

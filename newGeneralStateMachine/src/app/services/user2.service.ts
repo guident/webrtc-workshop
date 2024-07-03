@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { GuidentCraigEndpoint } from './guident-craig-endpoint';
+import { GuidentVtuPeerConnectionMediaNegotiator } from './guident-vtu-peer-connection-media-negotiator';
 
 @Injectable({
   providedIn: 'root'
@@ -12,6 +13,7 @@ export class User2Service {
   user2Var: GuidentCraigEndpoint;
 
   constructor() {
-    this.user2Var = new GuidentCraigEndpoint();
+    var pcnm = new GuidentVtuPeerConnectionMediaNegotiator();
+    this.user2Var = new GuidentCraigEndpoint(pcnm);
   }
 }
