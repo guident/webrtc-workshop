@@ -71,6 +71,7 @@ export class GuidentRmccEndpoint {
   private webrtcPeerConfiguration: RTCConfiguration;
   private stateMachine: any;
   private websocketConnection: WebSocket | null = null;
+  
   private webrtcPeerConnection: RTCPeerConnection | null = null;
   private timerId: any | null = null;
   private connectionId: string | null = null;

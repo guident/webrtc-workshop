@@ -9,50 +9,49 @@ export class GuidentVehicleEndpointService extends endpoint {
 
 
   private vehicle31ConnectionId: string = "";
-  
+
   constructor() { 
     super("VEHICLE", new GuidentVtuPeerConnectionMediaNegotiator());
   }
 
-
   override onConnecting() {
-    console.log("GuidentVehicleEndpointService::onConnecting(): not implemented.");
+    console.log("GuidentVehicleEndpointService::onConnecting(): Ok!.");
   }
 
   override onConnectionSuccessful() {
-    console.log("GuidentVehicleEndpointService::onConnectionSuccessful(): not implemented.");
+    console.log("GuidentVehicleEndpointService::onConnectionSuccessful(): Ok!.");
   }
 
   override onConnectionFailed(err: string) {
-    console.log("GuidentVehicleEndpointService::onConnectionFailed(): not implemented, called with err: " + err);
+    console.log("GuidentVehicleEndpointService::onConnectionFailed(): Ok!, called with err: " + err);
   }
 
   override onDisconnected(reason: string) {
-    console.log("GuidentVehicleEndpointService::onDisconnected(): not implemented, called with reason: " + reason);
+    console.log("GuidentVehicleEndpointService::onDisconnected(): Ok!, called with reason: " + reason);
   }
 
   override onRegistrationFailed() {
-    console.log("GuidentVehicleEndpointService::onRegistrationFailed(): not implemented.");
+    console.log("GuidentVehicleEndpointService::onRegistrationFailed(): Ok!.");
   }
 
   override onRegistrationSuccessful() {
-    console.log("GuidentVehicleEndpointService::onRegistrationSuccessful(): not implemented.");
+    console.log("GuidentVehicleEndpointService::onRegistrationSuccessful(): Ok!.");
   }
 
   override onEngaging() {
-    console.log("GuidentVehicleEndpointService::onEngaging(): not implemented.");
+    console.log("GuidentVehicleEndpointService::onEngaging(): Ok!.");
   }
 
   override onEngagementFailed(err: string) {
-    console.log("GuidentVehicleEndpointService::onEngagementFailed(): not implemented, called with err: " + err);
+    console.log("GuidentVehicleEndpointService::onEngagementFailed(): Ok!, called with err: " + err);
   }
 
   override onEngagementSuccessful() {
-    console.log("GuidentVehicleEndpointService::onEngagementSuccessful(): not implemented.");
+    console.log("GuidentVehicleEndpointService::onEngagementSuccessful(): Ok!.");
   }
 
   override onDisengagement(reason: any) {
-    console.log("GuidentVehicleEndpointService::onDisengagement(): not implemented, called with reason: " + reason);
+    console.log("GuidentVehicleEndpointService::onDisengagement(): Ok!, called with reason: " + reason);
   }
 
   override onNotification(msg: any) {
@@ -63,23 +62,23 @@ export class GuidentVehicleEndpointService extends endpoint {
   }
 
   override onNewLocation(latlon: any) {
-    console.log("GuidentVehicleEndpointService::onNewLocation(): not implemented");
+    console.log("GuidentVehicleEndpointService::onNewLocation(): Ok!");
   }
 
   override onDataChannelMessage(messageEvent: MessageEvent) {
-    console.log("GuidentVehicleEndpointService::onDataChannelMessage(): not implemented");
+    console.log("GuidentVehicleEndpointService::onDataChannelMessage(): Ok!");
   }
 
   override onDataChannelOpen(messageEvent: Event) {
-    console.log("GuidentVehicleEndpointService::onDataChannelOpen(): not implemented");
+    console.log("GuidentVehicleEndpointService::onDataChannelOpen(): Ok!");
   }
 
   override onDataChannelClose(messageEvent: Event) {
-    console.log("GuidentVehicleEndpointService::onDataChannelClose(): not implemented");
+    console.log("GuidentVehicleEndpointService::onDataChannelClose(): Ok!");
   }
 
   override onDataChannelError(messageEvent: Event) {
-    console.log("GuidentVehicleEndpointService::onDataChannelError(): not implemented");
+    console.log("GuidentVehicleEndpointService::onDataChannelError(): Ok!");
   }
 
 

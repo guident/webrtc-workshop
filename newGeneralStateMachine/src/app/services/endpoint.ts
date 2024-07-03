@@ -52,7 +52,7 @@ export class endpoint {
 
 
     start(): void {
-        console.log("endpoint::start(): The media negotiator is type: <<%s>>", this.mypcnm.getType());
+        console.log("endpoint::start(): The media negotiator is type: <<%s>>", this.mypcnm.getMediaNegotiatorType());
         this.setBindings();    // this kinda sux but i think it will be ok
         this.myep.start();
     }

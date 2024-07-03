@@ -10,7 +10,7 @@ export class GuidentPeerConnectionMediaNegotiator {
         this.pcMediaNegotiatorType = t;
     }
 
-    getType(): string {
+    getMediaNegotiatorType(): string {
         return(this.pcMediaNegotiatorType);
     }
 
