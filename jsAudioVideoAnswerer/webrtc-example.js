@@ -18,6 +18,51 @@ var currentLongitude = defaultLongitude;
 var randomLatLonCounter = 0;
 
 
+var authXhr = null;
+var authUsername = "dvega@guident.co";
+var authPassword = "Guident1!";
+var authAccessToken = null;
+
+
+
+async function authenticate() {
+
+	xhr = new XMLHttpRequest();
+	xhr.open("POST", "https://dev.bluepepper.us/api/auth/login");
+	xhr.setRequestHeader("Content-Type", "application/json");
+	const body = JSON.stringify({
+  		email: authUsername,
+  		password: authPassword
+	});
+
+	xhr.onload = () => {
+  		if (xhr.readyState == 4 && xhr.status == 200) {
+			console.log("authenticate::onload(): <<%s>>", xhr.responseText);
+			try {
+    			var jsonBlob = JSON.parse(xhr.responseText);
+				authAccessToken = jsonBlob.tokens.accessToken;
+				if ( authAccessToken != undefined && authAccessToken != null) {
+					startWebSocketConnection();
+				} else {
+					console.log("authenticate::onload(): Oops!!");
+				}
+			} catch(err) {
+				console.log("authenticate::onload(): Oops!!");
+			}
+
+  		} else {
+    		console.log(`Error: ${xhr.status}`);
+  		}
+	};
+
+	console.log("authenticate() Sending the authentication request!!");
+	xhr.send(body);
+}
+
+authenticate();
+
+
+
 function getNextRandomLatLon() {
 
 	if ( randomLatLonCounter >= 25 ) {
@@ -155,18 +200,24 @@ function sendWssMessage(messageType, destinationId) {
         }
 
         if (msg.endpointId != null ) msg.endpointId = myEndpointId;
-        msg.endpointType = GuidentMsgEndpointTypes.VEHICLE;
+        //msg.endpointType = GuidentMsgEndpointTypes.VEHICLE;
+		msg.endpointType = GuidentMsgEndpointTypes.MONITOR;
         msg.name = myUsername;
-        if ( messageType == "register" ) msg.credential = myPassword;
+        if ( messageType == "register" ) {
+			msg.name = authUsername;
+			msg.credential = myPassword;
+			msg.authenticationUsername = authUsername;
+			msg.authenticationToken = authAccessToken;
+		}
         if ( messageType == "notify" ) {
                 msg.eventType = "status";
-		var location = new Object();
-		msg.location = location;
+				var location = new Object();
+				msg.location = location;
                	//msg.location.lat = 26.3834684;
-		//msg.location.lng = -80.1001748;
-		msg.location = getNextRandomLatLon();
-		msg.location.speed = 23.1;
-		msg.location.heading = 45.0;
+				//msg.location.lng = -80.1001748;
+				msg.location = getNextRandomLatLon();
+				msg.location.speed = 23.1;
+				msg.location.heading = 45.0;
         }
         if ( messageType == "engage-offer" || messageType == "engage-answer" ) {
                 if ( pc != null ) {
@@ -192,24 +243,33 @@ function sendWssMessage(messageType, destinationId) {
 
 
 // ====================================================WebSocket_Connection=======================================================================================
-var websocketConnection = new WebSocket("wss://guident.bluepepper.us:8443");
-websocketConnection.onopen = function(evt) {
-  console.log("JsFiddleWssCallingExample::_onWssConnectionOpen(): CONNECTED!");
-}
-
-websocketConnection.onmessage = function(evt) {
-	var obj = JSON.parse(evt.data);
-	//onOfferReceived(obj.sdp);
-	onWssMessageReceived(obj);
-}
 
 
-websocketConnection.onclose = function(evt) {
-  console.log("JsFiddleWssCallingExample::_onWssConnectionClose(): Code: " + evt.code + " Reason: " + evt.reason + " Clean?: " + evt.wasClean);
-}
+var websocketConnection = null;
 
-websocketConnection.onerror = function(evt) {
-  console.log("JsFiddleWssCallingExample::_onWssConnectionError(): " + evt);
+
+function startWebSocketConnection() {
+
+	websocketConnection = new WebSocket("wss://guident.bluepepper.us:8443");
+
+	websocketConnection.onopen = function(evt) {
+		console.log("JsFiddleWssCallingExample::_onWssConnectionOpen(): CONNECTED!");
+	}
+
+	websocketConnection.onmessage = function(evt) {
+		var obj = JSON.parse(evt.data);
+		//onOfferReceived(obj.sdp);
+		onWssMessageReceived(obj);
+	}
+
+	websocketConnection.onclose = function(evt) {
+		console.log("JsFiddleWssCallingExample::_onWssConnectionClose(): Code: " + evt.code + " Reason: " + evt.reason + " Clean?: " + evt.wasClean);
+	}
+
+	websocketConnection.onerror = function(evt) {
+		console.log("JsFiddleWssCallingExample::_onWssConnectionError(): " + evt);
+	}
+
 }
 
 // ====================================================WebSocket_Connection=======================================================================================
@@ -271,26 +331,12 @@ function onDisengageRecieved() {
 
 
 var pc = null;
-var localVideoStreams = [ ];
-var streamIdx = 0;
-var localAudioStream = null
-var remoteVideoStream = null;
+var localMediaStream = null;
+var remoteMediaStream = null;
 
 
-var remoteControlDataChannel = null;
 
 
-async function mikemadethis() {
-        localMediaStreams = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
-
-	var tracks = localMediaStreams.getTracks();
-
-	tracks.forEach((track) => {
-		var trackSettings = track.getSettings();
-		console.log("ID: <<" + track.id + ">> Kind: <<" + track.kind + ">> Label: <<" + track.label + ">> DeviceId: <<" + trackSettings.deviceId + ">>");
-
-	});
-}
 
 //================================================================================================================================================================
 // response Objdect via dataChannel for the vehicle
@@ -357,42 +403,26 @@ function onStatusNotifyTimerTimeout1second() {
 //================================================================================================================================================================
 
 function showMediaStreams() {
-	console.log(JSON.stringify(localAudioVideo.getTracks()[0]));
-	console.log(JSON.stringify(localVideo.getTracks()));
-	console.log(JSON.stringify(localVideoSecond.getTracks()));
+	console.log(JSON.stringify(localMediaStreams.getTracks()[0]));
+	console.log(JSON.stringify(localMediaStreams.getTracks()[1]));
 }
 
 
-// Get Multiple Streams and add to list
-async function getLocalMediaStreams() {
-	localAudioStream = await navigator.mediaDevices.getUserMedia({audio:true, video:false})
-	await navigator.mediaDevices.getUserMedia({audio: false, video: true}).then(()=>{
-		navigator.mediaDevices.enumerateDevices().then((devices)=>{
-		devices.forEach((device)=>{
-			if(device.kind == "videoinput"){
-				console.log(device)
-				navigator.mediaDevices.getUserMedia({
-												video: {
-												deviceId: {
-													exact: device.deviceId
-													}
-												}
-											}).then( (data) => {
-												localVideoStreams[streamIdx++] = data;
-												console.log(data);
-												console.log(data.getTracks().length);
-											})
-				  
-				console.log("<< Devide ID: "+device.deviceId+" << label: "+device.label)
-				}
-			})
-		})
-	})
+async function getLocalMediaStream() {
+
+        localMediaStream = await navigator.mediaDevices.getUserMedia({audio: true, video: true});
+
+	var tracks = localMediaStream.getTracks();
+
+	tracks.forEach((track) => {
+		var trackSettings = track.getSettings();
+		console.log("ID: <<" + track.id + ">> Kind: <<" + track.kind + ">> Label: <<" + track.label + ">> DeviceId: <<" + trackSettings.deviceId + ">>");
+
+	});
 }
 
 // Async Function Call
-getLocalMediaStreams();
-//mikemadethis();
+getLocalMediaStream();
 
 const configuration = {'iceServers': [{'urls': 'stun:stun.l.google.com:19302'}], 'bundlePolicy': 'max-bundle'};
 // const configuration = {'iceServers': [{'urls': 'stun:stun.bluepepper.us:3478'}], 'bundlePolicy': 'max-bundle'};
@@ -407,79 +437,32 @@ function onOfferReceived(offer) {
 	pc = new RTCPeerConnection(configuration);
 
 	pc.ontrack = function(ev) {
+
 		console.log("pc.ontrack(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> Streams Length: <<" + ev.streams.length + ">>" );
-		//remoteAudioStream::1
 		if ( ev.transceiver.mid == "0" ) {
-			if ( remoteVideoStream == null ) {
-				remoteVideoStream = new MediaStream([ ev.track ]);
+			if ( remoteMediaStream == null ) {
+				remoteMediaStream = new MediaStream([ ev.track ]);
 				pc.addTrack(ev.track, remoteVideoStream);
-                console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getAudioTracks().length + " New stream.");
+                		console.log("New stream id: <<" + remoteMediaStream.id + ">> # tracks: " + remoteMediaStream.getAudioTracks().length + " New stream.");
 			} else {
 				pc.addTrack(ev.track, remoteVideoStream);
-                console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
+                		console.log("New stream id: <<" + remoteMediaStream.id + ">> # tracks: " + remoteMediaStream.getTracks().length);
 			}
-			document.getElementById("audioStream").srcObject = remoteVideoStream;
+			document.getElementById("audioStream").srcObject = remoteMediaStream;
+		} else {
+			if ( remoteMediaStream == null ) {
+				remoteMediaStream = new MediaStream([ ev.track ]);
+				pc.addTrack(ev.track, remoteMediaStream);
+                		console.log("New stream id: <<" + remoteMediaStream.id + ">> # tracks: " + remoteMediaStream.getVideoTracks().length + " New stream.");
+			} else {
+				pc.addTrack(ev.track, remoteVideoStream);
+                		console.log("New stream id: <<" + remoteMediaStream.id + ">> # tracks: " + remoteMediaStream.getTracks().length);
+			}
+			document.getElementById("audioStream").srcObject = remoteMediaStream;
 		}
-		// remoteVideoStream::1  
-	// 	if ( ev.transceiver.mid == "1" ) {
-	// 		if ( remoteVideoStream == null ) {
-	// 			remoteVideoStream = new MediaStream([ ev.track ]);
-    //                     	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length + " New stream.");
-	// 		} else {
-	// 			remoteVideoStream.addTrack(ev.track);
-    //                     	console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
-	// 		}
-    //                     document.getElementById("audioStream").srcObject = remoteVideoStream;
-    //             } 
 	}
 
-
-	pc.ondatachannel = function(ev) {
-
-		remoteControlDataChannel = ev.channel;
-
-		remoteControlDataChannel.onopen = function(event) {
-                        console.log("dataChannel.onopen(): The data channel is now open.");
-                };
-                remoteControlDataChannel.onmessage = function(event) {
-                        console.log("dataChannel.onmessage(): Message Recieved!! : <<" + event.data + ">>.");
-						dataChannelObject = JSON.parse(event.data);
-                };
-                remoteControlDataChannel.onclose = function(event) {
-                        console.log("dataChannel.onclose(): The data channel is now closed.");
-                        remoteControlDataChannel = null;
-                };
-                remoteControlDataChannel.onerror = function(event) {
-                        console.error("dataChannel.onerror(): Oops, the data channel has generated an error.");
-                        event.channel.onopen = null;
-                        event.channel.onmessage = null;
-                        event.channel.onclose = null;
-                        event.channel.onerror = null;
-                        remoteControlDataChannel = null;
-                };
-
-	};
-
-
 	
-	// Adding Transceivers for All the Streams
-	localAudioStream.getTracks().forEach(track => {
-		pc.addTransceiver(track, { direction: "sendrecv" });
-		console.log("Adding track/transceiver to PC.");
-	});
-	
-	localVideoStreams[0].getTracks().forEach(track => {
-		pc.addTrack(track, localVideoStreams[0]);
-		pc.addTransceiver(track,  { direction: "sendonly" })
-	});
-	localVideoStreams[1].getTracks().forEach(track => {
-		pc.addTrack(track, localVideoStreams[1]);
-		pc.addTransceiver(track,  { direction: "sendonly" })
-	});
-	localVideoStreams[2].getTracks().forEach(track => {
-		pc.addTrack(track, localVideoStreams[2]);
-		pc.addTransceiver(track,  { direction: "sendonly" })
-	});
     
 	pc.onicecandidate = function(iceevt) {
 		if ( iceevt.candidate == null ) {
@@ -490,6 +473,16 @@ function onOfferReceived(offer) {
 			console.log("pc.onicecandidate(): Got an ice candidate: <<" + iceevt.candidate.candidate + ">>");
 		}
 	};
+
+
+
+	// Adding Transceivers for All the Streams
+	console.log("Adding transceivers for the two streams.");
+	localMediaStream.getTracks().forEach(track => {
+		pc.addTransceiver(track, { direction: "sendrecv" });
+		console.log("Adding track/transceiver to PC.");
+	});
+
 
 	console.log("onOfferReceived(): Setting received offer as remote description.");
 	console.log("onOfferReceived(): OFFER: " + JSON.stringify(offer) + ">>");
