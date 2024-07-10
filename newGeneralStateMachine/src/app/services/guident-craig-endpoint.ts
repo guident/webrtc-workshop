@@ -4,8 +4,8 @@ import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-
 
 export class GuidentCraigEndpoint extends endpoint {
 
-  constructor(pcnm: GuidentPeerConnectionMediaNegotiator) { 
-    super("CRAIG", pcnm);
+  constructor(uname: string, token: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
+    super("CRAIG", uname, token, pcnm);
   }
 
 

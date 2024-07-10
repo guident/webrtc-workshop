@@ -14,6 +14,6 @@ export class User2Service {
 
   constructor() {
     var pcnm = new GuidentPcsPeerConnectionMediaNegotiator();
-    this.user2Var = new GuidentCraigEndpoint(pcnm);
+    this.user2Var = new GuidentCraigEndpoint(pcnm, username, authToken);
   }
 }

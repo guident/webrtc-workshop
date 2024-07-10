@@ -10,7 +10,7 @@ export class endpoint {
     private endpointType: string = "";
     private bindingsHaveBeenSet: boolean = false; 
 
-    constructor(t: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
+    constructor(t: string, uname: string, token: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
 
         this.endpointType = t;
 
@@ -18,10 +18,7 @@ export class endpoint {
             "whaddaya", 
             "wss://guident.bluepepper.us:8445", 
             [{'urls': "stun:guident.bluepepper.us:3478" }], 
-            null, 
-            "dvega@guident.co", 
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiOCIsImZpcnN0X25hbWUiOiJEYXZpZCIsImxhc3RfbmFtZSI6IlZlZ2EgU290b2xvbmdvIiwiYXZhdGFyIjpudWxsLCJjcmVhdGVkX2F0IjoiMjAyMy0wMi0yM1QxNzoxNzo1NC44MDBaIn0sImdlbmVyYXRlZF9hdCI6IjIwMjQtMDYtMjBUMjA6Mjg6MDkuNzcyWiIsImlhdCI6MTcxODkxNTI4OSwiZXhwIjoxNzE4OTIyNDg5fQ.CbgoD4gBBhBrFavzFSLrSb3vaeLfqbLCdw7GmDUee1s"
-        );
+            null, uname, token);
 
         this.mypcnm = pcnm;
     }
