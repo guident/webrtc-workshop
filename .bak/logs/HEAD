@@ -1,0 +1,9 @@
+0000000000000000000000000000000000000000 e6b54a681aaa9efe99ea945602da09af1a21d262 cades-guident <cades@guident.co> 1719248334 -0400	clone: from https://github.com/guident/webrtc-workshop.git
+e6b54a681aaa9efe99ea945602da09af1a21d262 4bec28f5147a2ccf15e06f7acd13ccc1816536b5 cades-guident <cades@guident.co> 1719248718 -0400	commit: craigs new instantiatable state machine
+4bec28f5147a2ccf15e06f7acd13ccc1816536b5 d5c64b40d8d6cb840f830a9ce11d7b531613c2ae cades-guident <cades@guident.co> 1720039123 -0400	checkout: moving from master to mikemadethis
+d5c64b40d8d6cb840f830a9ce11d7b531613c2ae 5739ec5c28b8ecb63b5f395642e3da581c431ea3 cades-guident <cades@guident.co> 1720548443 -0400	pull: Fast-forward
+5739ec5c28b8ecb63b5f395642e3da581c431ea3 724f22b7dbf0d0211fa517933c3c821b7d56c8b6 cades-guident <cades@guident.co> 1720643296 -0400	commit: username and token added
+724f22b7dbf0d0211fa517933c3c821b7d56c8b6 4bec28f5147a2ccf15e06f7acd13ccc1816536b5 cades-guident <cades@guident.co> 1720643904 -0400	checkout: moving from mikemadethis to master
+4bec28f5147a2ccf15e06f7acd13ccc1816536b5 724f22b7dbf0d0211fa517933c3c821b7d56c8b6 cades-guident <cades@guident.co> 1720643927 -0400	checkout: moving from master to mikemadethis
+724f22b7dbf0d0211fa517933c3c821b7d56c8b6 4bec28f5147a2ccf15e06f7acd13ccc1816536b5 cades-guident <cades@guident.co> 1720643946 -0400	checkout: moving from mikemadethis to master
+4bec28f5147a2ccf15e06f7acd13ccc1816536b5 724f22b7dbf0d0211fa517933c3c821b7d56c8b6 cades-guident <cades@guident.co> 1720643951 -0400	checkout: moving from master to mikemadethis
