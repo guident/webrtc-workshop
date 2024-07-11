@@ -15,7 +15,7 @@ export class User2Service {
     
   }
 
-
+  
   SayHelloToService(){  
 
     var pcnm = new GuidentPcsPeerConnectionMediaNegotiator();

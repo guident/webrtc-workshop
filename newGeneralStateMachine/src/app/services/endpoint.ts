@@ -1,4 +1,5 @@
 import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-media-negotiator";
+import { GuidentVtuPeerConnectionMediaNegotiator } from "./guident-vtu-peer-connection-media-negotiator";
 import { GuidentRmccEndpoint } from "./new-locator-api";
 
 
@@ -51,6 +52,7 @@ export class endpoint {
         this.myep.onNotification = this.onNotification.bind(this);
         this.myep.onNewLocation = this.onNewLocation.bind(this);
         //this.myep.notifyNetworkService = this.notifyNetworkService.bind(this);
+        this.myep._startPeerEngagementOffer = this.mypcnm._startPeerEngagementOffer();
         this.bindingsHaveBeenSet = true;
     }
 
