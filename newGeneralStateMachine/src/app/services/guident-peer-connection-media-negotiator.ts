@@ -1,5 +1,4 @@
 import { GuidentRmccEndpoint } from "./new-locator-api";
-import { endpoint } from "./endpoint";
 
 
 export class GuidentPeerConnectionMediaNegotiator {
@@ -36,4 +35,7 @@ export class GuidentPeerConnectionMediaNegotiator {
         console.log("GuidentPeerConnectionMediaNegotiator::onWebRtcPeerConnectionNegotiationError(): not implemented.");     
     }
     
+    _startPeerEngagementOffer (){
+        console.log("GuidentPeerConnectionMediaNegotiator::_startPeerEngagementOffer(): not implemented.");
+    }
 }

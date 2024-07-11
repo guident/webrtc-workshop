@@ -19,7 +19,7 @@ export class User2Service {
   SayHelloToService(){  
 
     var pcnm = new GuidentPcsPeerConnectionMediaNegotiator();
-    console.log("access token is: <<%s>>", this.authService.getAuthAccessToken());
+    console.log("user2 access token is: <<%s>>", this.authService.getAuthAccessToken());
     this.user2Var = new GuidentCraigEndpoint(this.authService.getAuthUserEmail(), this.authService.getAuthAccessToken(), pcnm);
     
     //setTimeout(() => this.onTwoSecondTimeout(), 50);
@@ -33,5 +33,10 @@ export class User2Service {
     this.user2Var.start();
   }
     */
+
+  engageTheVehicle(): void {
+    if ( this.user2Var.getVehicle14ConnectionId() == "" ) return;
+    this.user2Var.engage(this.user2Var.getVehicle14ConnectionId());
+  }
 
 }

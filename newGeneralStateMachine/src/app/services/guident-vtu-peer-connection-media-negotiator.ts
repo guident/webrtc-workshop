@@ -30,4 +30,7 @@ export class GuidentVtuPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         console.log("GuidentVtuPeerConnectionMediaNegotiator::onWebRtcPeerConnectionNegotiationError(): OK!");     
     }
 
+    override _startPeerEngagementOffer (){
+
+    }
 }

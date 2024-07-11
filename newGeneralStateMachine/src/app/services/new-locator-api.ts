@@ -157,8 +157,19 @@ export class GuidentRmccEndpoint {
   }
 
 
+  setCredentials(uname: string, token: string) {
+    if ( uname == undefined || uname == null || token == undefined || token == null ) return;
+    this.authUsername = uname;
+    this.authToken = token;
+  }
+
   start() {
     console.log("GuidentRmccEndpoint::start() called.");
+    if ( this.authUsername == undefined || this.authUsername == null || this.authUsername == "" || this.authToken == undefined || this.authToken == null || this.authToken == "" ) {
+      console.log("GuidentRmccEndpoint::start(): Oops, credentials have not yet been set!");
+      throw new Error("Oops can't start the endpoint because credentials haven't yet been set!");
+      return;
+    }
     this.stateMachine.transition('startstopclicked');
   }
 

@@ -12,7 +12,7 @@ export class GuidentVehicleEndpointService extends endpoint {
   private vehicle31ConnectionId: string = "";
 
   constructor(private authService: CraigAuthenticateService) { 
-    super("VEHICLE", "dvega@guident.co", "whaddaya", new GuidentVtuPeerConnectionMediaNegotiator());
+    super("VEHICLE", "", "", new GuidentVtuPeerConnectionMediaNegotiator());
   }
 
   override onConnecting() {
@@ -84,7 +84,7 @@ export class GuidentVehicleEndpointService extends endpoint {
 
 
 
-    getVehicle31ConnectionId(): string {
-       return this.vehicle31ConnectionId;
-    }
+  getVehicle31ConnectionId(): string {
+      return this.vehicle31ConnectionId;
+  }
 }

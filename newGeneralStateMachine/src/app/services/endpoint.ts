@@ -18,13 +18,20 @@ export class endpoint {
             "whaddaya", 
             "wss://guident.bluepepper.us:8445", 
             [{'urls': "stun:guident.bluepepper.us:3478" }], 
-            null, uname, token);
+            null, 
+            uname, 
+            token);
 
         this.mypcnm = pcnm;
     }
 
     getEndpointType(): string {
         return this.endpointType;
+    }
+
+    setCredentials(uname: string, token: string) {
+        console.log("endpoint::setCredentials() Setting credentials for username: <<%s>>.", uname);
+        this.myep.setCredentials(uname, token);
     }
 
     setBindings() : void {

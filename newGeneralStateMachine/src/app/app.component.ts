@@ -16,7 +16,7 @@ export class AppComponent {
   title = 'workstationNew';
 
   constructor(
-    private user2: User2Service, private user3: User3Service, private user1: User1Service, 
+    private user1: User1Service, private user2: User2Service, private user3: User3Service, 
     private authService: CraigAuthenticateService
   ){
       console.log("App::cstr(): Going to authenticate.");
@@ -38,6 +38,10 @@ export class AppComponent {
 
   EngageButton1Click(){
     this.user1.engageTheVehicle();
+  }
+
+  EngageButton2Click(){
+    this.user2.engageTheVehicle();
   }
 
 }

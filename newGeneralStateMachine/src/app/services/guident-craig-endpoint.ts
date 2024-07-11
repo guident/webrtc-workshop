@@ -4,6 +4,8 @@ import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-
 
 export class GuidentCraigEndpoint extends endpoint {
 
+  private vehicle14ConnectionId: string = "";
+
   constructor(uname: string, token: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
     super("CRAIG", uname, token, pcnm);
   }
@@ -50,7 +52,10 @@ export class GuidentCraigEndpoint extends endpoint {
   }
 
   override onNotification(msg: any) {
-    console.log(`GuidentCraigEndpoint::onNotification(): Got a message!! : <<${msg}>>`, msg);
+    console.log("GuidentCraigEndpointService::onNotification(): Got a message!!");
+    if ( msg.endpointId == 14 ) {
+      this.vehicle14ConnectionId = msg.conectionId;
+    }
   }
 
   override onNewLocation(latlon: any) {
@@ -72,5 +77,9 @@ export class GuidentCraigEndpoint extends endpoint {
   override onDataChannelError(messageEvent: Event) {
     console.log("GuidentCraigEndpoint::onDataChannelError(): ok!");
   }
+
+  getVehicle14ConnectionId(): string {
+    return this.vehicle14ConnectionId;
+  } 
 
 }
