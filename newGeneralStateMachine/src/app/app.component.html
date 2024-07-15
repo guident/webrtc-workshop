@@ -1,13 +1,20 @@
-<div>
-  <button (click)='ServiceOnButton1Click()'> Register User1 </button>
-
-  <button (click)='ServiceOnButton2Click()'> Register User2 </button>
+<div class="grid-container">
+  <button class="register-user1" (click)="ServiceOnButton1Click()">Register User1</button>
+  <button class="register-user2" (click)="ServiceOnButton2Click()">Register User2</button>
+  <button class="register-user3" (click)="ServiceOnButton3Click()">Register User3</button>
   
-  <button (click)='ServiceOnButton3Click()'> Register User3 </button>
-</div>
-
-<div>
-  <button (click)='EngageButton1Click()'> Engage User1 </button>
-
-  <button (click)='EngageButton2Click()'> Engage User2 </button>
+  <button class="engage-user1" (click)="EngageButton1Click()">Engage User1</button>
+  <button class="engage-user2" (click)="EngageButton2Click()">Engage User2</button>
+  
+  <div class="user1-videos">
+    <video id = "user1Video1" autoplay></video>
+    <video id = "user1Video0" autoplay></video>
+    <video id = "user1Video2" autoplay></video>
+  </div>
+  
+  <div class="user2-videos">
+    <video id = "user2Video1" autoplay></video>
+    <video id = "user2Video0" autoplay></video>
+    <video id = "user2Video2" autoplay></video>
+  </div>
 </div>

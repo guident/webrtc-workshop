@@ -52,7 +52,7 @@ export class endpoint {
         this.myep.onNotification = this.onNotification.bind(this);
         this.myep.onNewLocation = this.onNewLocation.bind(this);
         //this.myep.notifyNetworkService = this.notifyNetworkService.bind(this);
-        this.myep._startPeerEngagementOffer = this.mypcnm._startPeerEngagementOffer();
+        // this.myep._startPeerEngagementOffer = this.mypcnm._startPeerEngagementOffer.bind(this);
         this.bindingsHaveBeenSet = true;
     }
 
@@ -66,6 +66,11 @@ export class endpoint {
 
     engage(connId: string): void {
         this.myep.engage(connId);
+    }
+
+
+    setRemoteVideoId(cameraIndex: number, videoTagId: string) {
+        this.myep.setRemoteVideoId(cameraIndex, videoTagId);
     }
 
 

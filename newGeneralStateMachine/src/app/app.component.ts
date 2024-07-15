@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { AfterViewInit, Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { User1Service } from './services/user1.service';
 import { User2Service } from './services/user2.service';
@@ -12,7 +12,7 @@ import { CraigAuthenticateService } from './services/craig.authenticate.service'
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements AfterViewInit{
   title = 'workstationNew';
 
   constructor(
@@ -23,6 +23,13 @@ export class AppComponent {
       this.authService.authenticate();
       console.log("App::cstr(): Auth attempt launched!");
   }
+
+  ngAfterViewInit(): void {
+    this.user1.getInstance().myep.setRemoteVideoId(0, "user1Video0");
+    this.user1.getInstance().myep.setRemoteVideoId(1, "user1Video1");
+    this.user1.getInstance().myep.setRemoteVideoId(2, "user1Video2");
+  }
+  
 
   ServiceOnButton1Click(){
     this.user1.SayHelloToService();

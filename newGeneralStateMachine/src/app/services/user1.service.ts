@@ -27,4 +27,7 @@ export class User1Service {
     this.gves.engage(this.gves.getVehicle31ConnectionId());
   }
 
+  getInstance(): GuidentVehicleEndpointService{
+    return this.gves;
+  }
 }

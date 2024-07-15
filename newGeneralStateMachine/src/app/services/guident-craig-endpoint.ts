@@ -1,13 +1,14 @@
 import { endpoint } from "./endpoint";
-import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-media-negotiator";
+import { GuidentPcsPeerConnectionMediaNegotiator } from "./guident-pcs-peer-connection-media-negotiator";
 
 
 export class GuidentCraigEndpoint extends endpoint {
 
   private vehicle14ConnectionId: string = "";
 
-  constructor(uname: string, token: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
+  constructor(uname: string, token: string, pcnm: GuidentPcsPeerConnectionMediaNegotiator) {
     super("CRAIG", uname, token, pcnm);
+    this.myep.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
   }
 
 
@@ -53,8 +54,9 @@ export class GuidentCraigEndpoint extends endpoint {
 
   override onNotification(msg: any) {
     console.log("GuidentCraigEndpointService::onNotification(): Got a message!!");
+    // console.log(msg);
     if ( msg.endpointId == 14 ) {
-      this.vehicle14ConnectionId = msg.conectionId;
+      this.vehicle14ConnectionId = msg.connectionId;
     }
   }
 
@@ -79,6 +81,7 @@ export class GuidentCraigEndpoint extends endpoint {
   }
 
   getVehicle14ConnectionId(): string {
+    console.log("the vehicle connectionID is: <%s>", this.vehicle14ConnectionId);
     return this.vehicle14ConnectionId;
   } 
 

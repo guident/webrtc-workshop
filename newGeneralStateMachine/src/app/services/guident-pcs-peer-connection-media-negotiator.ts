@@ -30,4 +30,7 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         console.log("GuidentPcsPeerConnectionMediaNegotiator::onWebRtcPeerConnectionNegotiationError(): OK!");     
     }
 
+    override _startPeerEngagementOffer(){
+        console.log("GuidentPcsPeerConnectionMediaNegotiator::_startPeerEngagementOffer(): OK!")
+    }
 }

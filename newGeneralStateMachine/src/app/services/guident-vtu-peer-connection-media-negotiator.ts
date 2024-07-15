@@ -31,6 +31,6 @@ export class GuidentVtuPeerConnectionMediaNegotiator extends GuidentPeerConnecti
     }
 
     override _startPeerEngagementOffer (){
-
+        console.log("GuidentVtuPeerConnectionMediaNegotiator::_startPeerEngagementOffer(): OK!")
     }
 }

@@ -194,13 +194,14 @@ export class GuidentRmccEndpoint {
       bundlePolicy: 'max-bundle'
     };
   }
-
-  setRemoteVideoId(cameraIndex: GuidentCameraPositions, videoTagId: string) {
+ 
+  setRemoteVideoId(cameraIndex: GuidentCameraPositions, videoTagId: string){
     if (cameraIndex < 0 || cameraIndex >= GuidentCameraPositions.CAMERA_POSITIONS_LENGTH) {
       console.log("GuidentRmccEndpoint.setRemoteVideoId): Huh? Invalid video tag index.");
     }
 
     const videoId = this.remoteVideoId[cameraIndex];
+    // console.log(videoId);
 
     if (videoId !== null) {
         const videoElement = document.getElementById(videoId);
@@ -220,6 +221,7 @@ export class GuidentRmccEndpoint {
     }
 
     this.remoteVideoId[cameraIndex] = videoTagId;
+    // console.log(this.remoteVideoId[cameraIndex]);
   }
 
   nullVideoStreams() {
@@ -625,8 +627,8 @@ export class GuidentRmccEndpoint {
   }
 
   private _startPeerEngagementOffer(peerId: string): boolean {
-    
-    console.log(`GuidentRmccEndpoint._startPeerEngagementOffer(): Attempting engagement with peer id: <<${peerId}>>.`);
+    console.log(this.remoteVideoId);
+    console.log(`GuidentRmccEndpoint::._startPeerEngagementOffer(): Attempting engagement with peer id: <<${peerId}>>.`);
 
     const constraints = {
       video: true,
@@ -634,17 +636,17 @@ export class GuidentRmccEndpoint {
     };
 
     if (this.remoteVideoId[0] == null || document.getElementById(this.remoteVideoId[0]) == null || document.getElementById(this.remoteVideoId[0])!.nodeName !== "VIDEO") {
-      console.error("GuidentRmccEndpoint._startPeerEngagementOffer(): Need to set remote video element for index 0.");
+      console.error("GuidentRmccEndpoint::._startPeerEngagementOffer(): Need to set remote video element for index 0.");
       return false;
     }
 
     if (this.remoteVideoId[1] == null || document.getElementById(this.remoteVideoId[1]) == null || document.getElementById(this.remoteVideoId[1])!.nodeName !== "VIDEO") {
-      console.error("GuidentRmccEndpoint._startPeerEngagementOffer(): Need to set remote video element for index 1.");
+      console.error("GuidentRmccEndpoint::._startPeerEngagementOffer(): Need to set remote video element for index 1.");
       return false;
     }
 
     if (this.remoteVideoId[2] == null || document.getElementById(this.remoteVideoId[2]) == null || document.getElementById(this.remoteVideoId[2])!.nodeName !== "VIDEO") {
-      console.error("GuidentRmccEndpoint._startPeerEngagementOffer(): Need to set remote video element for index 2.");
+      console.error("GuidentRmccEndpoint::._startPeerEngagementOffer(): Need to set remote video element for index 2.");
       return false;
     }
 
