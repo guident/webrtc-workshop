@@ -618,13 +618,20 @@ export class GuidentRmccEndpoint {
     this.websocketConnection!.send(str);
   }
 
+
+
   async getLocalAudioStream() {
     try {
       this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+      console.log("getLocalAudioStream()");
+      console.log(this.localStream);
     } catch (e) {
       console.error("GuidentRmccEndpoint::localAudioStreams: Audio Device Not Found. Make sure your microphone is connected and enabled");
     }
   }
+
+
+
 
   private _startPeerEngagementOffer(peerId: string): boolean {
     console.log(this.remoteVideoId);

@@ -11,7 +11,7 @@ import { GuidentCraigEndpoint } from './guident-craig-endpoint';
 export class User1Service {
 
   constructor(private gves: GuidentVehicleEndpointService, private authService: CraigAuthenticateService) {
-
+      gves.myep.getLocalAudioStream();
   }
 
   SayHelloToService(){      
@@ -23,8 +23,12 @@ export class User1Service {
 
 
   engageTheVehicle(): void {
-    if ( this.gves.getVehicle31ConnectionId() == "" ) return;
-    this.gves.engage(this.gves.getVehicle31ConnectionId());
+    if ( this.gves.getVehicle14ConnectionId() == "" ) return;
+    this.gves.setRemoteVideoId(0, "user1Video0");
+    this.gves.setRemoteVideoId(1, "user1Video1");
+    this.gves.setRemoteVideoId(2, "user1Video2");
+    this.gves.myep.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
+    this.gves.engage(this.gves.getVehicle14ConnectionId());
   }
 
   getInstance(): GuidentVehicleEndpointService{

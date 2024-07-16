@@ -9,7 +9,7 @@ import { CraigAuthenticateService } from './services/craig.authenticate.service'
 export class GuidentVehicleEndpointService extends endpoint {
 
 
-  private vehicle31ConnectionId: string = "";
+  private vehicle14ConnectionId: string = "";
 
   constructor(private authService: CraigAuthenticateService) { 
     super("VEHICLE", "", "", new GuidentVtuPeerConnectionMediaNegotiator());
@@ -57,8 +57,9 @@ export class GuidentVehicleEndpointService extends endpoint {
 
   override onNotification(msg: any) {
     console.log("GuidentVehicleEndpointService::onNotification(): Got a message!!");
-    if ( msg.endpointId == 31 ) {
-      this.vehicle31ConnectionId = msg.conectionId;
+    if ( msg.endpointId == 14 ) {
+      console.log("Connection Id for vehicle 14 is <<%s>>", msg.connectionId);
+      this.vehicle14ConnectionId = msg.connectionId;
     }
   }
 
@@ -84,7 +85,7 @@ export class GuidentVehicleEndpointService extends endpoint {
 
 
 
-  getVehicle31ConnectionId(): string {
-      return this.vehicle31ConnectionId;
+  getVehicle14ConnectionId(): string {
+      return this.vehicle14ConnectionId;
   }
 }
