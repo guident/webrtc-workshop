@@ -37,5 +37,9 @@ export class GuidentPeerConnectionMediaNegotiator {
     
     _startPeerEngagementOffer (){
         console.log("GuidentPeerConnectionMediaNegotiator::_startPeerEngagementOffer(): not implemented.");
+    // make this "overrideable"
+    // should contain the peer connection, local video stream, local audio stream, etc
+    // child classes should override
+    // should lock onto camera
     }
 }
