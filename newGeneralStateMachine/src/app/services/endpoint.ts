@@ -1,6 +1,6 @@
 import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-media-negotiator";
 import { GuidentVtuPeerConnectionMediaNegotiator } from "./guident-vtu-peer-connection-media-negotiator";
-import { GuidentRmccEndpoint } from "./new-locator-api";
+import { WebsocketConnectionStateMachine } from "./new-locator-api";
 
 
 
@@ -9,21 +9,37 @@ export class endpoint {
     myep: any = null;
     protected mypcnm: GuidentPeerConnectionMediaNegotiator;
     private endpointType: string = "";
-    private bindingsHaveBeenSet: boolean = false; 
+    private bindingsHaveBeenSet: boolean = false;
+    // localStream: any = "B06"; 
 
     constructor(t: string, uname: string, token: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
-
         this.endpointType = t;
 
-        this.myep = new GuidentRmccEndpoint("harald", 
+        this.myep = new WebsocketConnectionStateMachine("harald", 
             "whaddaya", 
-            "wss://guident.bluepepper.us:8445", 
-            [{'urls': "stun:guident.bluepepper.us:3478" }], 
-            null, 
+            "wss://guident.bluepepper.us:8445",
             uname, 
             token);
 
+            
         this.mypcnm = pcnm;
+
+        this.mypcnm.setEndpoint(this.myep); // do I need to do this?
+
+        // this.myep.stateMachine = this.mypcnm.stateMachine;
+        // this.mypcnm.stateMachine = this.myep.stateMachine;
+        // add all other necessary variables from the endpoint to the pcnm
+        this.mypcnm.connectionId = this.myep.connectionId;
+        this.mypcnm.endpointId = this.myep.endpointId;
+        this.mypcnm.endpointType = this.myep.endpointType;
+        this.mypcnm.username = this.myep.username;
+        this.mypcnm.password = this.myep.password;
+        this.mypcnm.authUsername = this.myep.authUsername;
+        this.mypcnm.authToken = this.myep.authToken;
+        this.mypcnm.localMessageSequence = this.myep.localMessageSequence;
+        // this.mypcnm.websocketConnection = this.myep.websocketConnection;
+
+
     }
 
     getEndpointType(): string {
@@ -52,7 +68,13 @@ export class endpoint {
         this.myep.onNotification = this.onNotification.bind(this);
         this.myep.onNewLocation = this.onNewLocation.bind(this);
         //this.myep.notifyNetworkService = this.notifyNetworkService.bind(this);
-        // this.myep._startPeerEngagementOffer = this.mypcnm._startPeerEngagementOffer.bind(this);
+        this.myep.startPeerEngagementOffer = this.mypcnm.startPeerEngagementOffer.bind(this.mypcnm);
+        this.myep.processPeerEngagementAnswer = this.mypcnm.processPeerEngagementAnswer.bind(this.mypcnm);
+        this.myep._resetEngagement = this.mypcnm._resetEngagement.bind(this.mypcnm);
+
+        this.mypcnm._sendMessage = this.myep._sendMessage.bind(this.myep);
+
+
         this.bindingsHaveBeenSet = true;
     }
 
@@ -64,13 +86,18 @@ export class endpoint {
     }
 
 
-    engage(connId: string): void {
-        this.myep.engage(connId);
+    engage(connId: string): void {   
+        this.myep.engage(connId); 
     }
 
 
     setRemoteVideoId(cameraIndex: number, videoTagId: string) {
-        this.myep.setRemoteVideoId(cameraIndex, videoTagId);
+        // this.myep.setRemoteVideoId(cameraIndex, videoTagId);
+        this.mypcnm.setRemoteVideoId(cameraIndex, videoTagId); // AA: should media negotiator do this?
+    }
+
+    getLocalMediaStream(): void {
+        console.log("endpoint::getLocalMediaStream(): not implemented.");
     }
 
 
@@ -118,31 +145,44 @@ export class endpoint {
 
     
     onNotification(msg: any) {
-        console.log("endpoint::onNotification(): not implemented");
+        console.log("endpoint::onNotification(): not implemented.");
     }
     
 
     onNewLocation(latlon: any) {
-        console.log("endpoint::onNewLocation(): not implemented");
+        console.log("endpoint::onNewLocation(): not implemented.");
     }
 
     onDataChannelMessage(messageEvent: MessageEvent) {
-        console.log("endpoint::onDataChannelMessage(): not implemented");
+        console.log("endpoint::onDataChannelMessage(): not implemented.");
     }
 
     onDataChannelOpen(messageEvent: Event) {
-        console.log("endpoint::onDataChannelOpen(): not implemented");
+        console.log("endpoint::onDataChannelOpen(): not implemented.");
     }
 
     onDataChannelClose(messageEvent: Event) {
-        console.log("endpoint::onDataChannelClose(): not implemented");
+        console.log("endpoint::onDataChannelClose(): not implemented.");
     }
 
     onDataChannelError(messageEvent: Event) {
-        console.log("endpoint::onDataChannelError(): not implemented");
+        console.log("endpoint::onDataChannelError(): not implemented.");
     }
 
+    startPeerEngagementOffer(peerId: string) {
+        console.log("endpoint::startPeerEngagementOffer(): not implemented.");
+    }
 
+    processPeerEngagementAnswer(msg: any) {
+        console.log("endpoint::processPeerEngagementAnswer(): not implemented.");
+    }
 
+    setOfferVideoPayloadTypeManipulations(exclusivePtMid1?: number, exclusivePtMid2?: number, exclusivePtMid3?: number, changePtMid1?: number, changePtMid2?: number, changePtMid3?: number) {
+        console.log("endpoint::setOfferVideoPayloadTypeManipulations(): not implemented");
+    }
+
+    _resetEngagement() {
+        console.log("endpoint::_resetEngagement(): not implemented.");
+    }
     
 }

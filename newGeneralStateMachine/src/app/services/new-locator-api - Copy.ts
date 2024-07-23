@@ -61,7 +61,7 @@ interface StateMachineDefinition {
   [state: string]: any;
 }
 
-export class GuidentRmccEndpoint extends endpoint {
+export class GuidentRmccEndpoint {
   private vehicleLocatorServerUrl: string;
   private webrtcPeerConfiguration: RTCConfiguration;
   private stateMachine: any;
@@ -105,7 +105,6 @@ export class GuidentRmccEndpoint extends endpoint {
     authToken: string
   ) {
 
-    super();
 
     this.username = name;
     this.password = pwd;
@@ -346,67 +345,67 @@ export class GuidentRmccEndpoint extends endpoint {
     this.authToken = authToken;
   }
 
-  override onConnecting() {
+   onConnecting() {
     console.log("GuidentRmccEndpoint::onConnecting(): not implemented.");
   }
 
-  override onConnectionSuccessful() {
+   onConnectionSuccessful() {
     console.log("GuidentRmccEndpoint::onConnectionSuccessful(): not implemented.");
   }
 
-  override onConnectionFailed(err: string) {
+   onConnectionFailed(err: string) {
     console.log("GuidentRmccEndpoint::onConnectionFailed(): not implemented, called with err: " + err);
   }
 
-  override onDisconnected(reason: string) {
+   onDisconnected(reason: string) {
     console.log("GuidentRmccEndpoint::onDisconnected(): not implemented, called with reason: " + reason);
   }
 
-  override onRegistrationFailed() {
+   onRegistrationFailed() {
     console.log("GuidentRmccEndpoint::onRegistrationFailed(): not implemented.");
   }
 
-  override onRegistrationSuccessful() {
+   onRegistrationSuccessful() {
     console.log("GuidentRmccEndpoint::onRegistrationSuccessful(): not implemented.");
   }
 
-  override onEngaging() {
+   onEngaging() {
     console.log("GuidentRmccEndpoint::onEngaging(): not implemented.");
   }
 
-  override onEngagementFailed(err: string) {
+   onEngagementFailed(err: string) {
     console.log("GuidentRmccEndpoint::onEngagementFailed(): not implemented, called with err: " + err);
   }
 
-  override onEngagementSuccessful() {
+   onEngagementSuccessful() {
     console.log("GuidentRmccEndpoint::onEngagementSuccessful(): not implemented.");
   }
 
-  override onDisengagement(reason: any) {
+   onDisengagement(reason: any) {
     console.log("GuidentRmccEndpoint::onDisengagement(): not implemented, called with reason: " + reason);
   }
 
-  override onNotification(msg: GuidentVLESMessage) {
+   onNotification(msg: GuidentVLESMessage) {
     console.log("GuidentRmccEndpoint::onNotification(): not implemented");
   }
 
-  override onNewLocation(latlon: any) {
+   onNewLocation(latlon: any) {
     console.log("GuidentRmccEndpoint::onNewLocation(): not implemented");
   }
 
-  override onDataChannelMessage(messageEvent: MessageEvent) {
+   onDataChannelMessage(messageEvent: MessageEvent) {
     console.log("GuidentRmccEndpoint::onDataChannelMessage(): not implemented");
   }
 
-  override onDataChannelOpen(messageEvent: Event) {
+   onDataChannelOpen(messageEvent: Event) {
     console.log("GuidentRmccEndpoint::onDataChannelOpen(): not implemented");
   }
 
-  override onDataChannelClose(messageEvent: Event) {
+   onDataChannelClose(messageEvent: Event) {
     console.log("GuidentRmccEndpoint::onDataChannelClose(): not implemented");
   }
 
-  override onDataChannelError(messageEvent: Event) {
+   onDataChannelError(messageEvent: Event) {
     console.log("GuidentRmccEndpoint::onDataChannelError(): not implemented");
   }
 

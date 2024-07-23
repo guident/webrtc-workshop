@@ -25,9 +25,13 @@ export class AppComponent implements AfterViewInit{
   }
 
   ngAfterViewInit(): void {
-    this.user1.getInstance().myep.setRemoteVideoId(0, "user1Video0");
-    this.user1.getInstance().myep.setRemoteVideoId(1, "user1Video1");
-    this.user1.getInstance().myep.setRemoteVideoId(2, "user1Video2");
+    // this.user1.getInstance().myep.setRemoteVideoId(0, "user1Video0");
+    // this.user1.getInstance().myep.setRemoteVideoId(1, "user1Video1");
+    // this.user1.getInstance().myep.setRemoteVideoId(2, "user1Video2");
+
+    this.user1.getInstance().setRemoteVideoId(0, "user1Video0");
+    this.user1.getInstance().setRemoteVideoId(1, "user1Video1");
+    this.user1.getInstance().setRemoteVideoId(2, "user1Video2");
   }
   
 

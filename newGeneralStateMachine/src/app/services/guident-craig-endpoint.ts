@@ -4,11 +4,11 @@ import { GuidentPcsPeerConnectionMediaNegotiator } from "./guident-pcs-peer-conn
 
 export class GuidentCraigEndpoint extends endpoint {
 
-  private vehicle14ConnectionId: string = "";
+  private vehicle31ConnectionId: string = "";
 
   constructor(uname: string, token: string, pcnm: GuidentPcsPeerConnectionMediaNegotiator) {
     super("CRAIG", uname, token, pcnm);
-    this.myep.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
+    this.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
   }
 
 
@@ -55,8 +55,9 @@ export class GuidentCraigEndpoint extends endpoint {
   override onNotification(msg: any) {
     console.log("GuidentCraigEndpointService::onNotification(): Got a message!!");
     // console.log(msg);
-    if ( msg.endpointId == 14 ) {
-      this.vehicle14ConnectionId = msg.connectionId;
+    if ( msg.endpointId == 31 ) {
+      // console.log("GuidentCraigEndpoint::onNotification(): msg.endpointId is >>", msg.endpointId); // AA: remove
+      this.vehicle31ConnectionId = msg.connectionId;
     }
   }
 
@@ -80,9 +81,31 @@ export class GuidentCraigEndpoint extends endpoint {
     console.log("GuidentCraigEndpoint::onDataChannelError(): ok!");
   }
 
-  getVehicle14ConnectionId(): string {
-    console.log("the vehicle connectionID is: <%s>", this.vehicle14ConnectionId);
-    return this.vehicle14ConnectionId;
+  override async getLocalMediaStream() {
+    await this.mypcnm.getLocalMediaStream();
+  }
+
+  override startPeerEngagementOffer(peerId: string): void {
+    this.mypcnm.startPeerEngagementOffer(peerId);
+  }  
+
+  override processPeerEngagementAnswer(msg: any) {
+    this.mypcnm.processPeerEngagementAnswer(msg);
+  }
+
+  override setOfferVideoPayloadTypeManipulations(exclusivePtMid1?: number, exclusivePtMid2?: number, exclusivePtMid3?: number, changePtMid1?: number, changePtMid2?: number, changePtMid3?: number) {
+    this.mypcnm.setOfferVideoPayloadTypeManipulations(exclusivePtMid1, exclusivePtMid2, exclusivePtMid3, changePtMid1, changePtMid2, changePtMid3);
+  }
+
+  override _resetEngagement(): void {
+    this.mypcnm._resetEngagement();
+  }
+
+
+
+  getVehicle31ConnectionId(): string {
+    console.log("GuidentCraigEndpoint::getVehicle31ConnectionId(): the vehicle connectionID is: <%s>", this.vehicle31ConnectionId);
+    return this.vehicle31ConnectionId;
   } 
 
 }

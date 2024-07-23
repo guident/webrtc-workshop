@@ -9,7 +9,7 @@ import { CraigAuthenticateService } from './services/craig.authenticate.service'
 export class GuidentVehicleEndpointService extends endpoint {
 
 
-  private vehicle14ConnectionId: string = "";
+  private vehicle14ConnectionId: string = ""; // AA: 14 is MiCa
 
   constructor(private authService: CraigAuthenticateService) { 
     super("VEHICLE", "", "", new GuidentVtuPeerConnectionMediaNegotiator());
@@ -83,6 +83,21 @@ export class GuidentVehicleEndpointService extends endpoint {
     console.log("GuidentVehicleEndpointService::onDataChannelError(): Ok!");
   }
 
+  override getLocalMediaStream(): void {
+    this.mypcnm.getLocalMediaStream();
+  }
+
+  override startPeerEngagementOffer(peerId: string): void {
+    this.mypcnm.startPeerEngagementOffer(peerId);
+  }  
+
+  override processPeerEngagementAnswer(msg: any) {
+    this.mypcnm.processPeerEngagementAnswer(msg);
+  }
+
+  override setOfferVideoPayloadTypeManipulations(exclusivePtMid1?: number, exclusivePtMid2?: number, exclusivePtMid3?: number, changePtMid1?: number, changePtMid2?: number, changePtMid3?: number) {
+    this.mypcnm.setOfferVideoPayloadTypeManipulations(exclusivePtMid1, exclusivePtMid2, exclusivePtMid3, changePtMid1, changePtMid2, changePtMid3);
+  }
 
 
   getVehicle14ConnectionId(): string {
