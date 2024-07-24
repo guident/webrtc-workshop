@@ -1,5 +1,5 @@
 import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-media-negotiator";
-import { GuidentMessageType, GuidentCameraPositions } from "./new-locator-api"
+import { GuidentMessageType, GuidentCameraPositions, GuidentMsgEventType } from "./new-locator-api"
 
 
 export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnectionMediaNegotiator {
@@ -12,23 +12,29 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
 
     constructor() {
         super("PCS");
+        // this.webrtcPeerConfiguration = {
+        //     iceServers: [{
+        //         urls: [ "stun:us-turn5.xirsys.com" ]
+        //       }, {
+        //           username: "_DYVz1xUZvXJHIlhLB1ucpO50HEc98R9fOMH4xm13sTFd-3lhmM5Wxjee4ulyvLrAAAAAGRZMGpndWlkZW50",
+        //           credential: "41d94e58-edc5-11ed-8e3f-0242ac140004",
+        //           urls: [
+        //               "turn:us-turn5.xirsys.com:80?transport=udp",
+        //               "turn:us-turn5.xirsys.com:3478?transport=udp",
+        //               "turn:us-turn5.xirsys.com:80?transport=tcp",
+        //               "turn:us-turn5.xirsys.com:3478?transport=tcp",
+        //               "turns:us-turn5.xirsys.com:443?transport=tcp",
+        //               "turns:us-turn5.xirsys.com:5349?transport=tcp"
+        //         ]
+        //       }],
+        //     bundlePolicy: 'max-bundle'
+        // }
+
+        // AA: delete
         this.webrtcPeerConfiguration = {
-            iceServers: [{
-                urls: [ "stun:us-turn5.xirsys.com" ]
-              }, {
-                  username: "_DYVz1xUZvXJHIlhLB1ucpO50HEc98R9fOMH4xm13sTFd-3lhmM5Wxjee4ulyvLrAAAAAGRZMGpndWlkZW50",
-                  credential: "41d94e58-edc5-11ed-8e3f-0242ac140004",
-                  urls: [
-                      "turn:us-turn5.xirsys.com:80?transport=udp",
-                      "turn:us-turn5.xirsys.com:3478?transport=udp",
-                      "turn:us-turn5.xirsys.com:80?transport=tcp",
-                      "turn:us-turn5.xirsys.com:3478?transport=tcp",
-                      "turns:us-turn5.xirsys.com:443?transport=tcp",
-                      "turns:us-turn5.xirsys.com:5349?transport=tcp"
-                ]
-              }],
-            // bundlePolicy: 'max-bundle'
-        }
+            iceServers: [{'urls': "stun:guident.bluepepper.us:3478" }],
+            bundlePolicy: 'max-bundle'
+        };
 
         // console.log("DAVID: ", this.remoteVideoId); // AA: remove
     }
@@ -62,7 +68,7 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
             (videoElement as HTMLVideoElement).srcObject = ev.streams[0];
         }
     }
-
+    
     // private _sendMessage(messageType: GuidentMessageType, peerId: string) {
     //     console.log(`Sending message: ${messageType} to peerId: ${peerId}`);
     //     // Implement the logic to send a message here
@@ -331,7 +337,7 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         });
         }).then((promiseResult) => {
         console.log(`WebsocketConnectionStateMachine.startPeerEngagementOffer(): the wait-for-ice-candidates promise result: <<${promiseResult}>>, Sending offer.`);
-        this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId);
+        this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId, GuidentMsgEventType.UNKNOWN, null, this.webrtcPeerConfiguration.iceServers, this.webrtcPeerConnection?.localDescription);
         // this.
         }).catch((err) => {
             console.log("I am an error", err);

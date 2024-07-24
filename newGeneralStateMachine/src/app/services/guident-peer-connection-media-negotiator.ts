@@ -215,12 +215,12 @@ export class GuidentPeerConnectionMediaNegotiator {
         }
     }
 
-    _sendMessage(messageType: GuidentMessageType, destinationId?: string, eventType?: GuidentMsgEventType, eventData?: any) {
+    _sendMessage(messageType: GuidentMessageType, destinationId?: string, eventType?: GuidentMsgEventType, eventData?: any, iceServers?: any, sdpPayload?: any) {
         if ( this.myEndpoint == null ) {
             console.error("GuidentPeerConnectionMediaNegotiator::_sendMessage(): not implemented.");
             return;
         }
-        return(this.myEndpoint._sendMessage(messageType, destinationId, eventType, eventData));
+        return(this.myEndpoint._sendMessage(messageType, destinationId, eventType, eventData, iceServers, sdpPayload));
     }
     
 

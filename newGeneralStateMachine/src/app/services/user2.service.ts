@@ -66,7 +66,7 @@ export class User2Service {
     this.user2Var.engage(this.user2Var.getVehicle31ConnectionId());
   }
 
-  getInstance(): GuidentCraigEndpoint{
+  getInstance(): GuidentCraigEndpoint {
     return this.user2Var;
   }
 }

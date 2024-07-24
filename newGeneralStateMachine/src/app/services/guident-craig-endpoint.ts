@@ -59,7 +59,7 @@ export class GuidentCraigEndpoint extends endpoint {
       // console.log("GuidentCraigEndpoint::onNotification(): msg.endpointId is >>", msg.endpointId); // AA: remove
       this.vehicle31ConnectionId = msg.connectionId;
     }
-  }
+  } // instaniate and in constructor specify the connectionId of vehicle and pcs
 
   override onNewLocation(latlon: any) {
     console.log("GuidentCraigEndpoint::onNewLocation(): ok!");

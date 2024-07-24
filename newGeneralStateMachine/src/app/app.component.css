@@ -3,7 +3,7 @@
     --scaleGrid: 5%;
     display: grid;
     grid-template-columns: var(--scaleGrid) repeat(3, 1fr);
-    grid-template-rows: calc(var(--scaleGrid)*2.5) repeat(2, auto);
+    grid-template-rows: calc(var(--scaleGrid)*2.5) repeat(3, auto);
     gap: 10px;
   }
   
@@ -31,6 +31,11 @@
     grid-column: 1 / 2;
     grid-row: 3 / 4;
   }
+
+  .engage-user3 {
+    grid-column: 1 / 2;
+    grid-row: 4 / 5;
+  }
   
   .user1-videos {
     grid-column: 2 / 5;
@@ -42,6 +47,13 @@
   .user2-videos {
     grid-column: 2 / 5;
     grid-row: 3 / 4;
+    display: flex;
+    justify-content: space-around;
+  }
+
+  .user3-videos {
+    grid-column: 2 / 5;
+    grid-row: 4 / 5;
     display: flex;
     justify-content: space-around;
   }

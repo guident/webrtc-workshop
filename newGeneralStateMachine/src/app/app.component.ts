@@ -55,4 +55,8 @@ export class AppComponent implements AfterViewInit{
     this.user2.engageTheVehicle();
   }
 
+  EngageButton3Click(){
+    this.user3.engageTheVehicle();
+  }
+
 }

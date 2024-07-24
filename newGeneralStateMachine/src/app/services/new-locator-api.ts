@@ -441,6 +441,7 @@ export class WebsocketConnectionStateMachine {
   }
 
   private _onWssConnectionMessage(evt: MessageEvent) {
+    console.log("DAVID: ", evt.data);
     if (evt.data != undefined && evt.data != null) {
       let msg = JSON.parse(evt.data);
       let isMine = false;
@@ -546,7 +547,7 @@ export class WebsocketConnectionStateMachine {
   }
 
 
-  private _sendMessage(messageType: GuidentMessageType, destinationId?: string, eventType?: GuidentMsgEventType, eventData?: any) {
+  private _sendMessage(messageType: GuidentMessageType, destinationId?: string, eventType?: GuidentMsgEventType, eventData?: any, iceServers?: any, sdpPayload?: any) {
     let msg: any = new Object();
 
     msg.messageType = messageType;
@@ -581,12 +582,12 @@ export class WebsocketConnectionStateMachine {
     }
 
     if (messageType === GuidentMessageType.ENGAGE_OFFER || messageType === GuidentMessageType.ENGAGE_ANSWER) {
-      /*
-      if (this.webrtcPeerConnection != null) {
-        msg.iceServers = this.webrtcPeerConfiguration.iceServers;
-        msg.sessiondescription = this.webrtcPeerConnection.localDescription;
-      }
-      */
+      
+  
+      msg.iceServers = iceServers;
+      msg.sessiondescription = sdpPayload;
+
+      
     }
 
     msg.sequence = this.localMessageSequence++;
@@ -1121,7 +1122,7 @@ GuidentRmcwStateMachineDefinition: StateMachineDefinition = {
           action(wssm: any, evtData: any) {
             wssm._clearCurrentTimer();
             console.log("engagingwithoffer-engagementanswer(): will process answer sdp.");
-            if (!wssm._processPeerEngagementAnswer(evtData)) {
+            if (!wssm.processPeerEngagementAnswer(evtData)) {
               console.log("engagingwithoffer-engagementanswer(): Oops, error processing answer sdp.");
               wssm._resetEngagement();
               wssm.onEngagementFailed("config");

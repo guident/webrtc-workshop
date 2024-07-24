@@ -9,7 +9,7 @@ import { CraigAuthenticateService } from './services/craig.authenticate.service'
 export class GuidentVehicleEndpointService extends endpoint {
 
 
-  private vehicle14ConnectionId: string = ""; // AA: 14 is MiCa
+  private vehicle14ConnectionId: string = ""; 
 
   constructor(private authService: CraigAuthenticateService) { 
     super("VEHICLE", "", "", new GuidentVtuPeerConnectionMediaNegotiator());
