@@ -28,7 +28,8 @@ export class User3Service {
   }
 
   async engageTheVehicle() {
-    this.user3Var.setRemoteVideoId(0);
+    this.user3Var.setRemoteVideoId(0, "user3Video0");
+    // this.user3Var.setRemoteVideoId(1, "user3Video1");
     if ( this.user3Var.getVehicle31ConnectionId() == "" ) return;
     await this.user3Var.getLocalMediaStream();
     this.user3Var.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);

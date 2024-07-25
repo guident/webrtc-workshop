@@ -10,14 +10,13 @@ export class endpoint {
     protected mypcnm: GuidentPeerConnectionMediaNegotiator;
     private endpointType: string = "";
     private bindingsHaveBeenSet: boolean = false;
-    // localStream: any = "B06"; 
 
     constructor(t: string, uname: string, token: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
         this.endpointType = t;
 
         this.myep = new WebsocketConnectionStateMachine("harald", 
             "whaddaya", 
-            "wss://guident.bluepepper.us:8445",
+            "wss://guident.bluepepper.us:8443", // 8445
             uname, 
             token);
 
