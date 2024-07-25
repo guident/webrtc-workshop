@@ -142,8 +142,8 @@ var currentState = "disconnected"
 
 
 var isAuthenticated = false;
-var authUserEmail = "";
-var authPassword = ""
+var authUserEmail = "5ddabb13-4a1a-499e-b54f-b9baebefea88";
+var authPassword = "Guident1!"
 var authAccessToken = "whaddaya";
 
 
