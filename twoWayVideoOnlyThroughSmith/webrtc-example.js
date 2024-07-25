@@ -7,7 +7,7 @@ var peerConnectionId = null;
 
 var myUsername = "gabriel";
 var myPassword = "whaddaya";
-var myEndpointId = "31";
+var myEndpointId = "21";
 
 var defaultLatitude = 26.3834684;
 var defaultLongitude = -80.1001748;
@@ -154,14 +154,16 @@ function  authenticate() {
     var xhr = new XMLHttpRequest();
 
     // Initialize the request as a POST request to the specified URL.
-    xhr.open("POST", "https://dev.bluepepper.us:8081/handler");
+    xhr.open("POST", "http://dev.bluepepper.us:8081/handler");
 
     // Set the request header to specify that the request body will be JSON.
     xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Access-Control-Allow-Origin", "*");
+    xhr.setRequestHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
 
     // Create a JSON string from the email and password to be sent in the request body.
     const body = JSON.stringify({
-	    action: auth,
+	    action: 'auth',
       	    auth: {
 		uniqueId: authUserEmail,
 		password: authPassword
