@@ -173,6 +173,8 @@ export class GuidentPeerConnectionMediaNegotiator {
     // }
 
     setRemoteVideoId(cameraIndex: GuidentCameraPositions, videoTagId: string){
+        console.log("ANDY: ", videoTagId);
+        console.log("ANDY2: ", this.remoteVideoId);
         if (cameraIndex < 0 || cameraIndex >= GuidentCameraPositions.CAMERA_POSITIONS_LENGTH) {
           console.log("GuidentPeerConnectionMediaNegotiator::setRemoteVideoId(): Huh? Invalid video tag index.");
         }
