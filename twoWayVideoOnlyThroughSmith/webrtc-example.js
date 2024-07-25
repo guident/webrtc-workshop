@@ -144,7 +144,8 @@ var currentState = "disconnected"
 var isAuthenticated = false;
 var authUserEmail = "5ddabb13-4a1a-499e-b54f-b9baebefea88";
 var authPassword = "Guident1!"
-var authAccessToken = "whaddaya";
+// var authAccessToken = "whaddaya";
+authAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiOCIsImZpcnN0X25hbWUiOiJEYXZpZCIsImxhc3RfbmFtZSI6IlZlZ2EgU290b2xvbmdvIiwiYXZhdGFyIjpudWxsLCJjcmVhdGVkX2F0IjoiMjAyMy0wMi0yM1QxNzoxNzo1NC44MDBaIn0sImdlbmVyYXRlZF9hdCI6IjIwMjQtMDctMjVUMTU6MDA6MzEuMTU2WiIsImlhdCI6MTcyMTkxOTYzMSwiZXhwIjoxNzIxOTI2ODMxfQ.37hjJ9iZzXSzQrodOcpw1yTdb5eTA7MKs8pBJFDMqi8";
 
 
 
@@ -444,7 +445,9 @@ function showMediaStreams() {
 
 mikemadethis();
 
-authenticate();
+// authenticate();
+
+connectWss();
 
 
 
