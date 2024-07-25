@@ -16,7 +16,7 @@ export class endpoint {
 
         this.myep = new WebsocketConnectionStateMachine("harald", 
             "whaddaya", 
-            "wss://guident.bluepepper.us:8443", // 8445
+            "wss://guident.bluepepper.us:8445", // 8443
             uname, 
             token);
 

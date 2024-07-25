@@ -94,6 +94,10 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         }
                 
 
+        // console.log("MIKE", this.remoteVideoId[0]);
+
+        // console.log(document.getElementById(this.remoteVideoId[0]));
+
         if (this.remoteVideoId[0] != null && document.getElementById(this.remoteVideoId[0]) != null && document.getElementById(this.remoteVideoId[0])!.nodeName === "VIDEO") {
             (document.getElementById(this.remoteVideoId[0]) as HTMLVideoElement).srcObject = this.firstVideoMediaStream;
         }
@@ -133,7 +137,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
 
     override async getLocalMediaStream() { 
         try {
-            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });  // AA: changed this
             console.log("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): ", this.localStream);
         } catch (e) {
             console.error("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): Audio Device Not Found. Make sure your microphone is connected and enabled");
@@ -152,6 +156,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         audio: true,
         };
 
+        console.log("MIKE", this.remoteVideoId[0]);
         if (this.remoteVideoId[0] == null || document.getElementById(this.remoteVideoId[0]) == null || document.getElementById(this.remoteVideoId[0])!.nodeName !== "VIDEO") {
         console.error("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): Need to set remote video element for index 0.");
         return false;
@@ -171,20 +176,20 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                 }
             };
         
-            if (ev.transceiver.mid === "0") {
+            if (ev.transceiver.mid === "0") { // AA: 
                 if (this.firstVideoMediaStream == null) {
                     this.firstVideoMediaStream = new MediaStream([ev.track]);
                 } else {
                     this.firstVideoMediaStream.addTrack(ev.track);
                     this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
                 }
-            } else if (ev.transceiver.mid === "1") {
-                if (this.firstVideoMediaStream == null) {
-                    this.firstVideoMediaStream = new MediaStream([ev.track]);
-                } else {
-                    this.firstVideoMediaStream.addTrack(ev.track);
-                    this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
-                }
+            // } else if (ev.transceiver.mid === "1") {
+            //     if (this.firstVideoMediaStream == null) {
+            //         this.firstVideoMediaStream = new MediaStream([ev.track]);
+            //     } else {
+            //         this.firstVideoMediaStream.addTrack(ev.track);
+            //         this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
+            //     }
                 updateVideoElement(this.firstVideoMediaStream, this.remoteVideoId[0]);
             }
         };

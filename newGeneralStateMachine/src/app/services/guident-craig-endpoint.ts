@@ -1,12 +1,12 @@
 import { endpoint } from "./endpoint";
 import { GuidentPcsPeerConnectionMediaNegotiator } from "./guident-pcs-peer-connection-media-negotiator";
-
+import { GuidentTwvPeerConnectionMediaNegotiator } from "./guident-two-way-video-peer-connection-media-negotiator";
 
 export class GuidentCraigEndpoint extends endpoint {
 
   private vehicle31ConnectionId: string = "";
 
-  constructor(uname: string, token: string, pcnm: GuidentPcsPeerConnectionMediaNegotiator) {
+  constructor(uname: string, token: string, pcnm: GuidentTwvPeerConnectionMediaNegotiator) {
     super("CRAIG", uname, token, pcnm);
     this.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
   }
@@ -55,8 +55,9 @@ export class GuidentCraigEndpoint extends endpoint {
   override onNotification(msg: any) {
     console.log("GuidentCraigEndpointService::onNotification(): Got a message!!");
     // console.log(msg);
-    if ( msg.endpointId == 31 ) {
-      // console.log("GuidentCraigEndpoint::onNotification(): msg.endpointId is >>", msg.endpointId); // AA: remove
+    // console.log("ANDY !!! ", msg.endpointId);
+    if (msg.endpointId == 21) { //AA: was 31
+      console.log("ANDY!! GuidentCraigEndpoint::onNotification(): msg.endpointId is >>", msg.endpointId); // AA: remove
       this.vehicle31ConnectionId = msg.connectionId;
     }
   } // instaniate and in constructor specify the connectionId of vehicle and pcs
