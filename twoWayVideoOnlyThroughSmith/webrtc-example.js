@@ -145,7 +145,7 @@ var isAuthenticated = false;
 var authUserEmail = "5ddabb13-4a1a-499e-b54f-b9baebefea88";
 var authPassword = "Guident1!"
 // var authAccessToken = "whaddaya";
-authAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiOCIsImZpcnN0X25hbWUiOiJEYXZpZCIsImxhc3RfbmFtZSI6IlZlZ2EgU290b2xvbmdvIiwiYXZhdGFyIjpudWxsLCJjcmVhdGVkX2F0IjoiMjAyMy0wMi0yM1QxNzoxNzo1NC44MDBaIn0sImdlbmVyYXRlZF9hdCI6IjIwMjQtMDctMjVUMTU6MDA6MzEuMTU2WiIsImlhdCI6MTcyMTkxOTYzMSwiZXhwIjoxNzIxOTI2ODMxfQ.37hjJ9iZzXSzQrodOcpw1yTdb5eTA7MKs8pBJFDMqi8";
+authAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhmYjUxNWNkLTI2ODgtNDMxMC1hMjllLTU0ODlmYWYwYTZmNCIsInByb3BlcnR5X29uZSI6MjEsInByb3BlcnR5X3R3byI6MSwiaXNzdWVkX2F0IjoiMjAyNC0wNy0yNVQxNTozMjo0NC4xMDIzNzQwNzFaIiwiZXhwaXJlZF9hdCI6IjIwMjQtMDctMjZUMTU6MzI6NDQuMTAyMzc1NDE4WiJ9.tYBpzrR2jot3p9yxNPq0JJ1QlGp6-SWlbvxMfBa9SU8";
 
 
 
@@ -258,7 +258,7 @@ function sendWssMessage(messageType, destinationId) {
                 msg.peerConnectionId = destinationId;
         }
 
-        if (msg.endpointId != null ) msg.endpointId = myEndpointId;
+        if (myEndpointId != null ) msg.endpointId = myEndpointId;
         msg.endpointType = GuidentMsgEndpointTypes.VEHICLE;
         msg.name = myUsername;
         if ( messageType == "register" ) { 
@@ -474,7 +474,7 @@ function onOfferReceived(offer) {
 				pc.addTrack(ev.track, remoteVideoStream);
                 		console.log("New stream id: <<" + remoteVideoStream.id + ">> # tracks: " + remoteVideoStream.getTracks().length);
 			}
-			document.getElementById("audioStream").srcObject = remoteVideoStream;
+			document.getElementById("videoStream").srcObject = remoteVideoStream;
 		}
 	}
 
