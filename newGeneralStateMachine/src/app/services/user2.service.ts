@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { GuidentCraigEndpoint } from './guident-craig-endpoint';
 import { GuidentPcsPeerConnectionMediaNegotiator } from './guident-pcs-peer-connection-media-negotiator';
 import { CraigAuthenticateService } from './craig.authenticate.service';
-
+import { GuidentTwvPeerConnectionMediaNegotiator } from './guident-two-way-video-peer-connection-media-negotiator';
 @Injectable({
   providedIn: 'root'
 })
@@ -17,7 +17,8 @@ export class User2Service {
 
   SayHelloToService(){  
 
-    var pcnm = new GuidentPcsPeerConnectionMediaNegotiator();
+    // var pcnm = new GuidentPcsPeerConnectionMediaNegotiator();
+    var pcnm = new GuidentTwvPeerConnectionMediaNegotiator();
     console.log("user2 access token is: <<%s>>", this.authService.getAuthAccessToken());
     this.user2Var = new GuidentCraigEndpoint(this.authService.getAuthUserEmail(), this.authService.getAuthAccessToken(), pcnm);
     // this.user2Var.myep.setIceServer(
