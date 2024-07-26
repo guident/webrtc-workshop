@@ -1,4 +1,4 @@
-
+/*
 .grid-container {
     --scaleGrid: 5%;
     display: grid;
@@ -59,9 +59,163 @@
   }
   
   video {
-    width: calc(100% / 3 - 10px); /* Adjust this calculation as needed */
+    width: calc(100% / 3 - 10px); // Adjust this calculation as needed 
     aspect-ratio: 16 / 9;
     border: 2px solid black;
     background: black;
   }
-  
+  */
+
+
+
+
+
+
+
+.grid-container {
+  --scaleGrid: 5%;
+  display: grid;
+  grid-template-columns: var(--scaleGrid) repeat(3, 1fr);
+  grid-template-rows: calc(var(--scaleGrid) * 2.5) repeat(3, auto);
+  gap: 10px;
+  padding: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100vh;
+}
+
+button {
+  padding: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.register-user1 {
+  grid-column: 2 / 3;
+  grid-row: 1 / 2;
+}
+
+.register-user2 {
+  grid-column: 3 / 4;
+  grid-row: 1 / 2;
+}
+
+.register-user3 {
+  grid-column: 4 / 5;
+  grid-row: 1 / 2;
+}
+
+.engage-user1 {
+  grid-column: 1 / 2;
+  grid-row: 2 / 3;
+}
+
+.engage-user2 {
+  grid-column: 1 / 2;
+  grid-row: 3 / 4;
+}
+
+.engage-user3 {
+  grid-column: 1 / 2;
+  grid-row: 4 / 5;
+}
+
+.user1-videos,
+.user2-videos,
+.user3-videos {
+  grid-column: 2 / 5;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 100%;
+}
+
+.user1-videos video,
+.user2-videos video,
+.user3-videos video {
+  width: calc(100% / 3 - 20px);
+  aspect-ratio: 16 / 9;
+  border: 2px solid black;
+  background: black;
+}
+
+.user3-videos {
+  position: relative;
+}
+
+.user3-videos #user3RemoteVideo {
+  width: 100%;
+  height: auto;
+}
+
+.user3-videos #user3LocalVideo {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  width: 200px; /* Adjust this width as needed */
+  height: auto;
+  border: 2px solid white;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+  /* .grid-container {
+    --scaleGrid: 5%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 70px 5fr;
+    grid-template-areas: 
+    "title title"
+    "registerBtn engageBtn"
+    "videos videos";
+    gap: 10px 10px;
+    height: 65vh;
+  }
+
+  .demo-title {
+    grid-area: title;
+    text-align: center;
+  }
+
+  .register-user3 {
+    grid-area: registerBtn;
+  }
+
+  .engage-user3 {
+    grid-area: engageBtn;
+  }
+
+  .user3-videos {
+    grid-area: videos;
+    position: relative;
+  }
+
+  .remote-video {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+  }
+
+  .local-video {
+    position: absolute;
+    outline: solid skyblue 2px;
+    bottom: 16px;
+    right: 16px;
+    width: 400px;
+    aspect-ratio: 4 / 3;
+  } */
+
+
+
+
+

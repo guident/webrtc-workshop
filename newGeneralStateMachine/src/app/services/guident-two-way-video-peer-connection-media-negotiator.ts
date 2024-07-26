@@ -21,6 +21,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
     localStream: MediaStream | null = null;
     firstVideoMediaStream: MediaStream | null = null;
     localVideoId: string | null = null;
+    // localVideoId: string | null = "user3LocalVideo";
 
     constructor() {
         super("TWV");
@@ -135,9 +136,17 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         }
     }
 
+    override setLocalVideoId(id: string): void {
+        console.log("GuidentTwvPeerConnection::setLocalVideoId()): Attempting to set the local video tag to be <<" + id + ">>.");
+
+        if (id !== null) {
+            this.localVideoId = id;
+        } 
+    }
+
     override async getLocalMediaStream() { 
         try {
-            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });  // AA: changed this
+            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });  // AA: changed this to be video only 
             console.log("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): ", this.localStream);
         } catch (e) {
             console.error("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): Audio Device Not Found. Make sure your microphone is connected and enabled");
@@ -145,10 +154,8 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
     }
 
     override startPeerEngagementOffer(peerId: string): boolean {
-        // this.getLocalMediaStream()
-        console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): guident vtu starting peer");
 
-        console.log("DAVID2", this.localStream); 
+        console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): guident vtu starting peer");
         console.log(`GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): Attempting engagement with peer id: <<${peerId}>>.`);
 
         const constraints = {
@@ -176,24 +183,20 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                 }
             };
         
-            if (ev.transceiver.mid === "0") { // AA: 
+            if (ev.transceiver.mid === "0") { 
                 if (this.firstVideoMediaStream == null) {
                     this.firstVideoMediaStream = new MediaStream([ev.track]);
                 } else {
                     this.firstVideoMediaStream.addTrack(ev.track);
                     this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
                 }
-            // } else if (ev.transceiver.mid === "1") {
-            //     if (this.firstVideoMediaStream == null) {
-            //         this.firstVideoMediaStream = new MediaStream([ev.track]);
-            //     } else {
-            //         this.firstVideoMediaStream.addTrack(ev.track);
-            //         this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
-            //     }
                 updateVideoElement(this.firstVideoMediaStream, this.remoteVideoId[0]);
             }
         };
-        console.log("DAVID6: ", this.localStream);
+        
+        if (this.localVideoId != null && document.getElementById(this.localVideoId) != null) {
+            (document.getElementById(this.localVideoId) as HTMLVideoElement).srcObject = this.localStream;
+        }
 
         console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): Adding transceivers.");
         this.localStream!.getTracks().forEach(track => this.webrtcPeerConnection!.addTransceiver(track, { direction: "sendrecv" }));
@@ -228,8 +231,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
             let newSdp = this.exclusivizeCodecInSdp(sdp, 1, this.exclusiveVideoPayloadTypeForMid1);
             newSdp = this.changePayloadTypeForMid(newSdp, 1, this.changeVideoPayloadTypeForMid1);
             description.sdp = newSdp;
-            console.log("DAVID: ", newSdp);
-            console.log("DAVID", this.exclusiveVideoPayloadTypeForMid1);
+            console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): SDP constructed ", newSdp);
             return this.webrtcPeerConnection!.setLocalDescription(description);
         } else{
             return null;
