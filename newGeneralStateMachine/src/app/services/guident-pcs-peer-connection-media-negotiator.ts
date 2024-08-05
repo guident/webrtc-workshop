@@ -35,8 +35,6 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
             iceServers: [{'urls': "stun:guident.bluepepper.us:3478" }],
             bundlePolicy: 'max-bundle'
         };
-
-        // console.log("DAVID: ", this.remoteVideoId); // AA: remove
     }
 
     override launchWebRtcPeerConnection() {
@@ -68,12 +66,6 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
             (videoElement as HTMLVideoElement).srcObject = ev.streams[0];
         }
     }
-    
-    // private _sendMessage(messageType: GuidentMessageType, peerId: string) {
-    //     console.log(`Sending message: ${messageType} to peerId: ${peerId}`);
-    //     // Implement the logic to send a message here
-        
-    // }
 
     swapVideos() {
         if (this.firstVideoMediaStream == null || this.secondVideoMediaStream == null) {
@@ -211,10 +203,8 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
     }
 
     override startPeerEngagementOffer(peerId: string): boolean {
-        // this.getLocalMediaStream()
-        console.log("GuidentPcsPeerConnectionMediaNegotiator::startPeerEngagementOffer(): guident vtu starting peer");
 
-        console.log("DAVID2", this.localStream); 
+        console.log("GuidentPcsPeerConnectionMediaNegotiator::startPeerEngagementOffer(): guident vtu starting peer");
         console.log(`GuidentPcsPeerConnectionMediaNegotiator::startPeerEngagementOffer(): Attempting engagement with peer id: <<${peerId}>>.`);
 
         const constraints = {
@@ -275,8 +265,7 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                 console.log(`New stream id: <<${this.thirdVideoMediaStream.id}>> ${this.thirdVideoMediaStream.getTracks().length}`);
                 updateVideoElement(this.thirdVideoMediaStream, this.remoteVideoId[2]);
             }
-        };  
-        console.log("DAVID6: ", this.localStream);
+        };
 
         console.log("WebsocketConnectionStateMachine.startPeerEngagementOffer(): Adding transceivers.");
         this.localStream!.getTracks().forEach(track => this.webrtcPeerConnection!.addTransceiver(track, { direction: "sendrecv" }));
@@ -317,8 +306,7 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
             newSdp = this.changePayloadTypeForMid(newSdp, 2, this.changeVideoPayloadTypeForMid2);
             newSdp = this.changePayloadTypeForMid(newSdp, 3, this.changeVideoPayloadTypeForMid3);
             description.sdp = newSdp;
-            console.log("DAVID: ", newSdp);
-            console.log("DAVID", this.exclusiveVideoPayloadTypeForMid1);
+            console.log("GuidentPcsPeerConnectionMediaNegotiator::startPeerEngagementOffer(): SDP constructed ", newSdp);
             return this.webrtcPeerConnection!.setLocalDescription(description);
         } else{
             return null;
@@ -338,9 +326,7 @@ export class GuidentPcsPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         }).then((promiseResult) => {
         console.log(`WebsocketConnectionStateMachine.startPeerEngagementOffer(): the wait-for-ice-candidates promise result: <<${promiseResult}>>, Sending offer.`);
         this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId, GuidentMsgEventType.UNKNOWN, null, this.webrtcPeerConfiguration.iceServers, this.webrtcPeerConnection?.localDescription);
-        // this.
         }).catch((err) => {
-            console.log("I am an error", err);
         this.myEndpoint.stateMachine.transition('engagementerror', err)
         });
 

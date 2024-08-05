@@ -1,4 +1,4 @@
-<div class="grid-container">
+<!-- <div class="grid-container">
   <button class="register-user1" (click)="ServiceOnButton1Click()">Register User1</button>
   <button class="register-user2" (click)="ServiceOnButton2Click()">Register User2</button>
   <button class="register-user3" (click)="ServiceOnButton3Click()">Register User3</button>
@@ -24,4 +24,16 @@
     <video id = "user3RemoteVideo" autoplay></video>
   </div>
 
+</div> -->
+
+
+<div class="grid-container">
+<h1 class="demo-title" >Passenger Communication Module Demo</h1>
+  <button class="register-user3" (click)="ServiceOnButton3Click()">Register User 3</button>
+  <button class="engage-user3" (click)="EngageButton3Click()">Engage User 3</button>
+  
+  <div class="user3-videos">
+    <video id="user3RemoteVideo" class="remote-video" autoplay></video>
+    <video id="user3LocalVideo" class="local-video" autoplay></video>
+  </div>
 </div>

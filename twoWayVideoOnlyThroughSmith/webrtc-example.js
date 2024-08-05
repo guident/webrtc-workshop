@@ -145,9 +145,7 @@ var isAuthenticated = false;
 var authUserEmail = "5ddabb13-4a1a-499e-b54f-b9baebefea88";
 var authPassword = "Guident1!"
 // var authAccessToken = "whaddaya";
-authAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjhmYjUxNWNkLTI2ODgtNDMxMC1hMjllLTU0ODlmYWYwYTZmNCIsInByb3BlcnR5X29uZSI6MjEsInByb3BlcnR5X3R3byI6MSwiaXNzdWVkX2F0IjoiMjAyNC0wNy0yNVQxNTozMjo0NC4xMDIzNzQwNzFaIiwiZXhwaXJlZF9hdCI6IjIwMjQtMDctMjZUMTU6MzI6NDQuMTAyMzc1NDE4WiJ9.tYBpzrR2jot3p9yxNPq0JJ1QlGp6-SWlbvxMfBa9SU8";
-
-
+var authAccessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjgyOTNiMTU2LTU4NWUtNGI4Yy05OGNlLTg1OTcyMWViZmE1NSIsInByb3BlcnR5X29uZSI6MjEsInByb3BlcnR5X3R3byI6MSwiaXNzdWVkX2F0IjoiMjAyNC0wNy0yNlQxNjoyMzo0Mi4zNTMwNzAwNTZaIiwiZXhwaXJlZF9hdCI6IjIwMjQtMDctMjdUMTY6MjM6NDIuMzUzMDcxNTMzWiJ9.x7FRbT-H0RRMF5dPVoUw1tAUlhLyshDoPeOGRdVusic";
 
 function  authenticate() {
 

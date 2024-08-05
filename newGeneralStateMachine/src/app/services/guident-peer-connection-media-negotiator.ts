@@ -30,11 +30,7 @@ export class GuidentPeerConnectionMediaNegotiator {
     protected changeVideoPayloadTypeForMid3: number = -1;
     
     constructor(t: string) {
-        // constructor(t: string) {
-        this.pcMediaNegotiatorType = t;
-        // this.webrtcPeerConfiguration = webrtcPeerConfig;
-        console.log("ANDY: peer is: <<%s>>", this.webrtcPeerConfiguration.iceServers);
-        console.log("DAVID: ", this.remoteVideoId);
+      this.pcMediaNegotiatorType = t;
     }
 
 
@@ -171,7 +167,11 @@ export class GuidentPeerConnectionMediaNegotiator {
     //     console.log("not implemented.");
 
     // }
-
+     
+    setLocalVideoId(id: string) {
+      console.log("GuidentPeerConnectionMediaNegotiator::setLocalVideoId: not implemented.");
+    }  
+  
     setRemoteVideoId(cameraIndex: GuidentCameraPositions, videoTagId: string){
         console.log("ANDY: ", videoTagId);
         console.log("ANDY2: ", this.remoteVideoId);
@@ -205,7 +205,6 @@ export class GuidentPeerConnectionMediaNegotiator {
         }
     
         this.remoteVideoId[cameraIndex] = videoTagId;
-        console.log("DAVID5:", this.remoteVideoId);
     }
 
     sendRemoteControlMessage(msg: string) {
@@ -231,7 +230,8 @@ export class GuidentPeerConnectionMediaNegotiator {
         // PARENT: should contain the peer connection
         // CHILD: , local video stream, local audio stream, etc
 
-        // should lock onto camera and audio. Both are going to try to take control of audio
+      // should lock onto camera and audio. Both are going to try to take control of audio
+      // AA: UPDATE: for now two way video will not use audio
         return false;
     }
 

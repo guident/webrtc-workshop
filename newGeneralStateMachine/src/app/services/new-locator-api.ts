@@ -441,7 +441,6 @@ export class WebsocketConnectionStateMachine {
   }
 
   private _onWssConnectionMessage(evt: MessageEvent) {
-    console.log("DAVID: ", evt.data);
     if (evt.data != undefined && evt.data != null) {
       let msg = JSON.parse(evt.data);
       let isMine = false;

@@ -89,6 +89,9 @@ export class endpoint {
         this.myep.engage(connId); 
     }
 
+    setLocalVideoId(id: string) {
+        this.mypcnm.setLocalVideoId(id);
+    }
 
     setRemoteVideoId(cameraIndex: number, videoTagId: string) {
         // this.myep.setRemoteVideoId(cameraIndex, videoTagId);
