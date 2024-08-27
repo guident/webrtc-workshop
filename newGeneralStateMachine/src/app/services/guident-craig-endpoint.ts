@@ -53,7 +53,7 @@ export class GuidentCraigEndpoint extends endpoint {
   }
 
   override onNotification(msg: any) {
-    console.log("GuidentCraigEndpointService::onNotification(): Got a message!!");
+    console.log("GuidentCraigEndpointService::onNotification(): Got a message!!: \n", msg);
     // console.log(msg);
     // console.log("ANDY !!! ", msg.endpointId);
     if (msg.endpointId == 21) { //AA: was 31
