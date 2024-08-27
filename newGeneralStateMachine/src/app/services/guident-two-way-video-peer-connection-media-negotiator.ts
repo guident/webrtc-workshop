@@ -263,6 +263,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
     }
 
     override processPeerEngagementAnswer(msg: any): boolean {
+        console.log(msg)
         console.log(`GuidentTwvPeerConnectionMediaNegotiator::_processPeerEngagementAnswer(): Attempting to process answer SDP from remote vehicle with peer id: <<${msg.peerConnectionId}>>.`);
     
         if (msg.messageType !== GuidentMessageType.ENGAGE_ANSWER) {

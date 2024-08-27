@@ -1,4 +1,4 @@
-/*
+/* 
 .grid-container {
     --scaleGrid: 5%;
     display: grid;
@@ -59,12 +59,88 @@
   }
   
   video {
-    width: calc(100% / 3 - 10px); // Adjust this calculation as needed 
+    width: calc(100% / 3 - 10px);  
     aspect-ratio: 16 / 9;
     border: 2px solid black;
     background: black;
+  } */
+ 
+
+
+
+
+
+.grid-container {
+    --scaleGrid: 5%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 200px 5fr;
+    grid-template-areas: 
+    "title title"
+    "registerBtn engageBtn"
+    "videos videos";
+    gap: 10px 10px;
+    height: 95vh;
+    width: 100%;
   }
-  */
+
+.demo-title {
+    grid-area: title;
+    text-align: center;
+    font-size: 400%;
+    font-palette: light;
+}
+
+.register-user3 {
+    grid-area: registerBtn;
+    margin-left: 1260px;
+    margin-right: 20px;
+    font-size: 40px;
+    font-weight: 900;
+    color-scheme: dark;
+    background: rgba(148, 45, 244, 0.813);
+}
+
+.engage-user3 {
+    grid-area: engageBtn;
+    margin-right: 1260px; 
+    margin-left: 20px;
+    font-size: 40px;
+    font-weight: 900;
+    color-scheme: dark;
+    background: rgba(148, 45, 244, 0.813);
+}
+
+.user3-videos {
+    grid-area: videos;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    max-height: 100%;
+    max-width: 100%;
+    margin-top: 50px;
+}
+
+.remote-video {
+    width: 100%;
+    height: auto;
+    max-height: 100%;
+    object-fit: contain; 
+    aspect-ratio: 4 / 3;
+}
+
+.local-video {
+    position: absolute;
+    bottom: 16px;
+    right: 1016px;
+    width: 20%;
+    height: auto;
+    max-height: 20%;
+    object-fit: contain; 
+    aspect-ratio: 4 / 3;
+}
 
 
 
@@ -73,11 +149,7 @@
 
 
 
-
-
-
-
-  .grid-container {
+  /* .grid-container {
     --scaleGrid: 5%;
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -109,7 +181,7 @@
   }
 
   .remote-video {
-    height: 100%;
+    width: 100%;
     aspect-ratio: 4 / 3;
   }
 
@@ -120,9 +192,30 @@
     right: 16px;
     width: 400px;
     aspect-ratio: 4 / 3;
-  }
+  } */
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
