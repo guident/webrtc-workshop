@@ -13,6 +13,7 @@ export class GuidentVehicleEndpointService extends endpoint {
 
   constructor(private authService: CraigAuthenticateService) { 
     super("VEHICLE", "", "", new GuidentVtuPeerConnectionMediaNegotiator());
+    this.myep.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
   }
 
   override onConnecting() {
@@ -85,6 +86,7 @@ export class GuidentVehicleEndpointService extends endpoint {
 
 
   getVehicle31ConnectionId(): string {
-      return this.vehicle31ConnectionId;
+    console.log("the vehicle connectionID is: <%s>", this.vehicle31ConnectionId);
+    return this.vehicle31ConnectionId;
   }
 }
