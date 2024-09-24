@@ -14,13 +14,14 @@ export class endpoint {
     constructor(t: string, uname: string, token: string, pcnm: GuidentPeerConnectionMediaNegotiator) {
         this.endpointType = t;
 
-        this.myep = new WebsocketConnectionStateMachine("harald", 
-            "whaddaya", 
-            "wss://guident.bluepepper.us:8445", // 8443
-            uname, 
-            token);
+        this.myep = new WebsocketConnectionStateMachine(
+          "harald",
+          "whaddaya",
+          "wss://guident.bluepepper.us:8445", // 8443
+          uname,
+          token
+        );
 
-            
         this.mypcnm = pcnm;
 
         this.mypcnm.setEndpoint(this.myep); // do I need to do this?
@@ -85,8 +86,8 @@ export class endpoint {
     }
 
 
-    engage(connId: string): void {   
-        this.myep.engage(connId); 
+    engage(connId: string): void {
+        this.myep.engage(connId);
     }
 
     setLocalVideoId(id: string) {
@@ -108,11 +109,11 @@ export class endpoint {
     onConnecting() {
         console.log("endpoint::onConnecting(): not implemented.");
     }
-    
+
     onConnectionSuccessful() {
         console.log("endpoint::onConnectionSuccessful(): not implemented.");
     }
-    
+
     onConnectionFailed(err: string) {
         console.log("endpoint::onConnectionFailed(): not implemented, called with err: " + err);
     }
@@ -145,11 +146,11 @@ export class endpoint {
         console.log("endpoint::onDisengagement(): not implemented, called with reason: " + reason);
     }
 
-    
+
     onNotification(msg: any) {
         console.log("endpoint::onNotification(): not implemented.");
     }
-    
+
 
     onNewLocation(latlon: any) {
         console.log("endpoint::onNewLocation(): not implemented.");
@@ -186,5 +187,5 @@ export class endpoint {
     _resetEngagement() {
         console.log("endpoint::_resetEngagement(): not implemented.");
     }
-    
+
 }

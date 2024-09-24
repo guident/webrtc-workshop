@@ -16,7 +16,7 @@ export class AppComponent implements AfterViewInit{
   title = 'workstationNew';
 
   constructor(
-    private user1: User1Service, private user2: User2Service, private user3: User3Service, 
+    private user1: User1Service, private user2: User2Service, private user3: User3Service,
     private authService: CraigAuthenticateService
   ){
       console.log("App::cstr(): Going to authenticate.");
@@ -33,7 +33,12 @@ export class AppComponent implements AfterViewInit{
     this.user1.getInstance().setRemoteVideoId(1, "user1Video1");
     this.user1.getInstance().setRemoteVideoId(2, "user1Video2");
   }
-  
+
+  sendMessageToPeer(){
+    let text = (document.getElementById("dataMsg") as HTMLTextAreaElement).value;
+    text = JSON.stringify(text);
+    this.user3.sendMessage(text);
+  }
 
   ServiceOnButton1Click(){
     this.user1.SayHelloToService();

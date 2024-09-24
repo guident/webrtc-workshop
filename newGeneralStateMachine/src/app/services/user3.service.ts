@@ -16,16 +16,20 @@ export class User3Service {
   user3Var: any = null;
 
   constructor(private authService: CraigAuthenticateService) {
-  
+
   }
 
-  SayHelloToService() {      
+  SayHelloToService() {
     console.log("user3 access token is: <<%s>>", this.authService.getAuthAccessToken());
     var pcnm = new GuidentTwvPeerConnectionMediaNegotiator();
     this.user3Var = new GuidentCraigEndpoint(this.authService.getAuthUserEmail(), this.authService.getAuthAccessToken(), pcnm)
-    
+
     console.log('Hello, welcome your service, user3, your endpoint type is <<%s>>', this.user3Var.getEndpointType())
     this.user3Var.start();
+  }
+
+  sendMessage(msg: string){
+    this.user3Var.mypcnm.sendMessageOnDataChannel(msg);
   }
 
   async engageTheVehicle() {

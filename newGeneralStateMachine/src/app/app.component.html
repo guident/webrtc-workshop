@@ -2,17 +2,17 @@
   <button class="register-user1" (click)="ServiceOnButton1Click()">Register User1</button>
   <button class="register-user2" (click)="ServiceOnButton2Click()">Register User2</button>
   <button class="register-user3" (click)="ServiceOnButton3Click()">Register User3</button>
-  
+
   <button class="engage-user1" (click)="EngageButton1Click()">Engage User1</button>
   <button class="engage-user2" (click)="EngageButton2Click()">Engage User2</button>
   <button class="engage-user3" (click)="EngageButton3Click()">Engage User3</button>
-  
+
   <div class="user1-videos">
     <video id = "user1Video1" autoplay></video>
     <video id = "user1Video0" autoplay></video>
     <video id = "user1Video2" autoplay></video>
   </div>
-  
+
   <div class="user2-videos">
     <video id = "user2Video1" autoplay></video>
     <video id = "user2Video0" autoplay></video>
@@ -32,15 +32,28 @@
 
 <body>
   <div class="grid-container">
-    <h1 class="demo-title" >Guident Passenger Communication Module Demo</h1>
-      <button class="register-user3" (click)="ServiceOnButton3Click()">Register User 3</button>
-      <button class="engage-user3" (click)="EngageButton3Click()">Engage User 3</button>
-      
+      <h1 class="demo-title" >Guident Passenger Communication Module Demo</h1>
+      <div class="buttons">
+        <button class="register-user3" (click)="ServiceOnButton3Click()">Register User 3</button>
+        <button class="engage-user3" (click)="EngageButton3Click()">Engage User 3</button>
+      </div>
+
+
+      <div class="data-channel">
+        <h2>Data Channel Controls</h2>
+        <div class="data-area">
+          <textarea id="dataMsg"></textarea>
+          <button (click)="sendMessageToPeer()">Send Message</button>
+        </div>
+      </div>
+
       <div class="user3-videos">
         <video id="user3RemoteVideo" class="remote-video" autoplay></video>
         <video id="user3LocalVideo" class="local-video" autoplay></video>
       </div>
   </div>
+
+
 </body>
 
 

@@ -4,7 +4,7 @@ import { GuidentMessageType, GuidentCameraPositions, GuidentMsgEventType } from 
 /* AA: Questions
 1. How to decide how to instantiate pcnm and endpoint? Based on constructor ofuser service but why?
     - dependancy injection in user1 service automatically gets instantiated in constructor
-    - current 
+    - current
 2. Why does user1 remote videoId on Init?
  - user 2 (PCM) does not need to be instantiated on init but rather on an event like when a button
     is pressed or you recieve a call.
@@ -21,11 +21,12 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
     localStream: MediaStream | null = null;
     firstVideoMediaStream: MediaStream | null = null;
     localVideoId: string | null = null;
+    dataChannel: RTCDataChannel | null = null;
     // localVideoId: string | null = "user3LocalVideo";
 
     constructor() {
         super("TWV");
-        
+
         this.webrtcPeerConfiguration = {
             iceServers: [{'urls': "stun:guident.bluepepper.us:3478" }],
             bundlePolicy: 'max-bundle'
@@ -52,7 +53,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
     }
 
     override onWebRtcPeerConnectionNegotiationError() {
-        console.log("GuidentTwvPeerConnectionMediaNegotiator::onWebRtcPeerConnectionNegotiationError(): OK!");     
+        console.log("GuidentTwvPeerConnectionMediaNegotiator::onWebRtcPeerConnectionNegotiationError(): OK!");
     }
 
     protected override onTrack(ev: RTCTrackEvent) {
@@ -65,13 +66,13 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
 
     nullVideoStreams() {
         console.log("GuidentTwvPeerConnectionMediaNegotiator::nullVideoStreams(): Will set all the video streams to null srcObject.");
-        
+
             for (let i = 0; i < GuidentCameraPositions.CAMERA_POSITIONS_LENGTH; i++) {
                 const videoId = this.remoteVideoId[i];
-            
+
                 if (videoId !== null) {
                     const videoElement = document.getElementById(videoId);
-            
+
                     if (videoElement !== null && videoElement.nodeName === "VIDEO") {
                     (videoElement as HTMLVideoElement).srcObject = null;
                     }
@@ -84,16 +85,16 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
 
         for (let i = 0; i < GuidentCameraPositions.CAMERA_POSITIONS_LENGTH; i++) {
             const videoId = this.remoteVideoId[i];
-            
+
             if (videoId !== null) {
                 const videoElement = document.getElementById(videoId);
-            
+
                 if (videoElement !== null && videoElement.nodeName === "VIDEO") {
                 (videoElement as HTMLVideoElement).srcObject = null;
                 }
             }
         }
-                
+
 
         // console.log("MIKE", this.remoteVideoId[0]);
 
@@ -103,15 +104,15 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
             (document.getElementById(this.remoteVideoId[0]) as HTMLVideoElement).srcObject = this.firstVideoMediaStream;
         }
     }
-    
+
     override _resetEngagement() {
         try {
             console.log("GuidentTwvPeerConnectionMediaNegotiator._resetEngagement(): Resetting webrtc peer connection.");
-    
+
             if (this.localVideoId != null && document.getElementById(this.localVideoId) != null && document.getElementById(this.localVideoId)!.nodeName === "VIDEO") {
             (document.getElementById(this.localVideoId) as HTMLVideoElement).srcObject = null;
             }
-    
+
             const clearVideoElementSrc = (videoId: string | null) => {
             if (videoId !== null) {
                 const videoElement = document.getElementById(videoId);
@@ -120,15 +121,15 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                 }
             }
             };
-            
+
             clearVideoElementSrc(this.remoteVideoId[0]);
-            
-    
+
+
             this.firstVideoMediaStream = null;
-    
+
             if (this.webrtcPeerConnection != null) this.webrtcPeerConnection.close();
             this.webrtcPeerConnection = null;
-    
+
             this.remoteControlDataChannel = null;
             console.log("GuidentTwvPeerConnectionMediaNegotiator::_resetEngagement(): Done");
         } catch (err) {
@@ -141,12 +142,12 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
 
         if (id !== null) {
             this.localVideoId = id;
-        } 
+        }
     }
 
-    override async getLocalMediaStream() { 
+    override async getLocalMediaStream() {
         try {
-            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });  // AA: changed this to be video only 
+            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });  // AA: changed this to be video only
             console.log("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): ", this.localStream);
         } catch (e) {
             console.error("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): Audio Device Not Found. Make sure your microphone is connected and enabled");
@@ -173,7 +174,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
 
         this.webrtcPeerConnection.ontrack = (ev: RTCTrackEvent) => {
             console.log(`Got a track! Id: <<${ev.track.id}>> Kind: <<${ev.track.kind}>> Mid: <<${ev.transceiver.mid}>> Label: <<${ev.track.label}>> Streams length: <<${ev.streams.length}>> Stream Id: <<${ev.streams[0].id}>> #Tracks in stream: <<${ev.streams[0].getTracks().length}>>`);
-            
+
             const updateVideoElement = (mediaStream: MediaStream, videoId: string | null) => {
                 if (videoId !== null) {
                     const videoElement = document.getElementById(videoId);
@@ -182,8 +183,8 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                     }
                 }
             };
-        
-            if (ev.transceiver.mid === "0") { 
+
+            if (ev.transceiver.mid === "0") {
                 if (this.firstVideoMediaStream == null) {
                     this.firstVideoMediaStream = new MediaStream([ev.track]);
                 } else {
@@ -193,7 +194,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                 updateVideoElement(this.firstVideoMediaStream, this.remoteVideoId[0]);
             }
         };
-        
+
         if (this.localVideoId != null && document.getElementById(this.localVideoId) != null) {
             (document.getElementById(this.localVideoId) as HTMLVideoElement).srcObject = this.localStream;
         }
@@ -257,7 +258,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         this.myEndpoint.stateMachine.transition('engagementerror', err)
         });
 
-        // this.peerConnectionId = peerId;
+        this.createDataChannel();
 
         return true;
     }
@@ -265,17 +266,17 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
     override processPeerEngagementAnswer(msg: any): boolean {
         console.log(msg)
         console.log(`GuidentTwvPeerConnectionMediaNegotiator::_processPeerEngagementAnswer(): Attempting to process answer SDP from remote vehicle with peer id: <<${msg.peerConnectionId}>>.`);
-    
+
         if (msg.messageType !== GuidentMessageType.ENGAGE_ANSWER) {
           console.log("GuidentTwvPeerConnectionMediaNegotiator::processPeerEngagementAnswer(): Huh?");
           return false;
         }
-    
+
         if (msg == undefined || msg == null || msg.sessiondescription == undefined || msg.sessiondescription == null || msg.sessiondescription === "") {
           console.log("GuidentTwvPeerConnectionMediaNegotiator::processPeerEngagementAnswer(): Huh? session description is invalid");
           return false;
         }
-    
+
         this.webrtcPeerConnection!.setRemoteDescription(new RTCSessionDescription(msg.sessiondescription)).then(() => {
           console.log("GuidentTwvPeerConnectionMediaNegotiator::processPeerEngagementAnswer()::callBack(): remote answer sdp has been set.");
           this._sendMessage(GuidentMessageType.ENGAGE_ACK, msg.peerConnectionId);
@@ -283,8 +284,29 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
           console.log(`GuidentTwvPeerConnectionMediaNegotiator::processPeerEngagementAnswer()::callBack(): Error on setRemoteDescription() : <<${err}>>.`);
           this.myEndpoint.transition('engagementerror', err);
         });
-    
+
         return true;
+    }
+
+    createDataChannel(): RTCDataChannel | null{
+      if(!this.webrtcPeerConnection){
+        console.error("createDataChannel():: No PeerConnection object created, returning");
+        return null;
+      }
+      this.dataChannel = this.webrtcPeerConnection.createDataChannel("test-channel");
+      console.log("createDataChannel():: Creating the data channel: ", this.dataChannel);
+      return this.dataChannel;
+    }
+
+    async sendMessageOnDataChannel(msg: any){
+
+      if(!this.dataChannel){
+        let channel = this.createDataChannel();
+        if(channel) channel.send(msg);
+      } else {
+        this.dataChannel.send(msg);
+      }
+
     }
 
     override setOfferVideoPayloadTypeManipulations(exclusivePtMid1?: number, exclusivePtMid2?: number, exclusivePtMid3?: number, changePtMid1?: number, changePtMid2?: number, changePtMid3?: number) {
