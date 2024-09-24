@@ -56,7 +56,7 @@ export class GuidentCraigEndpoint extends endpoint {
     console.log("GuidentCraigEndpointService::onNotification(): Got a message!!: \n", msg);
     // console.log(msg);
     // console.log("ANDY !!! ", msg.endpointId);
-    if (msg.endpointId == 21) { //AA: was 31
+    if (msg.endpointId == 32) { //AA: was 31
       console.log("ANDY!! GuidentCraigEndpoint::onNotification(): msg.endpointId is >>", msg.endpointId); // AA: remove
       this.vehicle31ConnectionId = msg.connectionId;
     }
