@@ -232,6 +232,8 @@ textarea{
 
 .user3-videos {
   position: relative;
+  display: flex;
+  justify-content: center;
   /* outline: solid pink 1px; */
 }
 
@@ -241,8 +243,8 @@ video{
 
 .remote-video {
   outline: solid red 1px;
-  width: 100%;
-  height: auto;
+  /* width: 100%;
+  height: auto; */
   max-height: 30rem;
   aspect-ratio: 4 / 3;
   z-index: 3;
@@ -250,9 +252,9 @@ video{
 
 .local-video {
   outline: solid blue 1px;
-  position: absolute;
-  right: 1rem;
-  bottom: 1rem;
+  /* position: absolute; */
+  /* right: 1rem;
+  bottom: 1rem; */
   aspect-ratio: 4 / 3;
 }
 

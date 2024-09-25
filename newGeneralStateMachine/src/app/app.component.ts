@@ -36,7 +36,7 @@ export class AppComponent implements AfterViewInit{
 
   sendMessageToPeer(){
     let text = (document.getElementById("dataMsg") as HTMLTextAreaElement).value;
-    text = JSON.stringify(text);
+    // text = JSON.stringify(text);
     this.user3.sendMessage(text);
   }
 
