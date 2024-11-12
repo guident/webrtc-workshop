@@ -7,7 +7,8 @@ export enum GuidentMessageType {
   TAKEOVER = "takeover",
   RELEASE = "release",
   DISENGAGE = "disengage",
-  UNKNOWN = "unknown"
+  UNKNOWN = "unknown",
+  NEW_ICE_CANDIDATE = "NEW_ICE_CANDIDATE"
 }
 
 export enum GuidentMsgEventType {

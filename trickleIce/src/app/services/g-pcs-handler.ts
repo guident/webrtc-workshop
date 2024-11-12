@@ -2,6 +2,13 @@ import { Observable, Subject } from "rxjs";
 import { endpoint } from "./endpoint";
 import { GuidentLogger } from "./guident-logger";
 import { GTwvPeerConnectionMediaNegotiator } from "./g-two-way-video-peer-connection-media-negotiator";
+import { AuthService } from "./auth/auth.service";
+
+/**
+ * This class is a handler for the PCS endpoint. It is responsible for handling the state machine and the media negotiation for the endpoint.
+ * It also provides a set of functions that can be used to interact with the PCS component.
+ */   
+
 
 export class GPCSHandler extends endpoint {
 
@@ -14,11 +21,11 @@ export class GPCSHandler extends endpoint {
   private associatedVehicleId: number = -1;
   private engageLauncherTimeout: any;
 
-  constructor(uname: string, token: string, pcnm: GTwvPeerConnectionMediaNegotiator, connectionId: number, associatedVehicleId: number) {
-    super("PCS", uname, token, pcnm, "parco");
+  constructor(public authService: AuthService, uname: string, token: string, pcnm: GTwvPeerConnectionMediaNegotiator, connectionId: number, associatedVehicleId: number) {
+    super("PCS", authService.getUserEmailAddress(), authService.getAuthorizationToken(), pcnm, "parco");
     this.connectionId = `${connectionId}`;
     this.associatedVehicleId = associatedVehicleId;
-    this.setOfferVideoPayloadTypeManipulations(102, 0, 0, 102, 0, 0);
+    this.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
   }
 
   override onConnecting() {
