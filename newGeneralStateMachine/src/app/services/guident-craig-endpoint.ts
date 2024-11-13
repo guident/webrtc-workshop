@@ -11,6 +11,10 @@ export class GuidentCraigEndpoint extends endpoint {
     this.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
   }
 
+  setAudioFlag(af: boolean){
+    this.mypcnm.setAudioFlag(af);
+  }
+
 
   override onConnecting() {
     console.log("GuidentCraigEndpoint::onConnecting(): OK!.");
@@ -54,9 +58,9 @@ export class GuidentCraigEndpoint extends endpoint {
 
   override onNotification(msg: any) {
     console.log("GuidentCraigEndpointService::onNotification(): Got a message!!: \n", msg);
-    // console.log(msg);
+    console.log(msg);
     // console.log("ANDY !!! ", msg.endpointId);
-    if (msg.endpointId == 21) { //AA: was 31
+    if (msg.endpointId == 2) { //AA: was 31
       console.log("ANDY!! GuidentCraigEndpoint::onNotification(): msg.endpointId is >>", msg.endpointId); // AA: remove
       this.vehicle31ConnectionId = msg.connectionId;
     }

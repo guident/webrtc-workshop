@@ -1,27 +1,15 @@
 import { GuidentPeerConnectionMediaNegotiator } from "./guident-peer-connection-media-negotiator";
 import { GuidentMessageType, GuidentCameraPositions, GuidentMsgEventType } from "./new-locator-api"
 
-/* AA: Questions
-1. How to decide how to instantiate pcnm and endpoint? Based on constructor ofuser service but why?
-    - dependancy injection in user1 service automatically gets instantiated in constructor
-    - current 
-2. Why does user1 remote videoId on Init?
- - user 2 (PCM) does not need to be instantiated on init but rather on an event like when a button
-    is pressed or you recieve a call.
-3. Do I need a new endpoint for a new media negotiator?
-    - No, but need to specify connectionId in constructor of endpoint
-4. Which javascript code do I need to run on another pc?
-    - two way video port 8848
-5. what is the vehicleId of the Gmobile?
-    - 2
-*/
 
 export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnectionMediaNegotiator {
 
     localStream: MediaStream | null = null;
     firstVideoMediaStream: MediaStream | null = null;
     localVideoId: string | null = null;
+    audioFlag: boolean = false;
     // localVideoId: string | null = "user3LocalVideo";
+
 
     constructor() {
         super("TWV");
@@ -144,9 +132,16 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         } 
     }
 
+    override setAudioFlag(af: boolean) {
+        this.audioFlag = af;
+    }
+
     override async getLocalMediaStream() { 
         try {
-            this.localStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });  // AA: changed this to be video only 
+            this.localStream = await navigator.mediaDevices.getUserMedia({
+                audio: this.audioFlag,
+                video: true
+            });  // AA: changed this to be video only 
             console.log("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): ", this.localStream);
         } catch (e) {
             console.error("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): Audio Device Not Found. Make sure your microphone is connected and enabled");
@@ -182,8 +177,16 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                     }
                 }
             };
-        
-            if (ev.transceiver.mid === "0") { 
+
+
+            if (ev.transceiver.mid === "0") {
+                if (this.firstVideoMediaStream == null) {
+                    this.firstVideoMediaStream = new MediaStream([ev.track]);
+                } else {
+                    this.firstVideoMediaStream.addTrack(ev.track); //ev.track.level = 100 david thinks
+                    this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
+                }
+            } else if (ev.transceiver.mid === "1") { 
                 if (this.firstVideoMediaStream == null) {
                     this.firstVideoMediaStream = new MediaStream([ev.track]);
                 } else {
@@ -191,7 +194,8 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                     this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
                 }
                 updateVideoElement(this.firstVideoMediaStream, this.remoteVideoId[0]);
-            }
+            } 
+            
         };
         
         if (this.localVideoId != null && document.getElementById(this.localVideoId) != null) {
@@ -200,7 +204,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
 
         console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): Adding transceivers.");
         this.localStream!.getTracks().forEach(track => this.webrtcPeerConnection!.addTransceiver(track, { direction: "sendrecv" }));
-        this.webrtcPeerConnection!.addTransceiver("video", { direction: "sendrecv" });
+        //this.webrtcPeerConnection!.addTransceiver("video", { direction: "sendrecv" });
 
         console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): Setting up data channel.");
         this.remoteControlDataChannel = this.webrtcPeerConnection!.createDataChannel("foo");
@@ -228,10 +232,10 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         this.webrtcPeerConnection.createOffer().then((description) => {
         let sdp = description.sdp;
         if(sdp) {
-            let newSdp = this.exclusivizeCodecInSdp(sdp, 1, this.exclusiveVideoPayloadTypeForMid1);
-            newSdp = this.changePayloadTypeForMid(newSdp, 1, this.changeVideoPayloadTypeForMid1);
-            description.sdp = newSdp;
-            console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): SDP constructed ", newSdp);
+            //let newSdp = this.exclusivizeCodecInSdp(sdp, 1, this.exclusiveVideoPayloadTypeForMid1);
+            //newSdp = this.changePayloadTypeForMid(newSdp, 1, this.changeVideoPayloadTypeForMid1);
+            //description.sdp = newSdp;
+            console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): SDP constructed ",description.sdp /*newSdp*/);
             return this.webrtcPeerConnection!.setLocalDescription(description);
         } else{
             return null;
@@ -250,7 +254,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
         });
         }).then((promiseResult) => {
         console.log(`GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): the wait-for-ice-candidates promise result: <<${promiseResult}>>, Sending offer.`);
-        this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId, GuidentMsgEventType.UNKNOWN, null, this.webrtcPeerConfiguration.iceServers, this.webrtcPeerConnection?.localDescription);
+        this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId, GuidentMsgEventType.UNKNOWN, "audioFlag:true", this.webrtcPeerConfiguration.iceServers, this.webrtcPeerConnection?.localDescription);
         // this.
         }).catch((err) => {
             console.log("I am an error", err);

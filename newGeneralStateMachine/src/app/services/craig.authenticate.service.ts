@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
 export class CraigAuthenticateService {
 
   isAuthenticated: boolean = false;
-  authUserEmail: string = "dvega@guident.co";
+  authUserEmail: string = "aalvarez@guident.com";
   authPassword: string = "Guident1!";
   authAccessToken: string = "whaddaya";
 

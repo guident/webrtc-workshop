@@ -75,7 +75,8 @@ export class WebsocketConnectionStateMachine {
   private connectionId: string | null = null;
   private peerConnectionId: any;
   private endpointId: string | null = null;
-  private endpointType: string = 'monitor';
+  //private endpointType: string = 'monitor';
+  private endpointType: string = 'parco';
   private username: string;
   private password: string;
   private authUsername: string;
@@ -481,7 +482,7 @@ export class WebsocketConnectionStateMachine {
             console.log("WebsocketConnectionStateMachine::_onWssConnectionMessage(): No transition for this message.");
           }
         } else {
-          if (msg.endpointType === "vehicle") {
+          if (msg.endpointType === "pavehicle") {
             this.onNotification(msg);
           }
         }
@@ -559,7 +560,8 @@ export class WebsocketConnectionStateMachine {
     if (msg.endpointId != null) msg.endpointId = this.endpointId;
 
     msg.endpointType = this.endpointType;
-    msg.name = this.username;
+    //msg.name = this.username;
+    msg.name = "Andy";
 
     if (messageType === GuidentMessageType.REGISTER) {
       msg.credential = this.password;
@@ -567,7 +569,7 @@ export class WebsocketConnectionStateMachine {
       msg.authenticationToken = this.authToken;
     }
 
-    if (messageType === GuidentMessageType.NOTIFY) {
+    if (messageType === GuidentMessageType.NOTIFY ) {
       if (eventType) {
         msg.eventType = eventType;
         msg.status = GuidentMsgStatusType.UNKNOWN;
@@ -581,8 +583,13 @@ export class WebsocketConnectionStateMachine {
     }
 
     if (messageType === GuidentMessageType.ENGAGE_OFFER || messageType === GuidentMessageType.ENGAGE_ANSWER) {
-      
-  
+      try {
+        if (eventData.includes("audio")) {
+          msg.eventData = eventData;
+        }
+      } catch {
+        console.error("Oops! no audio.");
+      }
       msg.iceServers = iceServers;
       msg.sessiondescription = sdpPayload;
 

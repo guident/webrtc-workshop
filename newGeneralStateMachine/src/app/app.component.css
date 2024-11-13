@@ -73,149 +73,81 @@
 .grid-container {
     --scaleGrid: 5%;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 200px 5fr;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 150px 5fr;
     grid-template-areas: 
-    "title title"
-    "registerBtn engageBtn"
-    "videos videos";
+        "title title title"
+        "registerBtn engageBtn engageAudioBtn"
+        "videos videos videos";
     gap: 10px 10px;
     height: 95vh;
-    width: 100%;
-  }
+    width: 100vw; /* Ensure the grid container does not exceed the viewport width */
+    overflow-x: hidden; /* Prevent horizontal overflow */
+}
 
 .demo-title {
     grid-area: title;
     text-align: center;
-    font-size: 400%;
+    font-size: 2.5rem; /* Reduced font size */
     font-palette: light;
+    margin-bottom: 10px; /* Add spacing if needed */
+}
+
+.register-user3, .engage-user3, .engage-user3-audio {
+    font-size: 1.5rem; /* Reduced font size */
+    font-weight: 700;
+    color-scheme: dark;
+    background: rgba(148, 45, 244, 0.813);
+    padding: 8px 16px; /* Slightly smaller padding */
+    border: none;
+    cursor: pointer;
 }
 
 .register-user3 {
     grid-area: registerBtn;
-    margin-left: 1260px;
-    margin-right: 20px;
-    font-size: 40px;
-    font-weight: 900;
-    color-scheme: dark;
-    background: rgba(148, 45, 244, 0.813);
+    justify-self: end;
 }
 
 .engage-user3 {
     grid-area: engageBtn;
-    margin-right: 1260px; 
-    margin-left: 20px;
-    font-size: 40px;
-    font-weight: 900;
-    color-scheme: dark;
-    background: rgba(148, 45, 244, 0.813);
+    justify-self: center;
+}
+
+.engage-user3-audio {
+    grid-area: engageAudioBtn;
+    justify-self: start;
 }
 
 .user3-videos {
     grid-area: videos;
-    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+    max-width: 100%; /* Ensure the container doesn’t exceed viewport */
     overflow: hidden;
-    max-height: 100%;
-    max-width: 100%;
-    margin-top: 50px;
+    margin-top: 10px;
 }
 
 .remote-video {
-    width: 100%;
+    width: 85%; /* Increase width for a larger video */
     height: auto;
     max-height: 100%;
     object-fit: contain; 
     aspect-ratio: 4 / 3;
+    border: 2px solid black;
+    background: black;
 }
 
 .local-video {
     position: absolute;
-    bottom: 16px;
-    right: 1016px;
-    width: 20%;
+    bottom: 10px; /* Adjusted position */
+    right: 120px;
+    width: 10%; /* Slightly reduced overlay size */
     height: auto;
-    max-height: 20%;
+    max-height: 20%; /* Ensures it doesn’t exceed */
     object-fit: contain; 
     aspect-ratio: 4 / 3;
+    border: 2px solid white;
+    background: black;
 }
-
-
-
-
-
-
-
-
-  /* .grid-container {
-    --scaleGrid: 5%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 70px 5fr;
-    grid-template-areas: 
-    "title title"
-    "registerBtn engageBtn"
-    "videos videos";
-    gap: 10px 10px;
-    height: 65vh;
-  }
-
-  .demo-title {
-    grid-area: title;
-    text-align: center;
-  }
-
-  .register-user3 {
-    grid-area: registerBtn;
-  }
-
-  .engage-user3 {
-    grid-area: engageBtn;
-  }
-
-  .user3-videos {
-    grid-area: videos;
-    position: relative;
-  }
-
-  .remote-video {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-  }
-
-  .local-video {
-    position: absolute;
-    outline: solid skyblue 2px;
-    bottom: 16px;
-    right: 16px;
-    width: 400px;
-    aspect-ratio: 4 / 3;
-  } */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  

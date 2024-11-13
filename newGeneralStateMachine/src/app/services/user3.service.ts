@@ -32,7 +32,19 @@ export class User3Service {
     this.user3Var.setLocalVideoId("user3LocalVideo");
     this.user3Var.setRemoteVideoId(0, "user3RemoteVideo");
     // this.user3Var.setRemoteVideoId(1, "user3Video1");
-    if ( this.user3Var.getVehicle31ConnectionId() == "" ) return;
+    if (this.user3Var.getVehicle31ConnectionId() == "") return;
+    this.user3Var.setAudioFlag(false);
+    await this.user3Var.getLocalMediaStream();
+    this.user3Var.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
+    this.user3Var.engage(this.user3Var.getVehicle31ConnectionId());
+  }
+
+  async engageTheVehicleWithAudio() {
+    this.user3Var.setLocalVideoId("user3LocalVideo");
+    this.user3Var.setRemoteVideoId(0, "user3RemoteVideo");
+    // this.user3Var.setRemoteVideoId(1, "user3Video1");
+    if (this.user3Var.getVehicle31ConnectionId() == "") return;
+    this.user3Var.setAudioFlag(true);
     await this.user3Var.getLocalMediaStream();
     this.user3Var.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
     this.user3Var.engage(this.user3Var.getVehicle31ConnectionId());

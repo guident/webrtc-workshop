@@ -16,7 +16,9 @@ export class AppComponent implements AfterViewInit{
   title = 'workstationNew';
 
   constructor(
-    private user1: User1Service, private user2: User2Service, private user3: User3Service, 
+    //private user1: User1Service,
+    //private user2: User2Service,
+    private user3: User3Service, 
     private authService: CraigAuthenticateService
   ){
       console.log("App::cstr(): Going to authenticate.");
@@ -29,34 +31,38 @@ export class AppComponent implements AfterViewInit{
     // this.user1.getInstance().myep.setRemoteVideoId(1, "user1Video1");
     // this.user1.getInstance().myep.setRemoteVideoId(2, "user1Video2");
 
-    this.user1.getInstance().setRemoteVideoId(0, "user1Video0");
-    this.user1.getInstance().setRemoteVideoId(1, "user1Video1");
-    this.user1.getInstance().setRemoteVideoId(2, "user1Video2");
+    // this.user1.getInstance().setRemoteVideoId(0, "user1Video0");
+    // this.user1.getInstance().setRemoteVideoId(1, "user1Video1");
+    // this.user1.getInstance().setRemoteVideoId(2, "user1Video2");
   }
   
 
-  ServiceOnButton1Click(){
-    this.user1.SayHelloToService();
-  }
+  // ServiceOnButton1Click(){
+  //   this.user1.SayHelloToService();
+  // }
 
-  ServiceOnButton2Click(){
-    this.user2.SayHelloToService();
-  }
+  // ServiceOnButton2Click(){
+  //   this.user2.SayHelloToService();
+  // }
 
   ServiceOnButton3Click(){
     this.user3.SayHelloToService();
   }
 
-  EngageButton1Click(){
-    this.user1.engageTheVehicle();
-  }
+  // EngageButton1Click(){
+  //   this.user1.engageTheVehicle();
+  // }
 
-  EngageButton2Click(){
-    this.user2.engageTheVehicle();
-  }
+  // EngageButton2Click(){
+  //   this.user2.engageTheVehicle();
+  // }
 
   EngageButton3Click(){
     this.user3.engageTheVehicle();
+  }
+
+  EngageWithAudioButton3Click() {
+    this.user3.engageTheVehicleWithAudio();
   }
 
 }

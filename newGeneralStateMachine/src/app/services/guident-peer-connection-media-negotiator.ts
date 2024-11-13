@@ -82,6 +82,10 @@ export class GuidentPeerConnectionMediaNegotiator {
         console.error("The data channel has generated an error.");
         this.remoteControlDataChannel = null;
     }
+  
+    setAudioFlag(af: boolean) {
+        console.log("GuidentPeerConnectionMediaNegotiator::setAudioFlag(): not implemented.");
+    }
 
     getMediaNegotiatorType(): string {
         return(this.pcMediaNegotiatorType);
@@ -199,7 +203,8 @@ export class GuidentPeerConnectionMediaNegotiator {
         }
     
         console.log(`GuidentPeerConnectionMediaNegotiator::setRemoteVideoId(): Attempting to set the remote video tag for stream # ${cameraIndex}  to be <<${videoTagId}>>.`);
-        if ((videoTagId == null) || (document.getElementById(videoTagId) == null)) {
+      console.log(videoTagId, document.getElementById(videoTagId));
+      if ((videoTagId == null) || (document.getElementById(videoTagId) == null)) {
           console.error("GuidentPeerConnectionMediaNegotiator::setRemoteVideoId(): Oops, this id is not a valid tag to a video object in the DOM.");
           this.remoteVideoId[cameraIndex] = null;
         }
