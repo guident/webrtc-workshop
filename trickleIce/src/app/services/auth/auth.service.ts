@@ -17,20 +17,98 @@ type DecodedToken = {
 })
 export class AuthService {
 
-  errorData:any = {};
+  //errorData:any = {};
   //Variable that holds the reference to the interval used to refresh the token, this will be used to clear the interval on logout
-  refreshIntervalReference: any;
-  refreshTokenNotifier: EventEmitter<any> = new EventEmitter();
+  //refreshIntervalReference: any;
+  //refreshTokenNotifier: EventEmitter<any> = new EventEmitter();
 
-  serverError$: Subject<number> = new Subject<number>();
+  //serverError$: Subject<number> = new Subject<number>();
+
+
+  xhr: any = null;
+  userEmail: string = "dvega@guident.co";
+  password: string = "Guident1!";
+  userId: number = 0;
+  authToken: string = "";
+
 
 
   constructor(
-    private http: HttpClient
+    //private http: HttpClient
   )
   { }
 
-  redirectUrl: string = 'dashboard';
+
+
+
+  startLogin() : void {
+
+        this.xhr = new XMLHttpRequest();
+
+        var url = environment.apiUrl + "auth/login";
+
+        this.xhr.open("POST", url, true);
+        this.xhr.setRequestHeader("Content-Type", "application/json");
+
+        var json = { "email": this.userEmail, "password": this.password };
+        var jsonStr = JSON.stringify(json);
+
+
+      // Event handler for success
+      this.xhr.onload = this.onHttpPostSuccess.bind(this);
+
+      // Event handler for error
+      this.xhr.onerror = this.onHttpPostFailure.bind(this);
+
+              // Send the request
+      this.xhr.send(jsonStr); 
+
+  }
+
+
+  onHttpPostSuccess() {
+        console.log("Success!!");
+        if (this.xhr.status === 200) {
+          console.log("Success:", this.xhr.responseText);
+        } else {
+          console.error("Error:", this.xhr.statusText);
+        }
+
+        var authObj = JSON.parse(this.xhr.responseText);
+        this.userId = parseInt(authObj.user.id);
+        this.authToken = authObj.tokens.accessToken;
+        console.log("Authentication data: Email: <<%s>>, UserId: <<%d>>, AuthToken: <<%s>>", this.userEmail, this.userId, this.authToken);
+  }
+
+
+  onHttpPostFailure() {
+    console.log("Oops! error on authentication!");
+  }
+
+
+  getUserEmailAddress(): string {
+    return(this.userEmail);
+  }
+
+  getAuthorizationToken(): string {
+
+    return(this.authToken);
+  }
+
+
+  getUserId(): number {
+    return(this.userId);
+  }
+
+
+
+}
+
+
+
+
+
+  //redirectUrl: string = 'dashboard';
 
   // login(username: string, password: string) {
   //   return this.http.post<any>(`${serverUrl}auth/login`, {email: username, password: password})
@@ -42,6 +120,7 @@ export class AuthService {
   //     catchError(this.handleError)
   //   );
   // }
+  /*
   login(username: string, password: string) {
     return this.http.post<any>(`${serverUrl}auth/login`, {email: username, password: password})
     .pipe(
@@ -115,10 +194,13 @@ export class AuthService {
     };
     return throwError(this.errorData);
   }
+    */
 
   /**
    * Function to clear the interval created to refresh the token
    */
+
+  /*
   clearRefreshTokenInterval(){
     clearInterval(this.refreshIntervalReference);
   }
@@ -136,9 +218,14 @@ export class AuthService {
     })
   }
 
+  */
+
   /**
    * Function to start an interval that will refresh the accessToken every X amount of time
    */
+
+  
+  /*
   startRefreshTokenInterval(): void {
 
     //Make sure that the user is logged in
@@ -154,8 +241,10 @@ export class AuthService {
     }
 
   }
+    */
 
-  validateToken(){
+
+  //validateToken(){
     // this.http.get<any>(`${environment.apiUrl}auth/validate-token`)
     // .pipe(catchError(err => of("Forbidden")))
     // .subscribe( res =>{
@@ -170,5 +259,6 @@ export class AuthService {
     //     }
     //   }
     // })
-  }
-}
+  //}
+//}
+  
