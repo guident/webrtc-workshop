@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <!-- Main Window -->
+  <object class="GtkWindow" id="main_window">
+    <property name="default_width">1920</property>
+    <property name="default_height">1080</property>
+    <property name="title">Video Communication</property>
+    <child>
+      <!-- Main Vertical Box -->
+      <object class="GtkBox" id="main_vbox">
+        <property name="orientation">vertical</property>
+        <child>
+          <!-- Video Overlay -->
+          <object class="GtkOverlay" id="video_overlay">
+            <child>
+              <!-- Remote Video Box as the base layer -->
+              <object class="GtkBox" id="remote_video_box">
+                <property name="orientation">vertical</property>
+              </object>
+            </child>
+            <child type="overlay">
+              <!-- Local Video Box overlaid -->
+              <object class="GtkBox" id="local_video_box">
+                <property name="orientation">vertical</property>
+                <property name="halign">end</property>
+                <property name="valign">end</property>
+                <property name="width_request">320</property>
+                <property name="height_request">240</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>

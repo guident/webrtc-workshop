@@ -1,0 +1,217 @@
+Monitoring photodetector for rising edge...
+Light detected at: 1730410063577390 microseconds
+Latency calculator started
+ * Serving Flask app 'photodetector'
+ * Debug mode: off
+WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://192.168.1.44:5000
+Press CTRL+C to quit
+Received LED ON timestamp: 1730410064237767 microseconds
+10.45.0.28 - - [31/Oct/2024 21:27:44] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410064413094 microseconds
+Latency: 175 milliseconds
+Light detected at: 1730410064988315 microseconds
+Received LED ON timestamp: 1730410067353647 microseconds
+10.45.0.28 - - [31/Oct/2024 21:27:47] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410067514070 microseconds
+Latency: 160 milliseconds
+Light detected at: 1730410068095559 microseconds
+Received LED ON timestamp: 1730410070454688 microseconds
+10.45.0.28 - - [31/Oct/2024 21:27:50] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410070648145 microseconds
+Latency: 193 milliseconds
+Light detected at: 1730410071219260 microseconds
+Received LED ON timestamp: 1730410073589584 microseconds
+10.45.0.28 - - [31/Oct/2024 21:27:53] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410073747500 microseconds
+Latency: 157 milliseconds
+Light detected at: 1730410074318085 microseconds
+Received LED ON timestamp: 1730410076686404 microseconds
+10.45.0.28 - - [31/Oct/2024 21:27:56] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410076881947 microseconds
+Latency: 195 milliseconds
+Light detected at: 1730410077337857 microseconds
+Received LED ON timestamp: 1730410079804303 microseconds
+10.45.0.28 - - [31/Oct/2024 21:27:59] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410080041919 microseconds
+Latency: 237 milliseconds
+Light detected at: 1730410080471439 microseconds
+Received LED ON timestamp: 1730410082905994 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:02] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410083089082 microseconds
+Latency: 183 milliseconds
+Light detected at: 1730410083596508 microseconds
+Light detected at: 1730410084158924 microseconds
+Received LED ON timestamp: 1730410086003356 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:06] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410086205502 microseconds
+Latency: 202 milliseconds
+Light detected at: 1730410086680014 microseconds
+Received LED ON timestamp: 1730410089107432 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:09] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410089305175 microseconds
+Latency: 197 milliseconds
+Light detected at: 1730410089811363 microseconds
+Received LED ON timestamp: 1730410092209798 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:12] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410092404965 microseconds
+Latency: 195 milliseconds
+Light detected at: 1730410092948164 microseconds
+Received LED ON timestamp: 1730410095317791 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:15] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410095472517 microseconds
+Latency: 154 milliseconds
+Light detected at: 1730410096068513 microseconds
+Received LED ON timestamp: 1730410098407126 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:18] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410098607511 microseconds
+Latency: 200 milliseconds
+Light detected at: 1730410099060528 microseconds
+Received LED ON timestamp: 1730410101519259 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:21] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410101688286 microseconds
+Latency: 169 milliseconds
+Light detected at: 1730410102164383 microseconds
+Received LED ON timestamp: 1730410104624215 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:24] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410104788608 microseconds
+Latency: 164 milliseconds
+Light detected at: 1730410105294788 microseconds
+Received LED ON timestamp: 1730410107737177 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:27] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410107930604 microseconds
+Latency: 193 milliseconds
+Light detected at: 1730410108440363 microseconds
+Received LED ON timestamp: 1730410110857765 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:30] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410111048218 microseconds
+Latency: 190 milliseconds
+Light detected at: 1730410111525060 microseconds
+Received LED ON timestamp: 1730410113973063 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:34] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410114214018 microseconds
+Latency: 240 milliseconds
+Light detected at: 1730410114723090 microseconds
+Received LED ON timestamp: 1730410117075231 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:37] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410117297094 microseconds
+Latency: 221 milliseconds
+Light detected at: 1730410117806037 microseconds
+Received LED ON timestamp: 1730410120173083 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:40] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410120414577 microseconds
+Latency: 241 milliseconds
+Light detected at: 1730410120921820 microseconds
+Received LED ON timestamp: 1730410123301699 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:43] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410123530753 microseconds
+Latency: 229 milliseconds
+Light detected at: 1730410124055649 microseconds
+Received LED ON timestamp: 1730410126405879 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:46] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410126630974 microseconds
+Latency: 225 milliseconds
+Light detected at: 1730410127169864 microseconds
+Received LED ON timestamp: 1730410129524607 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:49] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410129780861 microseconds
+Latency: 256 milliseconds
+Light detected at: 1730410130288237 microseconds
+Received LED ON timestamp: 1730410132630856 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:52] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410132840173 microseconds
+Latency: 209 milliseconds
+Light detected at: 1730410133432218 microseconds
+Received LED ON timestamp: 1730410135727089 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:55] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410135958807 microseconds
+Latency: 231 milliseconds
+Light detected at: 1730410136424953 microseconds
+Received LED ON timestamp: 1730410138845372 microseconds
+10.45.0.28 - - [31/Oct/2024 21:28:58] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410139091241 microseconds
+Latency: 245 milliseconds
+Light detected at: 1730410139544201 microseconds
+Received LED ON timestamp: 1730410141943187 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:02] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410142155943 microseconds
+Latency: 212 milliseconds
+Light detected at: 1730410142633015 microseconds
+Received LED ON timestamp: 1730410145065203 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:05] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410145289774 microseconds
+Latency: 224 milliseconds
+Light detected at: 1730410145788926 microseconds
+Light detected at: 1730410146342871 microseconds
+Received LED ON timestamp: 1730410148160027 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:08] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410148356568 microseconds
+Latency: 196 milliseconds
+Light detected at: 1730410148864619 microseconds
+Received LED ON timestamp: 1730410151246234 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:11] "POST /timestamp HTTP/1.1" 200 -
+Received LED ON timestamp: 1730410154361213 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:14] "POST /timestamp HTTP/1.1" 200 -
+Received LED ON timestamp: 1730410157480031 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:17] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410157940952 microseconds
+Latency: 460 milliseconds
+Light detected at: 1730410158199000 microseconds
+Received LED ON timestamp: 1730410160575622 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:20] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410160732519 microseconds
+Latency: 156 milliseconds
+Light detected at: 1730410161228650 microseconds
+Received LED ON timestamp: 1730410163670259 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:23] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410163830522 microseconds
+Latency: 160 milliseconds
+Light detected at: 1730410164378623 microseconds
+Received LED ON timestamp: 1730410166780750 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:26] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410166998246 microseconds
+Latency: 217 milliseconds
+Light detected at: 1730410167509426 microseconds
+Light detected at: 1730410168124017 microseconds
+Received LED ON timestamp: 1730410169897022 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:29] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410170146977 microseconds
+Latency: 249 milliseconds
+Light detected at: 1730410170608726 microseconds
+Received LED ON timestamp: 1730410173007639 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:33] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410173481789 microseconds
+Latency: 474 milliseconds
+Light detected at: 1730410173979435 microseconds
+Received LED ON timestamp: 1730410176125736 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:36] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410176264619 microseconds
+Latency: 138 milliseconds
+Light detected at: 1730410176841560 microseconds
+Received LED ON timestamp: 1730410179231467 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:39] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410179398521 microseconds
+Latency: 167 milliseconds
+Light detected at: 1730410179984768 microseconds
+Received LED ON timestamp: 1730410182330666 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:42] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410182497942 microseconds
+Latency: 167 milliseconds
+Light detected at: 1730410182976703 microseconds
+Received LED ON timestamp: 1730410185441958 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:45] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410185631383 microseconds
+Latency: 189 milliseconds
+Light detected at: 1730410186112180 microseconds
+Received LED ON timestamp: 1730410188565143 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:48] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410188739116 microseconds
+Latency: 173 milliseconds
+Light detected at: 1730410189251801 microseconds
+Received LED ON timestamp: 1730410191668144 microseconds
+10.45.0.28 - - [31/Oct/2024 21:29:51] "POST /timestamp HTTP/1.1" 200 -
+Light detected at: 1730410191890322 microseconds
+Latency: 222 milliseconds
+Light detected at: 1730410192350929 microseconds
