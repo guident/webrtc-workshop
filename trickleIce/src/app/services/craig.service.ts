@@ -47,6 +47,11 @@ export class CraigService {
           ///this.engagementStarted = true;
         //}
       // }
+      setTimeout(() => {
+        if (this.ep) {
+          this.ep.startEngagement();
+        }
+      }, 500);
     }
   }
 
@@ -59,15 +64,6 @@ export class CraigService {
     this.ep = new TrickleIceTwoWayVideoEndpoint(this.authService.getUserEmailAddress(), this.authService.getAuthorizationToken(), new TrickeIceTwoWayVideoMediaNegotiator(), 33, this);
     this.ep.setRemoteVideoId(0, "videoRectangle");
     this.ep.start();
-
-    /*
-    setTimeout(() => {
-        if (this.PCShandler) {
-          this.PCShandler.startEngagement();
-        }
-      }, 3500);
-      */
-    
 
   }
 

@@ -189,7 +189,7 @@ export class TrickleIceTwoWayVideoEndpoint extends endpoint {
         this.engage(this.peerConnectionId);
         return(true);
     } else {
-        console.log("InternalCameraEngagementEndpoint::startEngagement(): Oops!, don;t have a session ID for the remote endpoint <<%d>>.", this.peerConnectionId);
+        console.log("TrickleIceTwoWayVideoEndpoint::startEngagement(): Oops!, don;t have a session ID for the remote endpoint <<%d>>.", this.peerConnectionId);
         return(false);
     }
 }
