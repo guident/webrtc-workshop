@@ -24,12 +24,12 @@ export class AuthService {
 
   //serverError$: Subject<number> = new Subject<number>();
 
-
+  isAuthenticated: boolean = false;
   xhr: any = null;
   userEmail: string = "dvega@guident.co";
   password: string = "Guident1!";
   userId: number = 0;
-  authToken: string = "";
+  authToken: string = "wookah";
 
 
 
@@ -62,6 +62,8 @@ export class AuthService {
 
               // Send the request
       this.xhr.send(jsonStr); 
+
+      this.isAuthenticated = true;
 
   }
 

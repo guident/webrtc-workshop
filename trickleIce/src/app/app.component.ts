@@ -3,19 +3,23 @@ import { RouterOutlet } from '@angular/router';
 import { GTwvPeerConnectionMediaNegotiator } from './services/g-two-way-video-peer-connection-media-negotiator';
 import { GPCSHandler } from './services/g-pcs-handler';
 import { AuthService } from './services/auth/auth.service';
+import { CraigService } from './craig.service';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  // imports: [RouterOutlet],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
   title = 'whaddaya';
+  public endpointsHaveBeenStarted = false;
+  public engagementStarted = false;
 
   constructor(
-    private authService: AuthService
+    private authService: AuthService,
+    private craigService: CraigService
   ) {
     console.log("this is the constructor");
   }
@@ -23,13 +27,15 @@ export class AppComponent {
   ngOnInit() {
     console.log("HELLO HELLO HELLO!!!!!");
     this.authService.startLogin();
-    //let pcnm = new GTwvPeerConnectionMediaNegotiator();
-    //let gpcs = new GPCSHandler(this.authService, this.authService.getUserEmailAddress(), this.authService.getAuthorizationToken(), pcnm, 1, 2);
   }
 
 
   onClickRegisterButton() {
-    console.log("Register button is clicked!! Auth data: Email: <<%s>>, UserId: <<%d>>, AuthToken: <<%s>>", this.authService.getUserEmailAddress(), this.authService.getUserId(), this.authService.getAuthorizationToken());
+    this.craigService.RegisterButton1Click();
+  }
+
+  onClickEngageButton() {
+    this.craigService.EngageButton1Click();
   }
 
 }

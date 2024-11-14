@@ -21,8 +21,8 @@ export class GPCSHandler extends endpoint {
   private associatedVehicleId: number = -1;
   private engageLauncherTimeout: any;
 
-  constructor(public authService: AuthService, uname: string, token: string, pcnm: GTwvPeerConnectionMediaNegotiator, connectionId: number, associatedVehicleId: number) {
-    super("PCS", authService.getUserEmailAddress(), authService.getAuthorizationToken(), pcnm, "parco");
+  constructor(uname: string, token: string, pcnm: GTwvPeerConnectionMediaNegotiator, connectionId: number, associatedVehicleId: number) {
+    super("PCS", uname, token, pcnm, "parco");
     this.connectionId = `${connectionId}`;
     this.associatedVehicleId = associatedVehicleId;
     this.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
@@ -183,5 +183,15 @@ export class GPCSHandler extends endpoint {
   getStateChangeEmitterAsObservable(): Observable<string>{
     return this.stateChangeEmitter$.asObservable();
   }
+
+  startEngagement(): boolean {
+    if ( this.connectionId.length >= 5 ) {
+        this.engage(this.connectionId);
+        return(true);
+    } else {
+        console.log("InternalCameraEngagementEndpoint::startEngagement(): Oops!, don;t have a session ID for the remote endpoint <<%d>>.", this.connectionId);
+        return(false);
+    }
+}
 
 }

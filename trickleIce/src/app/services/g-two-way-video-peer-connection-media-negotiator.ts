@@ -9,6 +9,7 @@ export class GTwvPeerConnectionMediaNegotiator extends GPeerConnectionMediaNegot
     localVideoId: string | null = null;
 
     errorTimeout: any;
+    private EndpointSessionId: string = "";
 
     constructor() {
       super("GTwvPeerConnectionMediaNegotiator");
@@ -234,6 +235,7 @@ export class GTwvPeerConnectionMediaNegotiator extends GPeerConnectionMediaNegot
     override processPeerEngagementAnswer(msg: any): boolean {
         console.log(msg)
         console.log(`GuidentTwvPeerConnectionMediaNegotiator::_processPeerEngagementAnswer(): Attempting to process answer SDP from remote vehicle with peer id: <<${msg.peerConnectionId}>>.`);
+        this.EndpointSessionId = msg.connectionId;
 
         if (msg.messageType !== GuidentMessageType.ENGAGE_ANSWER) {
           console.log("GuidentTwvPeerConnectionMediaNegotiator::processPeerEngagementAnswer(): Huh?");
