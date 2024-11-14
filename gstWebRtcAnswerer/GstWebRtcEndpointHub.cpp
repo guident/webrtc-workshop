@@ -311,7 +311,16 @@ void GstWebRtcEndpointHub::onNegotiationNeeded(GstElement * webrtc, gpointer off
         ret = gst_sdp_message_parse_buffer ((guint8 *) offerSdpFreeAfterUse, strlen ((const char *)offerSdpFreeAfterUse), sdp);
         g_assert_cmphex (ret, ==, GST_SDP_OK);
 
-        g_free(offerSdpFreeAfterUse);
+	// AA: DELETE
+	gchar *sdp_str = gst_sdp_message_as_text(sdp);
+    	if (sdp_str) {
+        	Log::Inst().log("GstWebRtcEndpointHub::onNegotiationNeeded(): Received SDP offer:\n%s", sdp_str);
+        	g_free(sdp_str);
+    	} else {
+        	Log::Inst().log("GstWebRtcEndpointHub::onNegotiationNeeded(): Failed to convert SDP message to text.");
+    	}
+        
+	g_free(offerSdpFreeAfterUse);
 
         GstWebRTCSessionDescription *offer = NULL;
         GstPromise * promise = NULL;
@@ -644,10 +653,10 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
 #define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload=111"
 #define RTP_CAPS_VP9 "application/x-rtp,media=video,encoding-name=VP9,payload=98"
-#define CAMERA_SERIAL_NUMBER "11120626"
+#define CAMERA_SERIAL_NUMBER "11120627"
 
 
-	//pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement stun-server=stun://stun.bluepepper.us:3478 " 
+	/*
 	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
                 "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
                 "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
@@ -656,22 +665,56 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
 		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
 		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
+	*/
 
-	/*
 	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
                 "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
                 "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
 		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1080,framerate=30/1\" conversion-element=3 ! "
-		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
-		//" nvv4l2vp9enc name=encoder iframeinterval=25 idrinterval=25 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
-		" nvv4l2vp9enc name=encoder ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
+		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! tee name=mike ! "
+		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
 		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
+
+
+	// tommie's pipeline # 1
+	/*
+	pipelineBinElement =  gst_parse_launch(
+        "webrtcbin bundle-policy=2 name=webrtcElement "
+        "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
+        "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
+
+        "tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1080,framerate=30/1\" conversion-element=3 ! "
+        "queue ! nvvidconv ! video/x-raw(memory:NVMM),format=I420,width=1920,height=1080,framerate=30/1 !"
+        "queue ! nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! "
+        "queue ! rtpvp9pay mtu=1300 pt=98 name = vp9payloader ! "
+        "queue ! " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
+	*/
+
+	// tommie's pipeline # 2
+	/*
+	pipelineBinElement = gst_parse_launch(
+        	"webrtcbin bundle-policy=2 name=webrtcElement "
+        	// Audio processing branch
+        	"audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
+        	"queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
+
+
+        	"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1080,framerate=30/1\" conversion-element=3 ! "
+        	"video/x-raw(memory:NVMM),format=(string)NV12,width=1920,height=1080,framerate=30/1 ! queue ! tee name=videotee ! "
+
+        	// First Branch for video encoding and sending over WebRTC
+        	"queue ! nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
+        	RTP_CAPS_VP9 " ! webrtcElement. "
+
+        	"videotee. ! queue ! videoconvert ! autovideosink ",
+        	&error);
 		*/
 
 
 
+
 	if (error || (pipelineBinElement == NULL)) {
-		Log::Inst().log("GstWebRtcEndpointHub::constructWebRtcPipeline(): Error on gst_parse_launch(). Returning unsuccessful.");
+		Log::Inst().log("GstWebRtcEndpointHub::constructWebRtcPipeline(): Error on gst_parse_launch(). Returning unsuccessful.<<%s>>\n", error->message);
 		g_error_free (error);
 		if ( pipelineBinElement != NULL ) { 
 			g_clear_object(&pipelineBinElement);
@@ -806,11 +849,13 @@ void GstWebRtcEndpointHub::stopDroppingFrames() {
 }
 
 
+/*
 void GstWebRtcEndpointHub::restartCamera() {
 
 	// hi andy!
 
 }
+*/
 
 
 void GstWebRtcEndpointHub::forceIdrFrame() {
