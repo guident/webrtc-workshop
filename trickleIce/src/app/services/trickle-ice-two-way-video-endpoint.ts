@@ -1,8 +1,9 @@
 import { Observable, Subject } from "rxjs";
 import { endpoint } from "./endpoint";
 import { GuidentLogger } from "./guident-logger";
-import { GTwvPeerConnectionMediaNegotiator } from "./g-two-way-video-peer-connection-media-negotiator";
+import { TrickeIceTwoWayVideoMediaNegotiator } from "./trickle-ice-two-way-video-media-negotiator";
 import { AuthService } from "./auth/auth.service";
+import { CraigService } from "./craig.service";
 
 /**
  * This class is a handler for the PCS endpoint. It is responsible for handling the state machine and the media negotiation for the endpoint.
@@ -10,86 +11,85 @@ import { AuthService } from "./auth/auth.service";
  */   
 
 
-export class GPCSHandler extends endpoint {
+export class TrickleIceTwoWayVideoEndpoint extends endpoint {
 
   //Variables to display and emit the state of the state machine
   private stateChangeEmitter$: Subject<string> = new Subject();
   private callInProgress$: Subject<boolean> = new Subject();
   private pamModifiers$: Subject<string> = new Subject();
   //Variables that store information about the PCS connection
-  private connectionId: string = "";
-  private associatedVehicleId: number = -1;
+  private peerConnectionId: string = "";
+  private peerEndpointId: number = -1;
   private engageLauncherTimeout: any;
 
-  constructor(uname: string, token: string, pcnm: GTwvPeerConnectionMediaNegotiator, connectionId: number, associatedVehicleId: number) {
+  constructor(uname: string, token: string, pcnm: TrickeIceTwoWayVideoMediaNegotiator, epId: number, craig: CraigService) {
     super("PCS", uname, token, pcnm, "parco");
-    this.connectionId = `${connectionId}`;
-    this.associatedVehicleId = associatedVehicleId;
+    this.peerEndpointId = epId;
     this.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
   }
 
   override onConnecting() {
-    GuidentLogger.logDebug("GPCSHandler","::onConnecting(): OK!.");
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onConnecting(): OK!.");
   }
 
   override onConnectionSuccessful() {
-    GuidentLogger.logDebug("GPCSHandler","::onConnectionSuccessful(): OK.");
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onConnectionSuccessful(): OK.");
   }
 
   override onConnectionFailed(err: string) {
-    GuidentLogger.logDebug("GPCSHandler","::onConnectionFailed(): ok!, called with err: " + err);
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onConnectionFailed(): ok!, called with err: " + err);
   }
 
   override onDisconnected(reason: string) {
-    GuidentLogger.logDebug("GPCSHandler","::onDisconnected(): ok!, called with reason: " + reason);
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onDisconnected(): ok!, called with reason: " + reason);
     this.destroy();
   }
 
   override onRegistrationFailed() {
-    GuidentLogger.logDebug("GPCSHandler","::onRegistrationFailed(): ok!.");
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onRegistrationFailed(): ok!.");
   }
 
   override onRegistrationSuccessful() {
-    GuidentLogger.logDebug("GPCSHandler","::onRegistrationSuccessful(): ok!.");
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onRegistrationSuccessful(): ok!.");
     this.engageLauncherTimeout = setTimeout(async ()=>{
       await this.getLocalMediaStream();
-      this.engage(this.connectionId);
+      //this.engage(this.peerConnectionId);
       //Clear the engagement launcher timeout
-      clearTimeout(this.engageLauncherTimeout);
+      //clearTimeout(this.engageLauncherTimeout);
       this.engageLauncherTimeout = null;
     }, 200)
   }
 
   override onEngaging() {
-    GuidentLogger.logDebug("GPCSHandler","::onEngaging(): ok!.");
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onEngaging(): ok!.");
   }
 
   override onEngagementFailed(err: string) {
-    GuidentLogger.logDebug("GPCSHandler","::onEngagementFailed(): ok!, called with err: " + err);
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onEngagementFailed(): ok!, called with err: " + err);
     this.stateChangeEmitter$.next("failed");
     this.destroy();
   }
 
   override onEngagementSuccessful() {
-    GuidentLogger.logDebug("GPCSHandler","::onEngagementSuccessful(): ok!.");
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onEngagementSuccessful(): ok!.");
     this.callInProgress$.next(false);
   }
 
   override onDisengagement(reason: any) {
-    GuidentLogger.logDebug("GPCSHandler","::onDisengagement(): ok!, called with reason: " + reason);
-
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onDisengagement(): ok!, called with reason: " + reason);
     this.destroy();
   }
 
   override onNotification(msg: any) {
-    if(msg.endpointType == "vehicle") return;
-
-    // GuidentLogger.logDebug("GPCSHandler","onNotification(): Got a message!! : \n");
-    // GuidentLogger.logObject("GPCSHandler", msg)
+    if ( ( this.peerConnectionId == "" || msg.connectionId != this.peerConnectionId ) && msg.endpointType == "vehicle" && msg.eventType == "status" && msg.endpointId == 33 ) {
+        GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNotification(): Got a Status notification from vehicle # 33!!!, Connection ID: <<%s>>", msg.connectionId);
+        this.peerConnectionId = msg.connectionId;
+        return;
+    }
   }
 
   override onNewLocation(latlon: any) {
-    GuidentLogger.logDebug("GPCSHandler","::onNewLocation(): ok!");
+    GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNewLocation(): ok!");
   }
 
   override async getLocalMediaStream() {
@@ -156,7 +156,7 @@ export class GPCSHandler extends endpoint {
   //Functions which are used to interact with other components and services
   onUserPressedEndCall(){
     this.callInProgress$.next(false);
-    this.myep.disengage(this.connectionId);
+    this.myep.disengage(this.peerConnectionId);
   }
   /**
    * Will emit en event to the PCS component so that it shrinks
@@ -185,11 +185,11 @@ export class GPCSHandler extends endpoint {
   }
 
   startEngagement(): boolean {
-    if ( this.connectionId.length >= 5 ) {
-        this.engage(this.connectionId);
+    if ( this.peerConnectionId.length >= 5 ) {
+        this.engage(this.peerConnectionId);
         return(true);
     } else {
-        console.log("InternalCameraEngagementEndpoint::startEngagement(): Oops!, don;t have a session ID for the remote endpoint <<%d>>.", this.connectionId);
+        console.log("InternalCameraEngagementEndpoint::startEngagement(): Oops!, don;t have a session ID for the remote endpoint <<%d>>.", this.peerConnectionId);
         return(false);
     }
 }

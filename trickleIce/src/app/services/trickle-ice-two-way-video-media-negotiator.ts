@@ -2,7 +2,7 @@ import { GPeerConnectionMediaNegotiator } from "./g-peer-connection-media-negoti
 import { GuidentMessageType, GuidentCameraPositions, GuidentMsgEventType } from "./vehicle-locator-api"
 import { GuidentLogger } from "./guident-logger";
 
-export class GTwvPeerConnectionMediaNegotiator extends GPeerConnectionMediaNegotiator {
+export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNegotiator {
 
     localStream: MediaStream | null = null;
     firstVideoMediaStream: MediaStream | null = null;

@@ -1,9 +1,9 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { GTwvPeerConnectionMediaNegotiator } from './services/g-two-way-video-peer-connection-media-negotiator';
-import { GPCSHandler } from './services/g-pcs-handler';
+import { TrickeIceTwoWayVideoMediaNegotiator } from './services/trickle-ice-two-way-video-media-negotiator';
+import { TrickleIceTwoWayVideoEndpoint } from './services/trickle-ice-two-way-video-endpoint';
 import { AuthService } from './services/auth/auth.service';
-import { CraigService } from './craig.service';
+import { CraigService } from './services/craig.service';
 
 @Component({
   selector: 'app-root',
@@ -31,11 +31,12 @@ export class AppComponent {
 
 
   onClickRegisterButton() {
-    this.craigService.RegisterButton1Click();
+    this.craigService.RegisterButtonClick();
   }
 
   onClickEngageButton() {
-    this.craigService.EngageButton1Click();
+    //this.craigService.EngageButtonClick();
+    this.engage(this.peerConnectionId);
   }
 
 }
