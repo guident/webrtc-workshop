@@ -113,6 +113,7 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
             if (videoId !== null) {
               const videoElement = document.getElementById(videoId);
               if (videoElement !== null && videoElement.nodeName === "VIDEO") {
+                  console.log("OK! Connecting new stream with new track to the video element <<%s>>!!", videoId);
                   (videoElement as HTMLVideoElement).srcObject = mediaStream;
               }
             }

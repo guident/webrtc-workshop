@@ -22,10 +22,10 @@ export class TrickleIceTwoWayVideoEndpoint extends endpoint {
   private peerEndpointId: number = -1;
   private engageLauncherTimeout: any;
 
-  constructor(uname: string, token: string, pcnm: TrickeIceTwoWayVideoMediaNegotiator, epId: number, craig: CraigService) {
+  constructor(uname: string, token: string, pcnm: TrickeIceTwoWayVideoMediaNegotiator, epId: number, private craig: CraigService) {
     super("PCS", uname, token, pcnm, "parco");
     this.peerEndpointId = epId;
-    this.setOfferVideoPayloadTypeManipulations(98, 98, 98, 99, 100, 101);
+    this.setOfferVideoPayloadTypeManipulations(102, 0, 0, 102, 0, 0);
   }
 
   override onConnecting() {
@@ -84,9 +84,13 @@ export class TrickleIceTwoWayVideoEndpoint extends endpoint {
     if ( ( this.peerConnectionId == "" || msg.connectionId != this.peerConnectionId ) && msg.endpointType == "vehicle" && msg.eventType == "status" && msg.endpointId == 33 ) {
         GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNotification(): Got a Status notification from vehicle # 33!!!, Connection ID: <<%s>>", msg.connectionId);
         this.peerConnectionId = msg.connectionId;
+        this.craig.setVehicleConnectionId(this.peerConnectionId);
         return;
+    } else if ( msg.eventType == "ice-candidate" ) {
+        GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNotification(): GOT AN ICE CANDIDATE!!");
     }
   }
+
 
   override onNewLocation(latlon: any) {
     GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNewLocation(): ok!");
