@@ -506,6 +506,7 @@ void WssStateMachine::onStatusNotifyTimerTimeout() {
         if ( strcmp(stateName, "CONNECTED") == 0 || strcmp(stateName, "ENGAGED" ) == 0) {
             printf("WssStateMachine::onStatusNotifyTimerTimeout(): Sending Message...\n");
             sendWssMessage(GuidentMessageTypes::NOTIFY);
+	    sendWssIceCandidateMessage(peerConnectionId);
         } 
 
 }
@@ -611,30 +612,68 @@ void WssStateMachine::sendWssMessage(const std::string &messageType, const std::
 }
 
 
-// void wssStateMachine::sendWssMessage() {
 
-//     JsonBuilder *builder = json_builder_new();
-//     json_builder_begin_object(builder);
 
-//     json_builder_set_member_name(builder, "messageType");
-//     json_builder_add_string_value(GuidentMessageTypes.NOTIFY);
+void WssStateMachine::sendWssIceCandidateMessage(const char * destinationId) {
 
-//     json_builder_set_member_name(builder, "endpointType");
-//     json_builder_add_string_value(GuidentMsgEndpointTypes.VEHICLE);
+    JsonBuilder *builder = json_builder_new();
+    json_builder_begin_object(builder);
 
-//     json_builder_set_member_name(builder, "eventType");
-//     json_builder_add_string_value(GuidentMsgEventTypes.STATUS);
+    json_builder_set_member_name(builder, "messageType");
+    json_builder_add_string_value(builder, "notify");
 
-//     json_builder_set_member_name(builder, "connectionId");
-//     json_builder_add_string_value(myConnectionId);
+    json_builder_set_member_name(builder, "connectionId");
+    json_builder_add_string_value(builder, myConnectionId);
 
-//     json_builder_set_member_name(builder, "EndpointId");
-//     json_builder_add_string_value(21); // do this differently, this is just for testing
-    
-//     json_builder_set_member_name(builder, "connectionId");
-//     json_builder_add_string_value(myConnectionId);
+    if (destinationId != NULL && strlen(destinationId) > 4 ) {
+        json_builder_set_member_name(builder, "peerConnectionId");
+        json_builder_add_string_value(builder, destinationId);
+    }
 
-// }
+    if (myEndpointId) {
+        json_builder_set_member_name(builder, "endpointId");
+        json_builder_add_string_value(builder, myEndpointId);
+    }
+
+    json_builder_set_member_name(builder, "endpointType");
+    json_builder_add_string_value(builder, GuidentMsgEndpointTypes::VEHICLE);
+
+    json_builder_set_member_name(builder, "name");
+    json_builder_add_string_value(builder, NAME);
+
+
+    json_builder_set_member_name(builder, "eventType");
+    json_builder_add_string_value(builder, "ice-candidate");
+    json_builder_set_member_name(builder, "eventData");
+    json_builder_add_string_value(builder, "thisisanicecandate");
+
+    json_builder_set_member_name(builder, "sequence");
+    json_builder_add_int_value(builder, localMessageSequence++);
+
+    json_builder_end_object(builder);
+
+    JsonGenerator *gen = json_generator_new();
+    JsonNode *root = json_builder_get_root(builder);
+    json_generator_set_root(gen, root);
+    gchar *messageStr = json_generator_to_data(gen, NULL);
+
+    // Debugging: Print the JSON message
+    std::cout << "WssStateMachine::sendWssMessage(): Sending: <<" << messageStr << ">>." << std::endl;
+
+    // Send the message over the WebSocket connection
+    if (websocketConnection) {
+        soup_websocket_connection_send_text(websocketConnection, messageStr);
+        // soup_websocket_connection_send_text(websocketConnection, sdp);
+    } else {
+        std::cerr << "WssStateMachine::sendWssMessage(): WebSocket connection is not established." << std::endl;
+    }
+
+    // Cleanup
+    g_free(messageStr);
+    json_node_free(root);
+    g_object_unref(builder);
+
+}
 
 
 

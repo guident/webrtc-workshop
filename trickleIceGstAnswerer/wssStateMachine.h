@@ -127,6 +127,7 @@ class WssStateMachine {
 
     void onStatusNotifyTimerTimeout();
     void sendWssMessage(const std::string &messageType, const std::string &destinationId = "");
+    void sendWssIceCandidateMessage(const char * destinationId);
     // static void sendSignalingMessageStatic(const gchar* message);
 
     static void onDatachannelCreatedStatic(GstElement *webrtcbin, GstWebRTCDataChannel *dc, gpointer user_data);
