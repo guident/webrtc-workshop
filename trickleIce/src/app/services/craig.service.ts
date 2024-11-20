@@ -26,8 +26,8 @@ export class CraigService {
   }
 
 
-  setEndpoint(myep: TrickleIceTwoWayVideoEndpoint) {
-    this.ep = myep;
+  setVehicleConnectionId(id: string) {
+    this.vehicleConnectionId = id;
   }
 
   RegisterButtonClick(){
@@ -59,8 +59,6 @@ export class CraigService {
 
   
   startWebSocketConnectionEndpoint(): void {
-
-  
     this.ep = new TrickleIceTwoWayVideoEndpoint(this.authService.getUserEmailAddress(), this.authService.getAuthorizationToken(), new TrickeIceTwoWayVideoMediaNegotiator(), 33, this);
     this.ep.setRemoteVideoId(0, "videoRectangle");
     this.ep.start();
