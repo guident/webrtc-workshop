@@ -21,7 +21,7 @@ WssStateMachine::WssStateMachine():
     authAccessToken(""),
     // io_context_(),
     isAuthenticated(false),
-    myEndpointId("32"),
+    myEndpointId("33"),
     myConnectionId(""),
     peerConnectionId(""),
     defaultLongitude(-80.1001748),
@@ -452,6 +452,7 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             if ( strcmp(message_type, GuidentMessageTypes::NOTIFY) == 0 && strcmp(event_type, GuidentMsgEventTypes::CONNECTED) == 0 ) {
                 printf("WssStateMachine::onWebsocketMessage(): Connected to server!\n");
                 self->myConnectionId = json_object_get_string_member(root_obj, "connectionId");
+		PcmAnswererHub::Instance()->setEngagementConnectionId("");
                 self->sendWssMessage(GuidentMessageTypes::REGISTER);
             }
 
@@ -462,6 +463,7 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
                     const gchar *sdp = json_object_get_string_member(sessiondescription_obj, "sdp");
                     self->engagementOfferSdp = std::string(sdp);
                     printf("WssStateMachine::onWebsocketMessage(): Got SDP, contents: <<%s>>. Going to construct the pipeline.\n", self->engagementOfferSdp.substr(0, 20).c_str());
+		    PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId);
                     PcmAnswererHub::Instance()->getState()->onOfferReceived();
                 } else {
                     printf("WssStateMachine::onWebsocketMessage(): SDP field not found in session description.\n");
@@ -477,7 +479,7 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             if (strcmp(message_type, GuidentMessageTypes::DISENGAGE) == 0) {
                 printf("WssStateMachine::onWebsocketMessage(): Got a DISENGAGE.\n");
 
-
+		PcmAnswererHub::Instance()->setEngagementConnectionId("");
                 PcmAnswererHub::Instance()->getState()->onDisengaged();
 
 
@@ -506,7 +508,6 @@ void WssStateMachine::onStatusNotifyTimerTimeout() {
         if ( strcmp(stateName, "CONNECTED") == 0 || strcmp(stateName, "ENGAGED" ) == 0) {
             printf("WssStateMachine::onStatusNotifyTimerTimeout(): Sending Message...\n");
             sendWssMessage(GuidentMessageTypes::NOTIFY);
-	    sendWssIceCandidateMessage(peerConnectionId);
         } 
 
 }
@@ -515,6 +516,8 @@ void WssStateMachine::onStatusNotifyTimerTimeout() {
 
 void WssStateMachine::sendWssMessage(const std::string &messageType, const std::string &destinationId) {
     
+
+
     JsonBuilder *builder = json_builder_new();
     json_builder_begin_object(builder);
 
@@ -614,7 +617,15 @@ void WssStateMachine::sendWssMessage(const std::string &messageType, const std::
 
 
 
-void WssStateMachine::sendWssIceCandidateMessage(const char * destinationId) {
+void WssStateMachine::sendWssIceCandidateMessage(guint mLineIndex, const gchar * candidate) {
+
+	if ( mLineIndex > 7 ) return;
+	if ( candidate == NULL || strlen(candidate) < 7 ) return;
+
+	std::string engagedId = PcmAnswererHub::Instance()->getEngagementConnectionId();
+
+	if ( engagedId.empty() ) return;
+
 
     JsonBuilder *builder = json_builder_new();
     json_builder_begin_object(builder);
@@ -625,10 +636,8 @@ void WssStateMachine::sendWssIceCandidateMessage(const char * destinationId) {
     json_builder_set_member_name(builder, "connectionId");
     json_builder_add_string_value(builder, myConnectionId);
 
-    if (destinationId != NULL && strlen(destinationId) > 4 ) {
-        json_builder_set_member_name(builder, "peerConnectionId");
-        json_builder_add_string_value(builder, destinationId);
-    }
+    json_builder_set_member_name(builder, "peerConnectionId");
+    json_builder_add_string_value(builder, engagedId.c_str());
 
     if (myEndpointId) {
         json_builder_set_member_name(builder, "endpointId");
@@ -644,8 +653,14 @@ void WssStateMachine::sendWssIceCandidateMessage(const char * destinationId) {
 
     json_builder_set_member_name(builder, "eventType");
     json_builder_add_string_value(builder, "ice-candidate");
+
     json_builder_set_member_name(builder, "eventData");
-    json_builder_add_string_value(builder, "thisisanicecandate");
+    json_builder_begin_object(builder);
+    json_builder_set_member_name(builder, "m-line-index");
+    json_builder_add_int_value(builder, mLineIndex);
+    json_builder_set_member_name(builder, "ice-candidate");
+    json_builder_add_string_value(builder, candidate);
+    json_builder_end_object(builder);
 
     json_builder_set_member_name(builder, "sequence");
     json_builder_add_int_value(builder, localMessageSequence++);
@@ -658,14 +673,14 @@ void WssStateMachine::sendWssIceCandidateMessage(const char * destinationId) {
     gchar *messageStr = json_generator_to_data(gen, NULL);
 
     // Debugging: Print the JSON message
-    std::cout << "WssStateMachine::sendWssMessage(): Sending: <<" << messageStr << ">>." << std::endl;
+    std::cout << "WssStateMachine::sendWssIceCandidateMessage(): Sending: <<" << messageStr << ">>." << std::endl;
 
     // Send the message over the WebSocket connection
     if (websocketConnection) {
         soup_websocket_connection_send_text(websocketConnection, messageStr);
         // soup_websocket_connection_send_text(websocketConnection, sdp);
     } else {
-        std::cerr << "WssStateMachine::sendWssMessage(): WebSocket connection is not established." << std::endl;
+        std::cerr << "WssStateMachine::sendWssIceCandidateMessage(): WebSocket connection is not established." << std::endl;
     }
 
     // Cleanup
@@ -961,9 +976,40 @@ void WssStateMachine::onAnswerSet(GstPromise * promise, gpointer userData) {
     */
 
     printf("WssStateMachine::onAnswerSet(): Answer SDP has been set.\n");
-    //printf("WssStateMachine::onAnswerSet(): Answer SDP has been set.");
-    //printf("WssStateMachine::onAnswerSet(): Answer SDP has been set. <<%s>>", buffer);
+
+    if ( webrtcElement == NULL ) {
+        printf("WssStateMachine::onAnswerSet(): Oops, error retrieving webrtc element.\n");
+        return;
+    }
+
+
+    /** THIS IS A PART OF THE TRICKLE ICE MODIFICATION!! */
+    /** start -- this is the stuff moved from the on-ice-gathering-state below -- we send the offer without waiting for the ice candidates */
+
+    GstWebRTCSessionDescription *answer = NULL;
+    g_object_get(webrtcElement, "local-description", &answer, NULL);
+
+    if ( answer != NULL ) {
+
+	printf("WssStateMachine::onAnswerSet(): Sending the SDP Answer!!");
+
+        char sdpAnswerBuffer[5000];
+        memset(sdpAnswerBuffer, 0, 5000);
+        strncpy(sdpAnswerBuffer, gst_sdp_message_as_text(answer->sdp), 4999);
+        const char * fullAnswer = createCompleteAnswerMessage((const char *)sdpAnswerBuffer);
+        sendSdpAnswerThroughWss(fullAnswer);
+
+        gst_webrtc_session_description_free (answer);
+
+    } else {
+	printf("WssStateMachine::onAnswerSet(): Oops, something is screwed up, can retrieve the answer!!");
+    }
+
+    /* end */
+
+    
     gst_promise_unref (promise);
+
 }
 
 const char * WssStateMachine::createCompleteAnswerMessage(const char* sdp) {
@@ -1034,54 +1080,13 @@ const char * WssStateMachine::createCompleteAnswerMessage(const char* sdp) {
 
 
 void WssStateMachine::onIceCandidate(GstElement * webrtc, guint mlineindex, gchar * candidate, gpointer userData) {
+
     printf("WssStateMachine::onIceCandidate(): Returned. Index: <<%d>> Candidate: <<%s>>\n", mlineindex, candidate ? candidate : "NULL");
-    // // Send the ICE candidate to the remote peer via signaling
-    // // For example, send a JSON message over WebSocket
-    // Json::Value message;
-    // message["type"] = "candidate";
-    // message["candidate"] = candidate;
-    // message["sdpMLineIndex"] = mlineindex;
 
-    //Convert JSON to string and send over WebSocket
-    // Create a JSON builder
-    JsonBuilder *builder = json_builder_new();
+    if ( candidate == NULL ) return;
+    if ( mlineindex > 7 ) return;
 
-    // Build the JSON message
-    json_builder_begin_object(builder);
-
-    json_builder_set_member_name(builder, "type");
-    json_builder_add_string_value(builder, "ice-candidate");
-
-    json_builder_set_member_name(builder, "candidate");
-    json_builder_add_string_value(builder, candidate);
-
-    json_builder_set_member_name(builder, "sdpMLineIndex");
-    json_builder_add_int_value(builder, mlineindex);
-
-    json_builder_end_object(builder);
-
-    // Generate the JSON node
-    JsonNode *root = json_builder_get_root(builder);
-
-    // Convert the JSON node to a string
-    JsonGenerator *generator = json_generator_new();
-    json_generator_set_root(generator, root);
-    gchar *messageStr = json_generator_to_data(generator, NULL);
-
-    // Send the message over the WebSocket connection
-    if (websocketConnection) {
-        soup_websocket_connection_send_text(websocketConnection, messageStr);
-        printf("WssStateMachine::onIceCandidate() - Sent ICE candidate message: <<%s>>. \n", messageStr);
-        // soup_websocket_connection_send_text(websocketConnection, sdp);
-    } else {
-        std::cerr << "WssStateMachine::sendWssMessage(): WebSocket connection is not established." << std::endl;
-    }
-
-    // Free resources
-    g_free(messageStr);
-    g_object_unref(generator);
-    json_node_free(root);
-    g_object_unref(builder);
+    sendWssIceCandidateMessage(mlineindex, candidate);
 }
 
 
@@ -1111,6 +1116,11 @@ void WssStateMachine::onIceGatheringStateNotify(GstElement * webrtc, GParamSpec 
             new_state = "complete";
             printf("WssStateMachine::onIceGatheringStateNotify(): Ice gathering is complete. Will now construct ANSWER message and send it.\n");
             {
+
+		/*
+
+		   Moving this code that grabs the answer sdp and sends it out through smith to the offerer.... up to OnAnswerSet above.
+
                 GstWebRTCSessionDescription *answer = NULL;
                 g_object_get(webrtc, "local-description", &answer, NULL);
 
@@ -1120,7 +1130,6 @@ void WssStateMachine::onIceGatheringStateNotify(GstElement * webrtc, GParamSpec 
                     strncpy(sdpAnswerBuffer, gst_sdp_message_as_text(answer->sdp), 4999);
                     const char * fullAnswer = createCompleteAnswerMessage((const char *)sdpAnswerBuffer);
                     sendSdpAnswerThroughWss(fullAnswer);
-                    // printf("MIIKKEEE: <<%s>>", (const char *)sdpAnswerBuffer);
 
                     gst_webrtc_session_description_free (answer);
 
@@ -1130,6 +1139,11 @@ void WssStateMachine::onIceGatheringStateNotify(GstElement * webrtc, GParamSpec 
                 } else {
                     printf("WssStateMachine::onIceGatheringStateNotify(): Ice gathering is complete, but oops, answer SDP cannot be retrieved.");
                 }
+			
+		    But we still want to use this "ice-gathering-state-complete event to prompt us to transition to the engaged state:
+		*/
+
+                PcmAnswererHub::Instance()->getState()->onEngaged();
 
             }
             break;
@@ -1385,4 +1399,18 @@ void WssStateMachine::constructWebRtcPipeline() {
 
 
 
+
+
+/*
+// mike made this
+void setEngagedConnectionId(const char * id) {
+
+	if ( id == NULL || strlen(id) < 4 ) {
+		//self->engagedConnectionId = "";
+	} else {
+		//self->engagedConnectionId = id;
+	}
+}
+
+*/
 

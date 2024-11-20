@@ -46,10 +46,14 @@ public:
     void cancelConnection();
     void constructWebRtcPipeline();
 
+    void setEngagementConnectionId(const char * id);
+    std::string getEngagementConnectionId();
 
     std::string vehicleUuid;
     std::string password;
     int pipelineType;
 
+
+    std::string engagementConnectionId;
    
 };

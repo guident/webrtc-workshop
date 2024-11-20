@@ -137,3 +137,15 @@ void PcmAnswererHub::constructWebRtcPipeline() {
 
 
 
+void PcmAnswererHub::setEngagementConnectionId(const char * id) {
+	if ( id == NULL || strlen(id) < 5 ) {
+		engagementConnectionId = "";
+	} else {
+		engagementConnectionId = id;
+	}
+}
+
+
+std::string PcmAnswererHub::getEngagementConnectionId() {
+	return(engagementConnectionId);
+}

@@ -66,6 +66,7 @@ class WssStateMachine {
 
     const char* myConnectionId;
     const char* peerConnectionId;
+    std::string engagedConnectionId;
     const char* myUsername;
     const char* myPassword;
     const char* myEndpointId;
@@ -127,7 +128,7 @@ class WssStateMachine {
 
     void onStatusNotifyTimerTimeout();
     void sendWssMessage(const std::string &messageType, const std::string &destinationId = "");
-    void sendWssIceCandidateMessage(const char * destinationId);
+    void sendWssIceCandidateMessage(guint mLineIndex, const gchar * candidate);
     // static void sendSignalingMessageStatic(const gchar* message);
 
     static void onDatachannelCreatedStatic(GstElement *webrtcbin, GstWebRTCDataChannel *dc, gpointer user_data);
@@ -151,6 +152,8 @@ public:
     void resetEverything();
     void resetWebrtcPipeline();
 
+    // mike made this
+    //void setEngagedConnectionId(const char * id);
     
     /* ----------------------------- MARK: Websocket ---------------------------- */
     void authenticate();
