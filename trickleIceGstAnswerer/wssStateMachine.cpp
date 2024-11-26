@@ -620,7 +620,7 @@ void WssStateMachine::sendWssMessage(const std::string &messageType, const std::
 void WssStateMachine::sendWssIceCandidateMessage(guint mLineIndex, const gchar * candidate) {
 
 	if ( mLineIndex > 7 ) return;
-	if ( candidate == NULL || strlen(candidate) < 7 ) return;
+	if ( candidate == NULL ) return;
 
 	std::string engagedId = PcmAnswererHub::Instance()->getEngagementConnectionId();
 
@@ -1083,10 +1083,14 @@ void WssStateMachine::onIceCandidate(GstElement * webrtc, guint mlineindex, gcha
 
     printf("WssStateMachine::onIceCandidate(): Returned. Index: <<%d>> Candidate: <<%s>>\n", mlineindex, candidate ? candidate : "NULL");
 
-    if ( candidate == NULL ) return;
     if ( mlineindex > 7 ) return;
 
-    sendWssIceCandidateMessage(mlineindex, candidate);
+    if ( candidate == NULL ){
+    	sendWssIceCandidateMessage(mlineindex, "");
+    } else {
+        sendWssIceCandidateMessage(mlineindex, candidate);
+    }
+    return;
 }
 
 
