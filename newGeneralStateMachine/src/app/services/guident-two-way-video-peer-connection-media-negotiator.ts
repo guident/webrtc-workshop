@@ -141,7 +141,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
             this.localStream = await navigator.mediaDevices.getUserMedia({
                 audio: this.audioFlag,
                 video: true
-            });  // AA: changed this to be video only 
+            });
             console.log("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): ", this.localStream);
         } catch (e) {
             console.error("GuidentTwvPeerConnectionMediaNegotiator::getlocalMediaStream(): Audio Device Not Found. Make sure your microphone is connected and enabled");
@@ -183,7 +183,7 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                 if (this.firstVideoMediaStream == null) {
                     this.firstVideoMediaStream = new MediaStream([ev.track]);
                 } else {
-                    this.firstVideoMediaStream.addTrack(ev.track); //ev.track.level = 100 david thinks
+                    this.firstVideoMediaStream.addTrack(ev.track);
                     this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
                 }
             } else if (ev.transceiver.mid === "1") { 
@@ -197,10 +197,17 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
             } 
             
         };
-        
+
+    
+
         if (this.localVideoId != null && document.getElementById(this.localVideoId) != null) {
-            (document.getElementById(this.localVideoId) as HTMLVideoElement).srcObject = this.localStream;
+            let videoTrack = this.localStream?.getVideoTracks()[0];
+            if (videoTrack) {
+                (document.getElementById(this.localVideoId) as HTMLVideoElement).srcObject = new MediaStream([videoTrack]);
+            }
+
         }
+
 
         console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): Adding transceivers.");
         this.localStream!.getTracks().forEach(track => this.webrtcPeerConnection!.addTransceiver(track, { direction: "sendrecv" }));
