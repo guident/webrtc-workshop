@@ -177,24 +177,37 @@ export class GuidentTwvPeerConnectionMediaNegotiator extends GuidentPeerConnecti
                     }
                 }
             };
-
-
-            if (ev.transceiver.mid === "0") {
-                if (this.firstVideoMediaStream == null) {
-                    this.firstVideoMediaStream = new MediaStream([ev.track]);
-                } else {
-                    this.firstVideoMediaStream.addTrack(ev.track);
-                    this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
+            
+            if (!this.audioFlag) {
+                // ! video only
+                if (ev.transceiver.mid === "0") {
+                    if (this.firstVideoMediaStream == null) {
+                        this.firstVideoMediaStream = new MediaStream([ev.track]);
+                    } else {
+                        this.firstVideoMediaStream.addTrack(ev.track);
+                        this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
+                    }
+                    updateVideoElement(this.firstVideoMediaStream, this.remoteVideoId[0]);
                 }
-            } else if (ev.transceiver.mid === "1") { 
-                if (this.firstVideoMediaStream == null) {
-                    this.firstVideoMediaStream = new MediaStream([ev.track]);
-                } else {
-                    this.firstVideoMediaStream.addTrack(ev.track);
-                    this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
-                }
-                updateVideoElement(this.firstVideoMediaStream, this.remoteVideoId[0]);
-            } 
+            } else {
+                // ! Audio and Video
+                if (ev.transceiver.mid === "0") {
+                    if (this.firstVideoMediaStream == null) {
+                        this.firstVideoMediaStream = new MediaStream([ev.track]);
+                    } else {
+                        this.firstVideoMediaStream.addTrack(ev.track);
+                        this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
+                    }
+                } else if (ev.transceiver.mid === "1") {
+                    if (this.firstVideoMediaStream == null) {
+                        this.firstVideoMediaStream = new MediaStream([ev.track]);
+                    } else {
+                        this.firstVideoMediaStream.addTrack(ev.track);
+                        this.webrtcPeerConnection!.addTrack(ev.track, this.firstVideoMediaStream);
+                    }
+                    updateVideoElement(this.firstVideoMediaStream, this.remoteVideoId[0]);
+                } 
+            }
             
         };
 
