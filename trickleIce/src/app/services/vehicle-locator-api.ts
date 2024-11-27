@@ -296,7 +296,7 @@ export class WebsocketConnectionStateMachine {
           } else if (msg.eventType === "rejected") {
             this.stateMachine.transition('rejectednotification');
           } else {
-            console.log("WebsocketConnectionStateMachine::_onWssConnectionMessage(): No transition for this message.");
+            console.log("WebsocketConnectionStateMachine::_onWssConnectionMessage(): No transition for this message: <<%s>>", evt.data);
           }
         } else {
           if (msg.endpointType === "vehicle" || msg.endpointType === "pavehicle") {
