@@ -46,6 +46,7 @@ namespace GuidentMsgEventTypes {
     constexpr const char* TAKEN_OVER = "taken-over";
     constexpr const char* RELEASED = "released";
     constexpr const char* STATUS = "status";
+    constexpr const char* ICE_CANDIDATE = "ice-candidate";
     constexpr const char* DISCONNECTED = "disconnected";
     constexpr const char* UNKNOWN = "unknown";
 }
@@ -64,8 +65,8 @@ class WssStateMachine {
 
     static WssStateMachine * __instance;
 
-    const char* myConnectionId;
-    const char* peerConnectionId;
+    std::string myConnectionId;
+    std::string peerConnectionId;
     std::string engagedConnectionId;
     const char* myUsername;
     const char* myPassword;
