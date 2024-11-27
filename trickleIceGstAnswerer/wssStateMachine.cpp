@@ -439,12 +439,6 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             JsonObject *root_obj = json_node_get_object(root);
 
             // Access specific attributes
-	    /*
-	    if ( self->myConnectionId.empty() ) {
-		   printf
-            	self->myConnectionId = std::string(json_object_get_string_member(root_obj, "connectionId")); // AA: 
-            }
-	    */
 													     
 
 	    if ( json_object_get_string_member(root_obj, "peerConnectionId") != NULL ) {
