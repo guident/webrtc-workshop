@@ -65,8 +65,8 @@ class WssStateMachine {
 
     static WssStateMachine * __instance;
 
-    const char* myConnectionId;
-    const char* peerConnectionId;
+    std::string myConnectionId;
+    std::string peerConnectionId;
     std::string engagedConnectionId;
     const char* myUsername;
     const char* myPassword;

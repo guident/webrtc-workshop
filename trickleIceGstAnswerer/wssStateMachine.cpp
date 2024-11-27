@@ -439,8 +439,17 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             JsonObject *root_obj = json_node_get_object(root);
 
             // Access specific attributes
-            self->myConnectionId = json_object_get_string_member(root_obj, "connectionId"); // AA: 
-            self->peerConnectionId = json_object_get_string_member(root_obj, "peerConnectionId");
+	    /*
+	    if ( self->myConnectionId.empty() ) {
+		   printf
+            	self->myConnectionId = std::string(json_object_get_string_member(root_obj, "connectionId")); // AA: 
+            }
+	    */
+													     
+
+	    if ( json_object_get_string_member(root_obj, "peerConnectionId") != NULL ) {
+            	self->peerConnectionId = std::string(json_object_get_string_member(root_obj, "peerConnectionId"));
+	    }
             const gchar *message_type = json_object_get_string_member(root_obj, "messageType");
             const gchar *endpoint_type = json_object_get_string_member(root_obj, "endpointType");
             const gchar *event_type = json_object_get_string_member(root_obj, "eventType");
@@ -451,7 +460,7 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             // if ( message_type == GuidentMessageTypes::NOTIFY && event_type == GuidentMsgEventTypes::CONNECTED ) {
             if ( strcmp(message_type, GuidentMessageTypes::NOTIFY) == 0 && strcmp(event_type, GuidentMsgEventTypes::CONNECTED) == 0 ) {
                 printf("WssStateMachine::onWebsocketMessage(): Connected to server!\n");
-                self->myConnectionId = json_object_get_string_member(root_obj, "connectionId");
+                self->myConnectionId = std::string(json_object_get_string_member(root_obj, "connectionId"));
 		PcmAnswererHub::Instance()->setEngagementConnectionId("");
                 self->sendWssMessage(GuidentMessageTypes::REGISTER);
             }
@@ -468,7 +477,7 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
                     const gchar *sdp = json_object_get_string_member(sessiondescription_obj, "sdp");
                     self->engagementOfferSdp = std::string(sdp);
                     printf("WssStateMachine::onWebsocketMessage(): Got SDP, contents: <<%s>>. Going to construct the pipeline.\n", self->engagementOfferSdp.substr(0, 20).c_str());
-		    PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId);
+		    PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId.c_str());
                     PcmAnswererHub::Instance()->getState()->onOfferReceived();
                 } else {
                     printf("WssStateMachine::onWebsocketMessage(): SDP field not found in session description.\n");
@@ -530,7 +539,7 @@ void WssStateMachine::sendWssMessage(const std::string &messageType, const std::
     json_builder_add_string_value(builder, messageType.c_str());
 
     json_builder_set_member_name(builder, "connectionId");
-    json_builder_add_string_value(builder, myConnectionId);
+    json_builder_add_string_value(builder, myConnectionId.c_str());
 
     if (!destinationId.empty()) {
         json_builder_set_member_name(builder, "peerConnectionId");
@@ -639,10 +648,12 @@ void WssStateMachine::sendWssIceCandidateMessage(guint mLineIndex, const gchar *
     json_builder_add_string_value(builder, "notify");
 
     json_builder_set_member_name(builder, "connectionId");
-    json_builder_add_string_value(builder, myConnectionId);
+    json_builder_add_string_value(builder, myConnectionId.c_str());
 
     json_builder_set_member_name(builder, "peerConnectionId");
     json_builder_add_string_value(builder, engagedId.c_str());
+
+    printf("MIKEMADETHIS... THESE ARE THE DAMN CONNECTION IDS: <<%s>>, peer: <<%s>>\n", myConnectionId, engagedId.c_str());
 
     if (myEndpointId) {
         json_builder_set_member_name(builder, "endpointId");
@@ -1032,13 +1043,13 @@ const char * WssStateMachine::createCompleteAnswerMessage(const char* sdp) {
     json_builder_add_string_value(builder, GuidentMsgEventTypes::UNKNOWN);
 
     json_builder_set_member_name(builder, "connectionId");
-    json_builder_add_string_value(builder, myConnectionId);
+    json_builder_add_string_value(builder, myConnectionId.c_str());
 
     json_builder_set_member_name(builder, "EndpointId");
     json_builder_add_string_value(builder, myEndpointId); 
     
     json_builder_set_member_name(builder, "peerConnectionId");
-    json_builder_add_string_value(builder, peerConnectionId);
+    json_builder_add_string_value(builder, peerConnectionId.c_str());
 
     json_builder_set_member_name(builder, "status");
     json_builder_add_string_value(builder, GuidentMsgStatusTypes::UNKNOWN);
