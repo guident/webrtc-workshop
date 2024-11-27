@@ -456,6 +456,11 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
                 self->sendWssMessage(GuidentMessageTypes::REGISTER);
             }
 
+            if ( strcmp(message_type, GuidentMessageTypes::NOTIFY) == 0 && strcmp(event_type, GuidentMsgEventTypes::ICE_CANDIDATE) == 0 ) {
+		const char * candidate = json_object_get_string_member(root_obj, "eventData");
+                printf("WssStateMachine::onWebsocketMessage(): Got an ICE CANDIDATE!!! <<%s>> <<%s>>\n", candidate, data);
+            }
+
 
             JsonObject *sessiondescription_obj = json_object_get_object_member(root_obj, "sessiondescription");
             if (sessiondescription_obj) {
