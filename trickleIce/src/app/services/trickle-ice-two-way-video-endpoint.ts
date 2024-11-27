@@ -88,6 +88,13 @@ export class TrickleIceTwoWayVideoEndpoint extends endpoint {
         return;
     } else if ( msg.eventType == "ice-candidate" ) {
         GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNotification(): GOT AN ICE CANDIDATE!!");
+        try {
+           var rtccInfo = { sdpMLineIndex: msg.eventData["m-line-index"], candidate: msg.eventData["ice-candidate"] }
+           var rtcc = new RTCIceCandidate(rtccInfo);
+           GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNotification(): GOT AN ICE CANDIDATE!! <<%d>> <%s>>.", rtcc.sdpMLineIndex, rtcc.candidate);
+        } catch(err) {
+           GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNotification(): Oops!!!!");
+        }
     }
   }
 

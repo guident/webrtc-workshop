@@ -147,23 +147,30 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
             return null;
         }
       }).then(() => {
-      return new Promise((resolve, reject) => {
-          this.webrtcPeerConnection!.onicecandidate = (iceevt) => {
-          if (iceevt.candidate == null) {
-              console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer::onicecandidate(): Completed!");
-              resolve("gathering complete");
-          } else {
-              console.log(`GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer::onicecandidate(): Got an ice candidate: <<${iceevt.candidate.candidate}>>`);
-          }
-          };
-          this.errorTimeout = setTimeout(() => { reject("Timeout gathering candidates"); }, 65000);
-      });
-      }).then((promiseResult) => {
-        console.log(`GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer(): the wait-for-ice-candidates promise result: <<${promiseResult}>>, Sending offer.`);
-        this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId, GuidentMsgEventType.UNKNOWN, null, this.webrtcPeerConfiguration.iceServers, this.webrtcPeerConnection?.localDescription);
-      }).catch((err) => {
-        console.log("I am an error", err);
-        this.myEndpoint.stateMachine.transition('engagementerror', err)
+          
+          // here's a change for trickle ice.... we send out the offer *before* the ice candidate get collected, and no need to return a promise:
+          //return new Promise((resolve, reject) => {
+
+              this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId, GuidentMsgEventType.UNKNOWN, null, this.webrtcPeerConfiguration.iceServers, this.webrtcPeerConnection?.localDescription);
+
+              this.webrtcPeerConnection!.onicecandidate = (iceevt) => {
+                  if (iceevt.candidate == null) {
+                      console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer::onicecandidate(): Completed!");
+                      //resolve("gathering complete");
+                      this._sendMessage(GuidentMessageType.NOTIFY, peerId, GuidentMsgEventType.ICE_CANDIDATE, "");
+                  } else {
+                      console.log(`GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer::onicecandidate(): Got an ice candidate: <<${iceevt.candidate.candidate}>>`);
+                      try {
+                        var candidate = iceevt.candidate.candidate;
+                        this._sendMessage(GuidentMessageType.NOTIFY, peerId, GuidentMsgEventType.ICE_CANDIDATE, candidate);
+                      } catch(err) {
+                        console.log("GuidentTwvPeerConnectionMediaNegotiator::startPeerEngagementOffer::onicecandidate(): Oops, Exception thrown!");
+                      }
+                  }
+              };
+              //this.errorTimeout = setTimeout(() => { 
+              //  this.myEndpoint.stateMachine.transition('engagementerror', "huh");
+              //}, 65000);
       });
 
       return true;
