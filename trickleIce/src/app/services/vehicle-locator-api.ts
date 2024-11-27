@@ -20,6 +20,7 @@ export enum GuidentMsgEventType {
   TAKEN_OVER = "taken-over",
   RELEASED = "released",
   STATUS = "status",
+  ICE_CANDIDATE = "ice-candidate",
   COMMAND = "command",
   DISCONNECTED = "disconnected",
   UNKNOWN = "unknown"
@@ -383,7 +384,7 @@ export class WebsocketConnectionStateMachine {
     msg.endpointType = this.endpointType;
     //Get the name of the user logged in
     const extractedUser = sessionStorage.getItem("currentUser")
-    if(extractedUser){
+    if ( extractedUser ) {
       const user = JSON.parse(extractedUser).user;
       msg.name = user.first_name + " " + user.last_name;
     } else {
@@ -398,10 +399,10 @@ export class WebsocketConnectionStateMachine {
     }
 
     if (messageType === GuidentMessageType.NOTIFY) {
-      if (eventType) {
+      if ( eventType ) {
         msg.eventType = eventType;
         msg.status = GuidentMsgStatusType.UNKNOWN;
-        if (eventData) {
+        if ( eventData ) {
           msg.eventData = eventData;
         }
       } else {
