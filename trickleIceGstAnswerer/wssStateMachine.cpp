@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 
+
 WssStateMachine * WssStateMachine::__instance = NULL;
 
 WssStateMachine::WssStateMachine(): 
@@ -455,13 +456,28 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             if ( strcmp(message_type, GuidentMessageTypes::NOTIFY) == 0 && strcmp(event_type, GuidentMsgEventTypes::CONNECTED) == 0 ) {
                 printf("WssStateMachine::onWebsocketMessage(): Connected to server!\n");
                 self->myConnectionId = std::string(json_object_get_string_member(root_obj, "connectionId"));
-		PcmAnswererHub::Instance()->setEngagementConnectionId("");
+		        PcmAnswererHub::Instance()->setEngagementConnectionId("");
                 self->sendWssMessage(GuidentMessageTypes::REGISTER);
             }
 
             if ( strcmp(message_type, GuidentMessageTypes::NOTIFY) == 0 && strcmp(event_type, GuidentMsgEventTypes::ICE_CANDIDATE) == 0 ) {
-		const char * candidate = json_object_get_string_member(root_obj, "eventData");
-                printf("WssStateMachine::onWebsocketMessage(): Got an ICE CANDIDATE!!! <<%s>> <<%s>>\n", candidate, data);
+                const char *eventData = json_object_get_string_member(root_obj, "eventData");
+                printf("WssStateMachine::onWebsocketMessage(): Got an ICE CANDIDATE!!! <<%s>>\n", eventData);
+
+                // Since eventData is a plain string, we don't need to parse it as JSON
+                const char* candidateStr = eventData;
+
+                // Assuming m-line-index is known or always 0
+                guint sdpMLineIndex = 0; // Update this if you have the correct index
+
+                // Add the ICE candidate to webrtcbin
+                if (self->webrtcElement != NULL) {
+                    printf("WssStateMachine::onWebsocketMessage(): Adding ICE candidate to webrtcbin.\n");
+                    g_signal_emit_by_name(self->webrtcElement, "add-ice-candidate", sdpMLineIndex, candidateStr);
+                    printf("WssStateMachine::onWebsocketMessage(): Succesfully Added an ICE candidate to webrtcbin.\n");
+                } else {
+                    printf("WssStateMachine::onWebsocketMessage(): webrtcElement is NULL, cannot add ICE candidate.\n");
+                }
             }
 
 
@@ -471,7 +487,7 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
                     const gchar *sdp = json_object_get_string_member(sessiondescription_obj, "sdp");
                     self->engagementOfferSdp = std::string(sdp);
                     printf("WssStateMachine::onWebsocketMessage(): Got SDP, contents: <<%s>>. Going to construct the pipeline.\n", self->engagementOfferSdp.substr(0, 20).c_str());
-		    PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId.c_str());
+		            PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId.c_str());
                     PcmAnswererHub::Instance()->getState()->onOfferReceived();
                 } else {
                     printf("WssStateMachine::onWebsocketMessage(): SDP field not found in session description.\n");
@@ -502,6 +518,40 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
     }
 
 }
+
+// // Method to handle incoming ICE candidates
+// void onIceCandidateReceived(const char * eventData) {
+//      console.log("WssStateMachine::onIceCandidateReceived(): Adding Ice Candidate\n");
+//   try {
+//     // Parse the ICE candidate data
+//     const candidateData = JSON.parse(eventData);
+
+//     // Create an RTCIceCandidate object
+//     const iceCandidate = new RTCIceCandidate({
+//       candidate: candidateData.candidate,
+//       sdpMid: candidateData.sdpMid,
+//       sdpMLineIndex: candidateData.sdpMLineIndex,
+//     });
+
+//     // Check if remote description is set
+//     if (this.peerConnection.remoteDescription) {
+//       // Add the candidate immediately
+//       this.peerConnection.addIceCandidate(iceCandidate)
+//         .then(() => {
+//           console.log('ICE candidate successfully added.');
+//         })
+//         .catch(error => {
+//           console.error('Error adding ICE candidate:', error);
+//         });
+//     } else {
+//       // Queue the candidate to add later
+//       this.iceCandidateQueue.push(iceCandidate);
+//     }
+//   } catch (error) {
+//     console.error('Error parsing ICE candidate data:', error);
+//   }
+// }
+
 
 
 
@@ -1042,8 +1092,11 @@ const char * WssStateMachine::createCompleteAnswerMessage(const char* sdp) {
     json_builder_set_member_name(builder, "EndpointId");
     json_builder_add_string_value(builder, myEndpointId); 
     
+    std::string engagedId = PcmAnswererHub::Instance()->getEngagementConnectionId();
+
     json_builder_set_member_name(builder, "peerConnectionId");
-    json_builder_add_string_value(builder, peerConnectionId.c_str());
+    //json_builder_add_string_value(builder, peerConnectionId.c_str());
+    json_builder_add_string_value(builder, engagedId.c_str());
 
     json_builder_set_member_name(builder, "status");
     json_builder_add_string_value(builder, GuidentMsgStatusTypes::UNKNOWN);

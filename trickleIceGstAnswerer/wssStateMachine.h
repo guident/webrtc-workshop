@@ -119,6 +119,7 @@ class WssStateMachine {
     static void onAnswerCreatedStatic(GstPromise * promise, gpointer userData);
     static void onAnswerSetStatic(GstPromise * promise, gpointer userData);
     static void onIceCandidateStatic(GstElement * webrtc, guint mlineIndex, gchar * candidate, gpointer userData);
+    // static void onIceCandidateReceived(const char * candidate);
     static void onIceGatheringStateNotifyStatic(GstElement * webrtc, GParamSpec * pspec, gpointer userData);
     static void onNewTransceiverStatic(GstElement * webrtc, GstWebRTCRTPTransceiver * trans, gpointer userData);
     static void onIncomingStreamStatic(GstElement * webrtc, GstPad * pad, WssStateMachine * hub);
