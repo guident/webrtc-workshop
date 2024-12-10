@@ -277,10 +277,35 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
 
 
 
-    startRenegotiateMediaStreams(audioVideoConfig: number): boolean {
+    async startRenegotiateMediaStreams(audioVideoConfig: number): Promise<boolean> {
       console.log("HELLLLOOOOO!!!!!!!!!  audioVideoConfig is <<%d>>", audioVideoConfig);
 
-      
+      // Initialize new media stream
+      const newStream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
+
+      if (audioVideoConfig == 0) {// Get new media with no audio and 1 video track
+        console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Attempting to renegotiate media streams to video only.");
+        const newStream = navigator.mediaDevices.getUserMedia({video: true, audio: false});
+        (await newStream).getTracks().forEach(async track => {
+          (await newStream!).addTrack(track);
+          console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Added track to local stream.");
+        }); 
+      } else if (audioVideoConfig == 1) { // Get new media with audio and video tracks
+        console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Attempting to renegotiate media streams to audio and video.");
+        const newStream = navigator.mediaDevices.getUserMedia({video: true, audio: true});
+        (await newStream).getTracks().forEach(async track => {
+          (await newStream!).addTrack(track);
+          console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Added track to local stream.");
+        }); 
+      }
+
+      // Create new offer for renegotiation
+      if (this.webrtcPeerConnection) {
+        const newOffer = await this.webrtcPeerConnection.createOffer();
+        await this.webrtcPeerConnection.setLocalDescription(newOffer);
+        // Send new offer to signaling server
+        console.log('Renegotiated Offer:', newOffer);
+      }
 
       return(false);
     }
