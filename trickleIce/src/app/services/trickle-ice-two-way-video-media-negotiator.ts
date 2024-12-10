@@ -275,4 +275,15 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
       }
     }
 
+
+
+    startRenegotiateMediaStreams(audioVideoConfig: number): boolean {
+      console.log("HELLLLOOOOO!!!!!!!!!  audioVideoConfig is <<%d>>", audioVideoConfig);
+
+      
+
+      return(false);
+    }
+
+
 }

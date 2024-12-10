@@ -172,6 +172,16 @@ export class WebsocketConnectionStateMachine {
     this.authToken = authToken;
   }
 
+
+  // NEW For renegotiation!
+
+  renegotiate(audioVideoConfig: number) {
+     this.stateMachine.transition('renegotiateclicked', audioVideoConfig);
+  }
+
+
+
+
   onConnecting() {
     console.log("WebsocketConnectionStateMachine::onConnecting(): not implemented.");
   }
@@ -220,6 +230,14 @@ export class WebsocketConnectionStateMachine {
     console.log("WebsocketConnectionStateMachine::onNewLocation(): not implemented");
   }
 
+
+  // NEW! for renegotiation
+
+  onRenegotiatonStarted() {
+    console.log("WebsocketConnectionStateMachine::onRenegotiationStarted(): not implemented");
+  }
+
+  // end of new stuff
 
   private _checkIncomingMessageSequence(msg: any) {
     return true;
@@ -808,6 +826,19 @@ GuidentRmcwStateMachineDefinition: StateMachineDefinition = {
             wssm._resetEngagement();
             wssm.onDisengagement();
             return "registered";
+          }
+        },
+        renegotiateclicked: {
+          action(wssm: any, evtData: any) {
+            console.log("engaged-renegotiateclicked(): Renegotiate button clicked.");
+            wssm._clearCurrentTimer();
+	    if ( wssm._startRenegotiateEngagement(evtData) ) {
+            	wssm.onRenegotiationStarted();
+            	return "engagingwithoffer";
+	    } else {
+	        console.log("engaged-renegotiateerror(): Oops, error starting a renegotiation: <<" + evtData + ">>.");
+		return("engaged");
+	    }
           }
         }
       }

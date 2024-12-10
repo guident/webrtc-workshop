@@ -204,6 +204,20 @@ export class TrickleIceTwoWayVideoEndpoint extends endpoint {
         console.log("TrickleIceTwoWayVideoEndpoint::startEngagement(): Oops!, don;t have a session ID for the remote endpoint <<%d>>.", this.peerConnectionId);
         return(false);
     }
-}
+  }
+
+
+
+  // NEW for renegotiation
+
+  override _startRenegotiateEngagement(audioVideoConfig: number): boolean {
+      return(this.mypcnm.startRenegotiateMediaStreams());
+  }
+
+  override onRenegotiationStarted() {
+	    console.log("Starting renegotiation!!!!!!!");
+  }
+
+
 
 }
