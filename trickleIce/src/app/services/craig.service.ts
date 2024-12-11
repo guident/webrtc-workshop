@@ -56,7 +56,7 @@ export class CraigService {
   }
 
   RenegotiateButtonClick(){
-      this.ep?._startRenegotiateEngagement(0);
+      this.ep?.renegotiate(0);
       console.log("RenegotiateButtonClick");
   }
 

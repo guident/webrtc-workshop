@@ -277,10 +277,12 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
 
 
 
-    async startRenegotiateMediaStreams(audioVideoConfig: number): Promise<boolean> {
+    startRenegotiateMediaStreams(audioVideoConfig: number): boolean {
+
       console.log("HELLLLOOOOO!!!!!!!!!  audioVideoConfig is <<%d>>", audioVideoConfig);
 
       // Initialize new media stream
+      /*
       const newStream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
 
       if (audioVideoConfig == 0) {// Get new media with no audio and 1 video track
@@ -306,6 +308,7 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
         // Send new offer to signaling server
         console.log('Renegotiated Offer:', newOffer);
       }
+      */
 
       return(false);
     }
