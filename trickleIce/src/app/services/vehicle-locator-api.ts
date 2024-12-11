@@ -832,13 +832,13 @@ GuidentRmcwStateMachineDefinition: StateMachineDefinition = {
           action(wssm: any, evtData: any) {
             console.log("engaged-renegotiateclicked(): Renegotiate button clicked.");
             wssm._clearCurrentTimer();
-	    if ( wssm._startRenegotiateEngagement(evtData) ) {
-            	wssm.onRenegotiationStarted();
-            	return "engagingwithoffer";
-	    } else {
-	        console.log("engaged-renegotiateerror(): Oops, error starting a renegotiation: <<" + evtData + ">>.");
-		return("engaged");
-	    }
+            if ( wssm._startRenegotiateEngagement(evtData) ) {
+                    wssm.onRenegotiationStarted();
+                    return "engagingwithoffer";
+            } else {
+                console.log("engaged-renegotiateerror(): Oops, error starting a renegotiation: <<" + evtData + ">>.");
+                return("engaged");
+            }
           }
         }
       }

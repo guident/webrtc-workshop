@@ -281,10 +281,31 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
 
       console.log("HELLLLOOOOO!!!!!!!!!  audioVideoConfig is <<%d>>", audioVideoConfig);
 
-      // Initialize new media stream
-      /*
-      const newStream = await navigator.mediaDevices.getUserMedia({video: true, audio: false});
+      if ( this.webrtcPeerConnection ) {
 
+        this.webrtcPeerConnection.getSenders().forEach( (sender) => { this.webrtcPeerConnection?.removeTrack(sender); } );
+
+        console.log("setting the onnegotiationneeded callback!!");
+        this.webrtcPeerConnection.onnegotiationneeded = (ev) => {
+            try {
+                console.log("On Negotiation needed has been called!!");
+                navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(( newStream ) => { 
+                    console.log("getUserMedia done!!!"); 
+                    newStream.getTracks().forEach( (track) => {
+                        console.log("startRenegotiationMediaStreams()::onnegotiationneeded()::newstreamGetTracks() Adding a track!");
+                        this.webrtcPeerConnection?.addTrack(track, newStream);
+                    });
+                    this.webrtcPeerConnection?.createOffer().then( (offer) => { console.log("offer: <<%s>>", offer.sdp?.toString() ); } );
+                });
+            } catch(err) {
+                console.log("startRenegotiateMediaStreams().onnegotiationneeded(): Oops, an exception was thrown.");
+            }
+        };
+      }
+
+      //
+
+      /*
       if (audioVideoConfig == 0) {// Get new media with no audio and 1 video track
         console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Attempting to renegotiate media streams to video only.");
         const newStream = navigator.mediaDevices.getUserMedia({video: true, audio: false});
@@ -300,7 +321,9 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
           console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Added track to local stream.");
         }); 
       }
+      */
 
+      /*
       // Create new offer for renegotiation
       if (this.webrtcPeerConnection) {
         const newOffer = await this.webrtcPeerConnection.createOffer();
