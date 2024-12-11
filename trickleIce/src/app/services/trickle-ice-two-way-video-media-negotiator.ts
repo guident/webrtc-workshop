@@ -277,7 +277,7 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
 
 
 
-    startRenegotiateMediaStreams(audioVideoConfig: number): boolean {
+    startRenegotiateMediaStreams(audioVideoConfig: number, peerId: string): boolean {
 
       console.log("HELLLLOOOOO!!!!!!!!!  audioVideoConfig is <<%d>>", audioVideoConfig);
 
@@ -295,45 +295,23 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
                         console.log("startRenegotiationMediaStreams()::onnegotiationneeded()::newstreamGetTracks() Adding a track!");
                         this.webrtcPeerConnection?.addTrack(track, newStream);
                     });
-                    this.webrtcPeerConnection?.createOffer().then( (offer) => { console.log("offer: <<%s>>", offer.sdp?.toString() ); } );
+                    this.webrtcPeerConnection?.createOffer().then( (offer) => {
+                      this.webrtcPeerConnection?.setLocalDescription(offer);
+                      console.log("offer: <<%s>>", offer.sdp?.toString() ); 
+                    }).then( () => {
+                      console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams()::onnegotiationneeded(): Sent the offer to the peer: <<%s>>", peerId);
+                      this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId, GuidentMsgEventType.UNKNOWN, null, this.webrtcPeerConfiguration.iceServers, this.webrtcPeerConnection?.localDescription);
+                    } );
                 });
+                return true;
             } catch(err) {
                 console.log("startRenegotiateMediaStreams().onnegotiationneeded(): Oops, an exception was thrown.");
+                return false;
             }
         };
       }
 
-      //
-
-      /*
-      if (audioVideoConfig == 0) {// Get new media with no audio and 1 video track
-        console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Attempting to renegotiate media streams to video only.");
-        const newStream = navigator.mediaDevices.getUserMedia({video: true, audio: false});
-        (await newStream).getTracks().forEach(async track => {
-          (await newStream!).addTrack(track);
-          console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Added track to local stream.");
-        }); 
-      } else if (audioVideoConfig == 1) { // Get new media with audio and video tracks
-        console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Attempting to renegotiate media streams to audio and video.");
-        const newStream = navigator.mediaDevices.getUserMedia({video: true, audio: true});
-        (await newStream).getTracks().forEach(async track => {
-          (await newStream!).addTrack(track);
-          console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams(): Added track to local stream.");
-        }); 
-      }
-      */
-
-      /*
-      // Create new offer for renegotiation
-      if (this.webrtcPeerConnection) {
-        const newOffer = await this.webrtcPeerConnection.createOffer();
-        await this.webrtcPeerConnection.setLocalDescription(newOffer);
-        // Send new offer to signaling server
-        console.log('Renegotiated Offer:', newOffer);
-      }
-      */
-
-      return(false);
+      return(true);
     }
 
 

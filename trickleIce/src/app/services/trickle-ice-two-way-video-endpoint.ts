@@ -212,7 +212,7 @@ export class TrickleIceTwoWayVideoEndpoint extends endpoint {
 
   override _startRenegotiateEngagement(audioVideoConfig: number): boolean {
     console.log("TrickleIceTwoWayVideoEndpoint::_startRenegotiateEngagement(): OK!.");
-    return(this.mypcnm.startRenegotiateMediaStreams(audioVideoConfig));
+    return(this.mypcnm.startRenegotiateMediaStreams(audioVideoConfig, this.peerConnectionId));
   }
 
   override onRenegotiationStarted() {

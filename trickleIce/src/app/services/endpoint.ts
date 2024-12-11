@@ -73,6 +73,7 @@ export class endpoint extends GuidentLogger{
     // this.myep.startPeerEngagementOffer = this.mypcnm.startPeerEngagementOffer.bind(this.mypcnm);
     this.myep.startPeerEngagementOffer = this.startPeerEngagementOffer.bind(this);
     this.myep._startRenegotiateEngagement = this._startRenegotiateEngagement.bind(this);
+    this.myep.onRenegotiationStarted = this.onRenegotiationStarted.bind(this);
     this.myep.processPeerEngagementAnswer = this.mypcnm.processPeerEngagementAnswer.bind(this.mypcnm);
     this.myep._resetEngagement = this.mypcnm._resetEngagement.bind(this.mypcnm);
     this.myep._sendDisengagement = this.mypcnm._sendDisengagement.bind(this.myep)
