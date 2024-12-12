@@ -449,10 +449,6 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             const gchar *endpoint_type = json_object_get_string_member(root_obj, "endpointType");
             const gchar *event_type = json_object_get_string_member(root_obj, "eventType");
             
-
-            // printf("msg.EndpointType: <<%s>>\n", endpoint_type);
-
-            // if ( message_type == GuidentMessageTypes::NOTIFY && event_type == GuidentMsgEventTypes::CONNECTED ) {
             if ( strcmp(message_type, GuidentMessageTypes::NOTIFY) == 0 && strcmp(event_type, GuidentMsgEventTypes::CONNECTED) == 0 ) {
                 printf("WssStateMachine::onWebsocketMessage(): Connected to server!\n");
                 self->myConnectionId = std::string(json_object_get_string_member(root_obj, "connectionId"));
@@ -481,20 +477,24 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             }
 
 
-            JsonObject *sessiondescription_obj = json_object_get_object_member(root_obj, "sessiondescription");
-            if (sessiondescription_obj) {
-                if (json_object_has_member(sessiondescription_obj, "sdp")) {
-                    const gchar *sdp = json_object_get_string_member(sessiondescription_obj, "sdp");
-                    self->engagementOfferSdp = std::string(sdp);
-                    printf("WssStateMachine::onWebsocketMessage(): Got SDP, contents: <<%s>>. Going to construct the pipeline.\n", self->engagementOfferSdp.substr(0, 20).c_str());
-		            PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId.c_str());
-                    PcmAnswererHub::Instance()->getState()->onOfferReceived();
+            if ( strcmp(message_type, GuidentMessageTypes::ENGAGE_OFFER) == 0 ) {
+
+            	JsonObject *sessiondescription_obj = json_object_get_object_member(root_obj, "sessiondescription");
+            	if (sessiondescription_obj) {
+                    if (json_object_has_member(sessiondescription_obj, "sdp")) {
+                    	const gchar *sdp = json_object_get_string_member(sessiondescription_obj, "sdp");
+                    	self->engagementOfferSdp = std::string(sdp);
+                    	printf("WssStateMachine::onWebsocketMessage(): Got an ENGAGE-OFFER message with SDP, contents: <<%s>>.\n", self->engagementOfferSdp.substr(0, 20).c_str());
+		        PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId.c_str());
+                    	PcmAnswererHub::Instance()->getState()->onOfferReceived();
+                    } else {
+                        printf("WssStateMachine::onWebsocketMessage(): SDP field not found in session description.\n");
+                    }
                 } else {
-                    printf("WssStateMachine::onWebsocketMessage(): SDP field not found in session description.\n");
+                    printf("WssStateMachine::onWebsocketMessage(): sessiondescription object not found.\n");
                 }
-            } else {
-                printf("WssStateMachine::onWebsocketMessage(): sessiondescription object not found.\n");
-            }
+	    }
+
 
             /* Catch disengagement to return to the advertisement screen */
             printf("Current State: <<%s>>\tNext State: <<%s>>\n", PcmAnswererHub::Instance()->getState()->getStateName(), message_type);
@@ -1393,7 +1393,6 @@ void WssStateMachine::constructWebRtcPipeline() {
     #define RTP_CAPS_VP8 "application/x-rtp,media=video,encoding-name=VP8,payload="
     #define RTP_CAPS_H264 "application/x-rtp,media=video,encoding-name=H264,payload="
     
-
     printf("mike made this!\n");
 
     /* h264 Software Encoder (openh264) */
@@ -1437,9 +1436,9 @@ void WssStateMachine::constructWebRtcPipeline() {
     g_signal_connect(webrtcElement, "notify::ice-gathering-state", G_CALLBACK(WssStateMachine::onIceGatheringStateNotifyStatic), this);
     g_signal_connect(webrtcElement, "on-new-transceiver", G_CALLBACK(WssStateMachine::onNewTransceiverStatic), this);
     g_signal_connect(webrtcElement, "pad-added", G_CALLBACK(WssStateMachine::onIncomingStreamStatic), this);
+    g_signal_connect(webrtcElement, "pad-removed", G_CALLBACK(WssStateMachine::onRemoveStreamStatic), this);
 
     // attach other callbacks
-
 
     GstBus *pipelineBus = gst_pipeline_get_bus(GST_PIPELINE(pipelineBinElement));
     gst_bus_enable_sync_message_emission(pipelineBus);
@@ -1448,7 +1447,6 @@ void WssStateMachine::constructWebRtcPipeline() {
     g_signal_connect(pipelineBus, "sync-message::stream-status", G_CALLBACK(WssStateMachine::onStreamStatusMessageStatic), this);
     g_signal_connect(pipelineBus, "message::error", G_CALLBACK(WssStateMachine::onErrorMessageStatic), this);
     g_signal_connect(pipelineBus, "message::eos", G_CALLBACK(WssStateMachine::onEndOfStreamMessageStatic), this);
-
 
     // Set pipeline to PLAYING state
     ret = gst_element_set_state(pipelineBinElement, GST_STATE_PLAYING);

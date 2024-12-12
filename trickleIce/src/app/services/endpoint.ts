@@ -72,6 +72,8 @@ export class endpoint extends GuidentLogger{
     //this.myep.notifyNetworkService = this.notifyNetworkService.bind(this);
     // this.myep.startPeerEngagementOffer = this.mypcnm.startPeerEngagementOffer.bind(this.mypcnm);
     this.myep.startPeerEngagementOffer = this.startPeerEngagementOffer.bind(this);
+    this.myep._startRenegotiateEngagement = this._startRenegotiateEngagement.bind(this);
+    this.myep.onRenegotiationStarted = this.onRenegotiationStarted.bind(this);
     this.myep.processPeerEngagementAnswer = this.mypcnm.processPeerEngagementAnswer.bind(this.mypcnm);
     this.myep._resetEngagement = this.mypcnm._resetEngagement.bind(this.mypcnm);
     this.myep._sendDisengagement = this.mypcnm._sendDisengagement.bind(this.myep)
@@ -109,6 +111,8 @@ export class endpoint extends GuidentLogger{
   getLocalMediaStream(): void {
     this.logDebug("getLocalMediaStream(): not implemented.");
   }
+
+
 
   onConnecting() {
       this.logDebug("onConnecting(): not implemented.");
@@ -194,7 +198,7 @@ export class endpoint extends GuidentLogger{
   }
 
   _resetEngagement() {
-      this.logDebug("_resetEngagement(): not implemented.");
+  this.logDebug("_resetEngagement(): not implemented.");
   }
 
   _sendDisengagement(){
@@ -204,5 +208,29 @@ export class endpoint extends GuidentLogger{
   getKillMeOffNotifier(){
     return this.killMeOffEmitter.asObservable();
   }
+
+
+  // NEW! this stuff is for renegotiating a peerconnection
+
+
+  // public
+  renegotiate(audioVideoConfig: number): void {
+      this.myep.renegotiate(audioVideoConfig);
+      return;
+  }
+
+
+  // private:
+  _startRenegotiateEngagement(audioVideoConfig: number) : boolean {
+      this.logDebug("_startRenegotiateEngagement(): not implemented.");
+      return(false);
+  }
+
+
+  // callback
+  onRenegotiationStarted() {
+      this.logDebug("onRenegotiationStarted(): not implemented.");
+  }
+
 
 }

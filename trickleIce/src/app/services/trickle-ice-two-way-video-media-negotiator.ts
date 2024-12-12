@@ -275,4 +275,44 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
       }
     }
 
+
+
+    startRenegotiateMediaStreams(audioVideoConfig: number, peerId: string): boolean {
+
+      console.log("HELLLLOOOOO!!!!!!!!!  audioVideoConfig is <<%d>>", audioVideoConfig);
+
+      if ( this.webrtcPeerConnection ) {
+
+        this.webrtcPeerConnection.getSenders().forEach( (sender) => { this.webrtcPeerConnection?.removeTrack(sender); } );
+
+        console.log("setting the onnegotiationneeded callback!!");
+        this.webrtcPeerConnection.onnegotiationneeded = (ev) => {
+            try {
+                console.log("On Negotiation needed has been called!!");
+                navigator.mediaDevices.getUserMedia({video: true, audio: true}).then(( newStream ) => { 
+                    console.log("getUserMedia done!!!"); 
+                    newStream.getTracks().forEach( (track) => {
+                        console.log("startRenegotiationMediaStreams()::onnegotiationneeded()::newstreamGetTracks() Adding a track!");
+                        this.webrtcPeerConnection?.addTrack(track, newStream);
+                    });
+                    this.webrtcPeerConnection?.createOffer().then( (offer) => {
+                      this.webrtcPeerConnection?.setLocalDescription(offer);
+                      console.log("offer: <<%s>>", offer.sdp?.toString() ); 
+                    }).then( () => {
+                      console.log("GuidentTwvPeerConnectionMediaNegotiator::startRenegotiateMediaStreams()::onnegotiationneeded(): Sent the offer to the peer: <<%s>>", peerId);
+                      this._sendMessage(GuidentMessageType.ENGAGE_OFFER, peerId, GuidentMsgEventType.UNKNOWN, null, this.webrtcPeerConfiguration.iceServers, this.webrtcPeerConnection?.localDescription);
+                    } );
+                });
+                return true;
+            } catch(err) {
+                console.log("startRenegotiateMediaStreams().onnegotiationneeded(): Oops, an exception was thrown.");
+                return false;
+            }
+        };
+      }
+
+      return(true);
+    }
+
+
 }
