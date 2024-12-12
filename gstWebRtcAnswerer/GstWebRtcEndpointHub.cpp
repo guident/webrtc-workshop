@@ -653,7 +653,18 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
 #define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload=111"
 #define RTP_CAPS_VP9 "application/x-rtp,media=video,encoding-name=VP9,payload=98"
+#define RTP_CAPS_H264 "application/x-rtp,media=video,encoding-name=H264,payload=104"
 #define CAMERA_SERIAL_NUMBER "11120627"
+
+
+	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
+                "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
+                "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
+		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
+		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
+		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
+		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
+		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
 
 
 	/*
@@ -663,10 +674,12 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
-		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
-		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
+		" nvv4l2h264enc name=encoder iframeinterval=150 profile=0 ! video/x-h264,width=(int)1920,height=(int)1080,profile=baseline ! rtph264pay mtu=1300 pt=104 name=h264payloader ! "
+		" " RTP_CAPS_H264 " ! webrtcElement. ", &error);
 	*/
 
+
+	/*
 	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
                 "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
                 "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
@@ -674,6 +687,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! tee name=mike ! "
 		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
 		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
+	*/
 
 
 	// tommie's pipeline # 1
@@ -708,7 +722,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
         	"videotee. ! queue ! videoconvert ! autovideosink ",
         	&error);
-		*/
+	*/
 
 
 
@@ -759,8 +773,13 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 			GstCaps * caps;
 			//caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=VP9,clock-rate=90000");
 			caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=VP9,payload=98,clock-rate=90000");
+			//caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=H264,payload=104,clock-rate=90000,packetization-mode=(string)0,profile-level-id=(string)42001f");
 			trans->codec_preferences = gst_caps_ref(caps);
 			gst_caps_unref(caps);
+			//g_object_set(trans, "fec-type", GST_WEBRTC_FEC_TYPE_ULP_RED, "fec-percentage", 10, "do-nack", FALSE, NULL);
+			//g_object_set(trans, "do-nack", FALSE, NULL);
+			//trans->do_nack = FALSE;
+			//trans->fec_type = GST_WEBRTC_FEC_TYPE_ULP_RED;
 		} else if ( trans->mline == 0 ) {
 			GstCaps * caps;
 			caps = gst_caps_from_string ("application/x-rtp,media=audio,payload=111,clock-rate=48000,encoding-name=OPUS,encoding-params=(string)2,minptime=(string)10,useinbandfec=(string)1,rtcp-fb-transport-cc=true");
@@ -778,8 +797,6 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
         /* Lifetime is the same as the pipeline itself */
         gst_object_unref (webrtcElement);
-
-
 
 
 	// bus messages
