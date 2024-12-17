@@ -106,7 +106,7 @@ void WssConnectionProcessor::processIncomingMessage(std::string id, std::string 
 			return;
 		}
 		
-		LOG_DEBUG << "WssConnectionProcessor::processIncomingMessage(): Sending message from <<" << id << ">> to <<" << iter->first << ">>.";
+		LOG_DEBUG << "WssConnectionProcessor::processIncomingMessage(): Sending message from <<" << id << ">> to <<" << iter->first << ">>. Msg start: <<"  << msg.substr(0, 20) << ">>";
 		iter->second->send(msg);
 
 	} catch(...) {
