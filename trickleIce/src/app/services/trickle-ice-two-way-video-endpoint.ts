@@ -92,7 +92,8 @@ export class TrickleIceTwoWayVideoEndpoint extends endpoint {
            var rtccInfo = { sdpMLineIndex: msg.eventData["m-line-index"], candidate: msg.eventData["ice-candidate"] }
            var rtcc = new RTCIceCandidate(rtccInfo);
            GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNotification(): GOT AN ICE CANDIDATE!! <<%d>> <%s>>.", rtcc.sdpMLineIndex, rtcc.candidate);
-        } catch(err) {
+            this.mypcnm.webrtcPeerConnection.addIceCandidate(rtcc).then( (data: any) =>  { console.log("onAddIceCandidateSuccess! Adding ICE Candidate was successful!");  });
+          } catch(err) {
            GuidentLogger.logDebug("TrickleIceTwoWayVideoEndpoint","::onNotification(): Oops!!!!");
         }
     }
@@ -203,6 +204,21 @@ export class TrickleIceTwoWayVideoEndpoint extends endpoint {
         console.log("TrickleIceTwoWayVideoEndpoint::startEngagement(): Oops!, don;t have a session ID for the remote endpoint <<%d>>.", this.peerConnectionId);
         return(false);
     }
-}
+  }
+
+
+
+  // NEW for renegotiation
+
+  override _startRenegotiateEngagement(audioVideoConfig: number): boolean {
+    console.log("TrickleIceTwoWayVideoEndpoint::_startRenegotiateEngagement(): OK!.");
+    return(this.mypcnm.startRenegotiateMediaStreams(audioVideoConfig, this.peerConnectionId));
+  }
+
+  override onRenegotiationStarted() {
+	    console.log("Starting renegotiation!!!!!!!");
+  }
+
+
 
 }

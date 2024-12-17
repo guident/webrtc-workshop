@@ -38,5 +38,10 @@ export class AppComponent {
     this.craigService.EngageButtonClick();
     // this.engage(this.peerConnectionId);
   }
+  
+  onClickRenegotiateButton() {
+    this.craigService.RenegotiateButtonClick();
+    // this.engage(this.peerConnectionId);
+  }
 
 }

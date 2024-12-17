@@ -15,6 +15,7 @@
 #include <iostream>
 #include <string>
 
+
 WssStateMachine * WssStateMachine::__instance = NULL;
 
 WssStateMachine::WssStateMachine(): 
@@ -439,43 +440,61 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
             JsonObject *root_obj = json_node_get_object(root);
 
             // Access specific attributes
-            self->myConnectionId = json_object_get_string_member(root_obj, "connectionId"); // AA: 
-            self->peerConnectionId = json_object_get_string_member(root_obj, "peerConnectionId");
+													     
+
+	    if ( json_object_get_string_member(root_obj, "peerConnectionId") != NULL ) {
+            	self->peerConnectionId = std::string(json_object_get_string_member(root_obj, "peerConnectionId"));
+	    }
             const gchar *message_type = json_object_get_string_member(root_obj, "messageType");
             const gchar *endpoint_type = json_object_get_string_member(root_obj, "endpointType");
             const gchar *event_type = json_object_get_string_member(root_obj, "eventType");
             
-
-            // printf("msg.EndpointType: <<%s>>\n", endpoint_type);
-
-            // if ( message_type == GuidentMessageTypes::NOTIFY && event_type == GuidentMsgEventTypes::CONNECTED ) {
             if ( strcmp(message_type, GuidentMessageTypes::NOTIFY) == 0 && strcmp(event_type, GuidentMsgEventTypes::CONNECTED) == 0 ) {
                 printf("WssStateMachine::onWebsocketMessage(): Connected to server!\n");
-                self->myConnectionId = json_object_get_string_member(root_obj, "connectionId");
-		PcmAnswererHub::Instance()->setEngagementConnectionId("");
+                self->myConnectionId = std::string(json_object_get_string_member(root_obj, "connectionId"));
+		        PcmAnswererHub::Instance()->setEngagementConnectionId("");
                 self->sendWssMessage(GuidentMessageTypes::REGISTER);
             }
 
             if ( strcmp(message_type, GuidentMessageTypes::NOTIFY) == 0 && strcmp(event_type, GuidentMsgEventTypes::ICE_CANDIDATE) == 0 ) {
-		const char * candidate = json_object_get_string_member(root_obj, "eventData");
-                printf("WssStateMachine::onWebsocketMessage(): Got an ICE CANDIDATE!!! <<%s>> <<%s>>\n", candidate, data);
-            }
+                const char *eventData = json_object_get_string_member(root_obj, "eventData");
+                printf("WssStateMachine::onWebsocketMessage(): Got an ICE CANDIDATE!!! <<%s>>\n", eventData);
 
+                // Since eventData is a plain string, we don't need to parse it as JSON
+                const char* candidateStr = eventData;
 
-            JsonObject *sessiondescription_obj = json_object_get_object_member(root_obj, "sessiondescription");
-            if (sessiondescription_obj) {
-                if (json_object_has_member(sessiondescription_obj, "sdp")) {
-                    const gchar *sdp = json_object_get_string_member(sessiondescription_obj, "sdp");
-                    self->engagementOfferSdp = std::string(sdp);
-                    printf("WssStateMachine::onWebsocketMessage(): Got SDP, contents: <<%s>>. Going to construct the pipeline.\n", self->engagementOfferSdp.substr(0, 20).c_str());
-		    PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId);
-                    PcmAnswererHub::Instance()->getState()->onOfferReceived();
+                // Assuming m-line-index is known or always 0
+                guint sdpMLineIndex = 0; // Update this if you have the correct index
+
+                // Add the ICE candidate to webrtcbin
+                if (self->webrtcElement != NULL) {
+                    printf("WssStateMachine::onWebsocketMessage(): Adding ICE candidate to webrtcbin.\n");
+                    g_signal_emit_by_name(self->webrtcElement, "add-ice-candidate", sdpMLineIndex, candidateStr);
+                    printf("WssStateMachine::onWebsocketMessage(): Succesfully Added an ICE candidate to webrtcbin.\n");
                 } else {
-                    printf("WssStateMachine::onWebsocketMessage(): SDP field not found in session description.\n");
+                    printf("WssStateMachine::onWebsocketMessage(): webrtcElement is NULL, cannot add ICE candidate.\n");
                 }
-            } else {
-                printf("WssStateMachine::onWebsocketMessage(): sessiondescription object not found.\n");
             }
+
+
+            if ( strcmp(message_type, GuidentMessageTypes::ENGAGE_OFFER) == 0 ) {
+
+            	JsonObject *sessiondescription_obj = json_object_get_object_member(root_obj, "sessiondescription");
+            	if (sessiondescription_obj) {
+                    if (json_object_has_member(sessiondescription_obj, "sdp")) {
+                    	const gchar *sdp = json_object_get_string_member(sessiondescription_obj, "sdp");
+                    	self->engagementOfferSdp = std::string(sdp);
+                    	printf("WssStateMachine::onWebsocketMessage(): Got an ENGAGE-OFFER message with SDP, contents: <<%s>>.\n", self->engagementOfferSdp.substr(0, 20).c_str());
+		        PcmAnswererHub::Instance()->setEngagementConnectionId(self->peerConnectionId.c_str());
+                    	PcmAnswererHub::Instance()->getState()->onOfferReceived();
+                    } else {
+                        printf("WssStateMachine::onWebsocketMessage(): SDP field not found in session description.\n");
+                    }
+                } else {
+                    printf("WssStateMachine::onWebsocketMessage(): sessiondescription object not found.\n");
+                }
+	    }
+
 
             /* Catch disengagement to return to the advertisement screen */
             printf("Current State: <<%s>>\tNext State: <<%s>>\n", PcmAnswererHub::Instance()->getState()->getStateName(), message_type);
@@ -499,6 +518,40 @@ void WssStateMachine::onWebsocketMessage(SoupWebsocketConnection *conn, SoupWebs
     }
 
 }
+
+// // Method to handle incoming ICE candidates
+// void onIceCandidateReceived(const char * eventData) {
+//      console.log("WssStateMachine::onIceCandidateReceived(): Adding Ice Candidate\n");
+//   try {
+//     // Parse the ICE candidate data
+//     const candidateData = JSON.parse(eventData);
+
+//     // Create an RTCIceCandidate object
+//     const iceCandidate = new RTCIceCandidate({
+//       candidate: candidateData.candidate,
+//       sdpMid: candidateData.sdpMid,
+//       sdpMLineIndex: candidateData.sdpMLineIndex,
+//     });
+
+//     // Check if remote description is set
+//     if (this.peerConnection.remoteDescription) {
+//       // Add the candidate immediately
+//       this.peerConnection.addIceCandidate(iceCandidate)
+//         .then(() => {
+//           console.log('ICE candidate successfully added.');
+//         })
+//         .catch(error => {
+//           console.error('Error adding ICE candidate:', error);
+//         });
+//     } else {
+//       // Queue the candidate to add later
+//       this.iceCandidateQueue.push(iceCandidate);
+//     }
+//   } catch (error) {
+//     console.error('Error parsing ICE candidate data:', error);
+//   }
+// }
+
 
 
 
@@ -530,7 +583,7 @@ void WssStateMachine::sendWssMessage(const std::string &messageType, const std::
     json_builder_add_string_value(builder, messageType.c_str());
 
     json_builder_set_member_name(builder, "connectionId");
-    json_builder_add_string_value(builder, myConnectionId);
+    json_builder_add_string_value(builder, myConnectionId.c_str());
 
     if (!destinationId.empty()) {
         json_builder_set_member_name(builder, "peerConnectionId");
@@ -639,10 +692,12 @@ void WssStateMachine::sendWssIceCandidateMessage(guint mLineIndex, const gchar *
     json_builder_add_string_value(builder, "notify");
 
     json_builder_set_member_name(builder, "connectionId");
-    json_builder_add_string_value(builder, myConnectionId);
+    json_builder_add_string_value(builder, myConnectionId.c_str());
 
     json_builder_set_member_name(builder, "peerConnectionId");
     json_builder_add_string_value(builder, engagedId.c_str());
+
+    printf("MIKEMADETHIS... THESE ARE THE DAMN CONNECTION IDS: <<%s>>, peer: <<%s>>\n", myConnectionId, engagedId.c_str());
 
     if (myEndpointId) {
         json_builder_set_member_name(builder, "endpointId");
@@ -1032,13 +1087,16 @@ const char * WssStateMachine::createCompleteAnswerMessage(const char* sdp) {
     json_builder_add_string_value(builder, GuidentMsgEventTypes::UNKNOWN);
 
     json_builder_set_member_name(builder, "connectionId");
-    json_builder_add_string_value(builder, myConnectionId);
+    json_builder_add_string_value(builder, myConnectionId.c_str());
 
     json_builder_set_member_name(builder, "EndpointId");
     json_builder_add_string_value(builder, myEndpointId); 
     
+    std::string engagedId = PcmAnswererHub::Instance()->getEngagementConnectionId();
+
     json_builder_set_member_name(builder, "peerConnectionId");
-    json_builder_add_string_value(builder, peerConnectionId);
+    //json_builder_add_string_value(builder, peerConnectionId.c_str());
+    json_builder_add_string_value(builder, engagedId.c_str());
 
     json_builder_set_member_name(builder, "status");
     json_builder_add_string_value(builder, GuidentMsgStatusTypes::UNKNOWN);
@@ -1335,7 +1393,6 @@ void WssStateMachine::constructWebRtcPipeline() {
     #define RTP_CAPS_VP8 "application/x-rtp,media=video,encoding-name=VP8,payload="
     #define RTP_CAPS_H264 "application/x-rtp,media=video,encoding-name=H264,payload="
     
-
     printf("mike made this!\n");
 
     /* h264 Software Encoder (openh264) */
@@ -1379,9 +1436,9 @@ void WssStateMachine::constructWebRtcPipeline() {
     g_signal_connect(webrtcElement, "notify::ice-gathering-state", G_CALLBACK(WssStateMachine::onIceGatheringStateNotifyStatic), this);
     g_signal_connect(webrtcElement, "on-new-transceiver", G_CALLBACK(WssStateMachine::onNewTransceiverStatic), this);
     g_signal_connect(webrtcElement, "pad-added", G_CALLBACK(WssStateMachine::onIncomingStreamStatic), this);
+    g_signal_connect(webrtcElement, "pad-removed", G_CALLBACK(WssStateMachine::onRemoveStreamStatic), this);
 
     // attach other callbacks
-
 
     GstBus *pipelineBus = gst_pipeline_get_bus(GST_PIPELINE(pipelineBinElement));
     gst_bus_enable_sync_message_emission(pipelineBus);
@@ -1390,7 +1447,6 @@ void WssStateMachine::constructWebRtcPipeline() {
     g_signal_connect(pipelineBus, "sync-message::stream-status", G_CALLBACK(WssStateMachine::onStreamStatusMessageStatic), this);
     g_signal_connect(pipelineBus, "message::error", G_CALLBACK(WssStateMachine::onErrorMessageStatic), this);
     g_signal_connect(pipelineBus, "message::eos", G_CALLBACK(WssStateMachine::onEndOfStreamMessageStatic), this);
-
 
     // Set pipeline to PLAYING state
     ret = gst_element_set_state(pipelineBinElement, GST_STATE_PLAYING);

@@ -55,7 +55,10 @@ export class CraigService {
     }
   }
 
-
+  RenegotiateButtonClick(){
+      this.ep?.renegotiate(0);
+      console.log("RenegotiateButtonClick");
+  }
 
   
   startWebSocketConnectionEndpoint(): void {
