@@ -283,7 +283,7 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
 
       if ( this.webrtcPeerConnection ) {
 
-        this.webrtcPeerConnection.getSenders().forEach( (sender) => { this.webrtcPeerConnection?.removeTrack(sender); } );
+        //this.webrtcPeerConnection.getSenders().forEach( (sender) => { this.webrtcPeerConnection?.removeTrack(sender); } );
 
         console.log("setting the onnegotiationneeded callback!!");
         this.webrtcPeerConnection.onnegotiationneeded = (ev) => {
@@ -309,6 +309,10 @@ export class TrickeIceTwoWayVideoMediaNegotiator extends GPeerConnectionMediaNeg
                 return false;
             }
         };
+      
+
+        this.webrtcPeerConnection.getSenders().forEach( (sender) => { this.webrtcPeerConnection?.removeTrack(sender); } );
+
       }
 
       return(true);

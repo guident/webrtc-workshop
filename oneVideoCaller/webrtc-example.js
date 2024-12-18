@@ -1,5 +1,5 @@
 // ====================================================WebSocket_Connection=======================================================================================
-var websocketConnection = new WebSocket("wss://guident.bluepepper.us:8848");
+var websocketConnection = new WebSocket("wss://guident.bluepepper.us:8850");
 websocketConnection.onopen = function(evt) {
   console.log("CallerWebRTC::_onWssConnectionOpen(): CONNECTED!");
 }
@@ -79,6 +79,7 @@ function onStartPressed() {
 
 	// Adding Transceivers for All the Streams
 	localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
+
         pc.addTransceiver("video", { direction: "recvonly" } );
 
 
@@ -148,4 +149,67 @@ function onAnswerReceived(answer) {
 	pc.setRemoteDescription(obj).then(function() {
 		console.log("OK, done!");
 	});
+}
+
+
+
+
+
+
+
+function onRenegotiatePressed() {
+	console.log("Renegotiate pressed!!");
+
+	//pc.onnegotiationneeded = onNegotiationNeeded;
+
+	pc.onnegotiationneeded = (ev) => {
+		try {
+			console.log("got the ONN event!!!!!!!! ");
+			//pc.addTransceiver("video", { "direction": "recvonly" } );
+			//pc.createOffer().then( (offer) => { console.log("renegotiate offer: <<%s>>.", offer.sdp); } ); 
+		} catch(err) {
+			console.log("Oops!!!!");
+		}
+	}
+
+	/*
+	console.log("removing senders");
+
+	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
+
+	debugger;
+
+	pc.getSenders().forEach( (sender) => { 
+		console.log("removing a sending track! <<%s>> <<%s>>", sender.track.kind, sender.track.label);
+		pc.removeTrack(sender);
+		console.log("Done removing a sender track!!");
+	});
+
+	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
+
+
+
+	console.log("getting new user media");
+
+	navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then( (ms) => {
+		ms.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
+	}); 
+
+	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
+	*/
+
+	pc.getTransceivers().forEach( (t) => { 
+		if ( t.mid == "1" ) {
+			t.Direction = "inactive";
+			console.log("changing the direction of the track with mid 1 to be sendrecv.");
+		}
+	});
+
+	console.log("Bye!");
+}
+
+
+function onNegotiationNeeded(ev) {
+
+	console.log("HELLO!!!!!!!");
 }
