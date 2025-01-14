@@ -27,6 +27,9 @@ var remoteAudioStream = null;
 var remoteVideoStream1 = null;
 
 
+var audioIsTurnedOn = false;
+
+
 var remoteControlDataChannel = null;
 
 
@@ -84,7 +87,6 @@ function onStartPressed() {
 
 
 
-
 	// data channel stuff
 	// 
 	/*
@@ -122,11 +124,15 @@ function onStartPressed() {
 		}
 	};
 
+	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
 
 	pc.createOffer().then(function(description) {
 		console.log("onStartPressed(): Offer SDP has been created. Setting it as local descript tio the PC.");
+		pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
 		pc.setLocalDescription(description);
 	})
+
+	audioIsTurnedOn = true;
 
 }
 
@@ -136,6 +142,7 @@ function sendOfferToCallee() {
 	console.log("sendOfferToCallee(): OFFER: <<" + msg + ">>");
 	websocketConnection.send(msg);
 }
+
 
 // onAnswer Recieved from the Callee
 function onAnswerReceived(answer) {
@@ -155,55 +162,86 @@ function onAnswerReceived(answer) {
 
 
 
+function onRestartPressed() {
+	websocketConnection.send("RESTART");
+}
+
+
 
 
 function onRenegotiatePressed() {
-	console.log("Renegotiate pressed!!");
 
-	//pc.onnegotiationneeded = onNegotiationNeeded;
+	console.log("Renegotiate pressed!!");
 
 	pc.onnegotiationneeded = (ev) => {
 		try {
 			console.log("got the ONN event!!!!!!!! ");
 			//pc.addTransceiver("video", { "direction": "recvonly" } );
 			//pc.createOffer().then( (offer) => { console.log("renegotiate offer: <<%s>>.", offer.sdp); } ); 
+			pc.getTransceivers().forEach( (t) => { console.log("GGot a transceiver!!", t); });
 		} catch(err) {
 			console.log("Oops!!!!");
 		}
 	}
 
-	/*
-	console.log("removing senders");
 
 	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
 
-	debugger;
+	//debugger;
 
-	pc.getSenders().forEach( (sender) => { 
-		console.log("removing a sending track! <<%s>> <<%s>>", sender.track.kind, sender.track.label);
-		pc.removeTrack(sender);
-		console.log("Done removing a sender track!!");
-	});
+	if ( audioIsTurnedOn ) {
+		console.log("removing senders");
+		pc.getSenders().forEach( (sender) => { 
+			if ( sender && sender.track && sender.track.kind == "audio" ) {
+				console.log("removing a sending track! <<%s>> <<%s>>", sender.track.kind, sender.track.label);
+				pc.removeTrack(sender);
+				console.log("Done removing a sender track!!");
+			}
+		});
+	}
 
-	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
-
-
-
-	console.log("getting new user media");
-
-	navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then( (ms) => {
-		ms.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
-	}); 
+	console.log("after removing senders");
 
 	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
-	*/
 
 	pc.getTransceivers().forEach( (t) => { 
-		if ( t.mid == "1" ) {
-			t.Direction = "inactive";
-			console.log("changing the direction of the track with mid 1 to be sendrecv.");
+		if ( t.mid == "0" ) {
+			if ( audioIsTurnedOn ) {
+				t.direction = "inactive";
+				console.log("changing the direction of the track with mid 0 to be inactive.");
+			} else {
+				t.direction = "sendrecv";
+				console.log("changing the direction of the track with mid 0 to be sendrecv.");
+				//localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
+			}
+		} else if ( t.mid == "1" ) {
+			t.direction = "recvonly";
 		}
 	});
+
+	audioIsTurnedOn = !audioIsTurnedOn;
+
+	/*
+	pc.ontrack = function(ev) {
+		console.log("onRenegotitatePressed(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> " );
+
+		if ( ev.transceiver.mid == "0" ) {
+			remoteVideoStream1.addTrack(ev.track);
+			pc.addTrack(ev.track, remoteVideoStream1);
+                        console.log("Previous stream id: <<" + remoteVideoStream1.id + ">> " + remoteVideoStream1.getTracks().length);
+                        document.getElementById("videoStream1").srcObject = remoteVideoStream1;
+                } 
+	}
+	*/
+
+
+	pc.createOffer().then(function(description) {
+		console.log("Here is the new offer: <<%s>>.", description.sdp);
+		pc.setLocalDescription(description).then( () => { 
+			console.log("done setting local description!!");
+			sendOfferToCallee();
+		});
+	})
 
 	console.log("Bye!");
 }
