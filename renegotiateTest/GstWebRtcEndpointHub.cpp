@@ -19,7 +19,7 @@ GstWebRtcEndpointHub * GstWebRtcEndpointHub::__instance = NULL;
 
 
 GstWebRtcEndpointHub::GstWebRtcEndpointHub() : __state(new GstEndpointStartState()), mainLoop(NULL), websocketConnection(NULL), preconnectSession(NULL), lastPongReceived(0L), connectionAttemptStartedAt(0L), 
-			timerId(0), clockSecondsTicked(0LL), deadlineTimerTicks(0LL), __initialized(false), pipelineBinElement(NULL), negotiationDone(false) {
+			timerId(0), clockSecondsTicked(0LL), deadlineTimerTicks(0LL), __initialized(false), pipelineBinElement(NULL), negotiationDone(false), firstAnswerHasBeenSent(false), __audioIsTurnedOn(false) {
 }
 
 
@@ -343,7 +343,6 @@ void GstWebRtcEndpointHub::onNegotiationNeeded(GstElement * webrtc, gpointer off
 
 
 
-
 void GstWebRtcEndpointHub::onOfferSet(GstPromise * promise, gpointer userData) {
 
         Log::Inst().log("GstWebRtcEndpointHub::onOfferSet(): Remote offer has been set.");
@@ -407,18 +406,33 @@ void GstWebRtcEndpointHub::onAnswerCreated (GstPromise * promise, gpointer userD
 
 void GstWebRtcEndpointHub::onAnswerSet(GstPromise * promise, gpointer userData) {
 
-	/*
-	GstWebRTCSessionDescription * answer = (GstWebRTCSessionDescription *)userData;
-
-	char buffer[1000];
-	memset(buffer, 0, 1000);
-	strncpy(buffer, gst_sdp_message_as_text(answer->sdp), 999);
-	*/
 
         Log::Inst().log("GstWebRtcEndpointHub::onAnswerSet(): Answer SDP has been set.");
-        //Log::Inst().log("GstWebRtcEndpointHub::onAnswerSet(): Answer SDP has been set.");
-        //Log::Inst().log("GstWebRtcEndpointHub::onAnswerSet(): Answer SDP has been set. <<%s>>", buffer);
         gst_promise_unref (promise);
+
+	//GstWebRTCSessionDescription * answer = (GstWebRTCSessionDescription *)userData;
+	GstWebRTCSessionDescription * answer = NULL;
+
+	if ( firstAnswerHasBeenSent ) {
+        	Log::Inst().log("GstWebRtcEndpointHub::onAnswerSet(): This is a renegotiation.");
+		
+                g_object_get(this->webrtcElement, "local-description", &answer, NULL);
+
+		char buffer[10000];
+		memset(buffer, 0, 10000);
+
+		if ( answer->sdp == NULL ) {
+			printf("Oops NULL!!!!\n");
+		} else {
+			printf("copying answer into buffer... %lu\n", strlen(gst_sdp_message_as_text(answer->sdp)));
+			strncpy(buffer, gst_sdp_message_as_text(answer->sdp), 9999);
+		}
+
+                sendSdpAnswerThroughWss((const char *)buffer);
+	}
+
+        gst_webrtc_session_description_free (answer);
+
 }
 
 
@@ -486,6 +500,19 @@ void GstWebRtcEndpointHub::onEndOfStreamMessage(GstBus * bus, GstMessage * msg, 
 }
 
 
+void GstWebRtcEndpointHub::onPipelineStateChange(GstBus * bus, GstMessage * msg, gpointer userData) {
+
+	if ( msg->type == GST_MESSAGE_ASYNC_DONE ) {
+		Log::Inst().log("GstWebRtcEndpointHub::onPipelineStateChange(): Got an pipeline ASYNC DONE statechange message.");
+	} else  {
+		Log::Inst().log("GstWebRtcEndpointHub::onPipelineStateChange(): Got some other pipeline statechange message.");
+	}
+
+}
+
+
+
+
 
 
 
@@ -532,6 +559,7 @@ void GstWebRtcEndpointHub::onIceGatheringStateNotify(GstElement * webrtc, GParam
 					memset(sdpAnswerBuffer, 0, 5000);
                                         strncpy(sdpAnswerBuffer, gst_sdp_message_as_text(answer->sdp), 4999);
                                         sendSdpAnswerThroughWss((const char *)sdpAnswerBuffer);
+					firstAnswerHasBeenSent = true;
 
                                         gst_webrtc_session_description_free (answer);
 
@@ -651,107 +679,24 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 #define RTP_CAPS_H264 "application/x-rtp,media=video,encoding-name=H264,payload="
 */
 
-// #define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload=111"
-#define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload=111,clock-rate=48000,encoding-params=(string)2,minptime=(string)10,useinbandfec=(string)1,rtcp-fb-transport-cc=(boolean)true"
+#define RTP_CAPS_OPUS "application/x-rtp,media=audio,encoding-name=OPUS,payload=111"
 #define RTP_CAPS_VP8 "application/x-rtp,media=video,encoding-name=VP8,payload=96"	
 #define RTP_CAPS_VP9 "application/x-rtp,media=video,encoding-name=VP9,payload=98"
 #define RTP_CAPS_H264 "application/x-rtp,media=video,encoding-name=H264,payload=104"
 #define CAMERA_SERIAL_NUMBER "11120627"
 
 
-	// VP8 ANDY Testing
-	// pipelineBinElement = gst_parse_launch(
-    // "webrtcbin bundle-policy=2 name=webrtcElement "
-    // // Audio test source
-    // "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
-    // "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
 
-    // // Camera Source -> Video Encoding -> RTP Payloading
-    // "tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
-    // "video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
-    // "video/x-raw(memory:NVMM),format=(string)I420,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
-    // "nvv4l2vp8enc name=encoder bitrate=1000000 ! rtpvp8pay mtu=1300 pt=96 name=vp8payloader ! "
-    // RTP_CAPS_VP8 " ! webrtcElement. ",
-    // &error);
-    
-
-         // VP9 iframeinterval=150 idrinterval=384
-	// pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
-    //             "audiotestsrc is-live=true wave=red-noise volume=0.1 name=audio_source ! audioconvert ! audioresample ! queue name=audio_queue ! opusenc ! rtpopuspay ! "
-    //             "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
-	// 	"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
-	// 	" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
-	// 	" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
-	// 	" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
-	// 	" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
-
-
-	// Video only vp9
+         // VP9
 	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
+                "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
+                "queue ! capsfilter caps=" RTP_CAPS_OPUS " name=\"capsFilterBeforeWebRtcBin\" ! webrtcElement. "
 		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
 		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
 		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
         
-
-	/*
-	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
-                "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
-                "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
-		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
-		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
-		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
-		" nvv4l2h264enc name=encoder iframeinterval=150 profile=0 ! video/x-h264,width=(int)1920,height=(int)1080,profile=baseline ! rtph264pay mtu=1300 pt=104 name=h264payloader ! "
-		" " RTP_CAPS_H264 " ! webrtcElement. ", &error);
-	*/
-
-
-	/*
-	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
-                "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
-                "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
-		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1080,framerate=30/1\" conversion-element=3 ! "
-		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! tee name=mike ! "
-		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
-		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
-	*/
-
-
-	// tommie's pipeline # 1
-	/*
-	pipelineBinElement =  gst_parse_launch(
-        "webrtcbin bundle-policy=2 name=webrtcElement "
-        "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
-        "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
-
-        "tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1080,framerate=30/1\" conversion-element=3 ! "
-        "queue ! nvvidconv ! video/x-raw(memory:NVMM),format=I420,width=1920,height=1080,framerate=30/1 !"
-        "queue ! nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! "
-        "queue ! rtpvp9pay mtu=1300 pt=98 name = vp9payloader ! "
-        "queue ! " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
-	*/
-
-	// tommie's pipeline # 2
-	/*
-	pipelineBinElement = gst_parse_launch(
-        	"webrtcbin bundle-policy=2 name=webrtcElement "
-        	// Audio processing branch
-        	"audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
-        	"queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
-
-
-        	"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1080,framerate=30/1\" conversion-element=3 ! "
-        	"video/x-raw(memory:NVMM),format=(string)NV12,width=1920,height=1080,framerate=30/1 ! queue ! tee name=videotee ! "
-
-        	// First Branch for video encoding and sending over WebRTC
-        	"queue ! nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
-        	RTP_CAPS_VP9 " ! webrtcElement. "
-
-        	"videotee. ! queue ! videoconvert ! autovideosink ",
-        	&error);
-	*/
-
 
 
 
@@ -765,20 +710,8 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 		return;
 	}
 
-	// GstElement *audio_source = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "audio_source");
-	// if (audio_source) {
-	// 	g_object_set(audio_source, "sync", FALSE, NULL);
-	// 	gst_object_unref(audio_source);
-	// }
-
-	// GstElement *audio_queue = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "audio_queue");
-	// if (audio_queue) {
-	// 	g_object_set(audio_queue, "sync", FALSE, NULL);
-	// 	gst_object_unref(audio_queue);
-	// }
-
-
-	GstElement * webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
+	//GstElement * webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
+	webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
         g_assert_nonnull (webrtcElement);
 
         /* This is the gstwebrtc entry point where we create the offer and so on. It
@@ -810,57 +743,36 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 	int I;
         for ( I = 0; I < transceivers->len; I++ ) {
 		trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, I);
-		if ( trans->mline == 0 ) {
+		if ( trans->mline == 1 ) {
 			GstCaps * caps;
 			
-			// VP8 FEC
-			// caps = gst_caps_from_string(
-			// "application/x-rtp,media=video,encoding-name=VP8,clock-rate=90000;"
-			// "application/x-rtp,media=video,encoding-name=red,clock-rate=90000;"
-			// "application/x-rtp,media=video,encoding-name=ulpfec,clock-rate=90000"
-			// );
-
-			// VP9 FEC
-			// caps = gst_caps_from_string(
-			// "application/x-rtp,media=video,encoding-name=VP9,clock-rate=90000;"
-			// "application/x-rtp,media=video,encoding-name=red,clock-rate=90000;"
-			// "application/x-rtp,media=video,encoding-name=ulpfec,clock-rate=90000");
-
-			caps = gst_caps_from_string("application/x-rtp,media=video,encoding-name=VP9,payload=98,clock-rate=90000,rtcp-fb=(string)nack");
+			/*
+			caps = gst_caps_from_string(
+        "application/x-rtp,media=video,encoding-name=VP8,clock-rate=90000;"
+        "application/x-rtp,media=video,encoding-name=red,clock-rate=90000;"
+        "application/x-rtp,media=video,encoding-name=ulpfec,clock-rate=90000"
+    );
+    			*/
 
 			//caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=VP9,clock-rate=90000");
-			// caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=VP9,payload=98,clock-rate=90000"); // MIKE VP9
+			caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=VP9,payload=98,clock-rate=90000");
 			//caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=H264,payload=104,clock-rate=90000,packetization-mode=(string)0,profile-level-id=(string)42001f");
 			trans->codec_preferences = gst_caps_ref(caps);
 			gst_caps_unref(caps);
-			
-			
-			// g_object_set(trans,
-    		// 		"fec-type", GST_WEBRTC_FEC_TYPE_ULP_RED,
-    		// 		"fec-percentage", 20,
-			// 	     "do-nack", FALSE,  // TRUE causes freeze.
-    		// 		NULL);
-				
-
-			// g_object_set(trans,
-            //                     "fec-type", GST_WEBRTC_FEC_TYPE_ULP_RED,
-            //                     "fec-percentage", 20,
-            //                     NULL);
-
-			// g_object_set(trans,
-			// 	"fec-type", GST_WEBRTC_FEC_TYPE_NONE,
-			// 	"do-nack", TRUE,
-			// 	NULL);
-
+			/*
+			g_object_set(trans,
+    				"fec-type", GST_WEBRTC_FEC_TYPE_ULP_RED,
+    				"fec-percentage", 10,
+    				"do-nack", FALSE,
+    				NULL);
+				*/
 			//g_object_set(trans, "fec-type", GST_WEBRTC_FEC_TYPE_ULP_RED, "fec-percentage", 10, "do-nack", FALSE, NULL);
-			g_object_set(trans, "do-nack", FALSE, NULL);
-			// trans->do_nack = FALSE;
+			//g_object_set(trans, "do-nack", FALSE, NULL);
+			//trans->do_nack = FALSE;
 			//trans->fec_type = GST_WEBRTC_FEC_TYPE_ULP_RED;
-		} else if ( trans->mline == 20 ) {
+		} else if ( trans->mline == 0 ) {
 			GstCaps * caps;
 			caps = gst_caps_from_string ("application/x-rtp,media=audio,payload=111,clock-rate=48000,encoding-name=OPUS,encoding-params=(string)2,minptime=(string)10,useinbandfec=(string)1,rtcp-fb-transport-cc=true");
-	// 		caps = gst_caps_from_string("application/x-rtp,media=audio,encoding-name=OPUS,payload=111,clock-rate=48000,"
-    // "encoding-params=2,minptime=10,useinbandfec=1,rtcp-fb-transport-cc=true");
 			trans->codec_preferences = gst_caps_ref(caps);
 			gst_caps_unref(caps);
 		}
@@ -893,7 +805,8 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 	auto oeosm = [](GstBus * bus, GstMessage * msg,  gpointer ptr){ GstWebRtcEndpointHub::Instance()->onEndOfStreamMessage(bus, msg, ptr); };
         g_signal_connect(pipelineBus, "message::eos", G_CALLBACK((OEOSMTYPE)oeosm), NULL);
 
-
+	auto opsc = [](GstBus * bus, GstMessage * msg,  gpointer ptr){ GstWebRtcEndpointHub::Instance()->onPipelineStateChange(bus, msg, ptr); };
+        g_signal_connect(pipelineBus, "message::state-change", G_CALLBACK((OPSCTYPE)opsc), NULL);
 
 
 	Log::Inst().log("GstWebRtcEndpintHub::constructWebRtcPipeline(): Attempting to set pipeline to \"PLAYING\" state.");
@@ -907,12 +820,164 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 		Log::Inst().log("GstWebRtcEndpointHub::constructWebRtcPipeline(): Error on gst_element_set_state(). Unable to switch pipeline to \"PLAYING\" state. Returning unsuccessful.");
                 return;
         }
-	Log::Inst().log("GstWebRtcEndpointHub::constructWebRtcPipeline(): Pipeline has been set to \"PLAYING\" state.");
+	Log::Inst().log("GstWebRtcEndpointHub::constructWebRtcPipeline(): Pipeline has been set to \"PLAYING\" state. <<%d>>", ret);
+
+
+	__audioIsTurnedOn = true;
 
 	return;
 }
 
 
+
+void GstWebRtcEndpointHub::replaceOfferForRenegotiation() {
+
+	Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Setting up the new offer.");
+
+        GstSDPMessage *sdp = NULL;
+
+        GstSDPResult ret = gst_sdp_message_new (&sdp);
+        g_assert_cmphex (ret, ==, GST_SDP_OK);
+        ret = gst_sdp_message_parse_buffer ((guint8 *) engagementOfferSdp.c_str(), engagementOfferSdp.size(), sdp);
+        g_assert_cmphex (ret, ==, GST_SDP_OK);
+
+	// AA: DELETE
+	gchar *sdp_str = gst_sdp_message_as_text(sdp);
+    	if (sdp_str) {
+        	Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Received SDP offer:\n%s", sdp_str);
+        	g_free(sdp_str);
+    	} else {
+        	Log::Inst().log("GstWebRtcEndpointHub::onNegotiationNeeded(): Failed to convert SDP message to text.");
+    	}
+        
+        GstWebRTCSessionDescription *offer = NULL;
+        GstPromise * promise = NULL;
+
+        offer = gst_webrtc_session_description_new (GST_WEBRTC_SDP_TYPE_OFFER, sdp);
+        g_assert_nonnull (offer);
+
+        Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Setting received offer SDP with promise \"onOfferSet\" for when it's done.");
+
+        /* Set remote description on our pipeline */
+        {
+		auto oos = [](GstPromise * p, gpointer data){ GstWebRtcEndpointHub::Instance()->onOfferSet(p, data); };
+		GstElement * webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
+        	g_assert_nonnull (webrtcElement);
+                promise = gst_promise_new_with_change_func((GstPromiseChangeFunc)oos, webrtcElement, NULL);
+                g_signal_emit_by_name (webrtcElement, "set-remote-description", offer, promise);
+        }
+        gst_webrtc_session_description_free (offer);
+
+        Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Done setting offer.");
+
+	/*
+	gchar * offerSdpCopy = NULL;
+	offerSdpCopy = g_strndup(engagementOfferSdp.c_str(), engagementOfferSdp.size());
+	auto onn = [](GstElement * webrtc, gpointer userData){ GstWebRtcEndpointHub::Instance()->onNegotiationNeeded(webrtc, userData); };
+	GstElement * webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
+        g_assert_nonnull (webrtcElement);
+	g_signal_connect(webrtcElement, "on-negotiation-needed", G_CALLBACK((ONNTYPE)onn), offerSdpCopy);
+	*/
+
+}
+
+
+
+/*
+void GstWebRtcEndpointHub::onNegotiationNeededForRenegotiation(GstElement * webrtc, gpointer offerSdpFreeAfterUse) {
+
+
+}
+*/
+
+
+
+void GstWebRtcEndpointHub::turnOffAudioInWebRtcPipeline() {
+
+	GstStateChangeReturn ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PAUSED);
+	Log::Inst().log("turnOffAudioInWebRtcPipeline(): Pausing the pipeline. <<%d>>", ret);
+
+	Log::Inst().log("turnOffAudioInWebRtcPipeline(): Getting the capsfilter from the pipeline.");
+
+        GstElement * capsFilterElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "capsFilterBeforeWebRtcBin");
+        g_assert(capsFilterElement != NULL);
+
+	Log::Inst().log("turnOffAudioInWebRtcPipeline(): Getting the webrtc element from the pipeline.");
+
+        GstElement * webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
+        g_assert(webrtcElement != NULL);
+
+	gst_element_unlink(capsFilterElement, webrtcElement);
+
+	GstElement * fakesinkElement = gst_element_factory_make("fakesink", "parkTheAudioHere");
+        g_assert(fakesinkElement != NULL);
+
+	gst_bin_add (GST_BIN (pipelineBinElement), fakesinkElement);
+
+	gst_element_link(capsFilterElement, fakesinkElement);
+
+	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_READY);
+	Log::Inst().log("turnOffAudioInWebRtcPipeline(): Readying the pipeline. <<%d>>", ret);
+
+	GArray *transceivers = NULL;
+        GstWebRTCRTPTransceiver *trans = NULL;
+        g_signal_emit_by_name (webrtcElement, "get-transceivers", &transceivers);
+        int I;
+        for ( I = 0; I < transceivers->len; I++ ) {
+                trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, I);
+		Log::Inst().log("turnOffAudioInWebRtcPipeline(): Got a transceiver. %d %d", trans->mline, trans->direction);
+	}
+
+	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PLAYING);
+	Log::Inst().log("turnOffAudioInWebRtcPipeline(): Starting the pipeline. %d", ret);
+
+	__audioIsTurnedOn = false;
+
+}
+
+
+
+void GstWebRtcEndpointHub::turnOnAudioInWebRtcPipeline() {
+
+	GstStateChangeReturn ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PAUSED);
+	Log::Inst().log("turnOnAudioInWebRtcPipeline(): Pausing the pipeline. <<%d>>", ret);
+
+	Log::Inst().log("turnOnAudioInWebRtcPipeline(): Getting the capsfilter from the pipeline.");
+
+        GstElement * capsFilterElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "capsFilterBeforeWebRtcBin");
+        g_assert(capsFilterElement != NULL);
+
+	Log::Inst().log("turnOnAudioInWebRtcPipeline(): Getting the park element from the pipeline.");
+
+        GstElement * fakesinkElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "parkTheAudioHere");
+        g_assert(fakesinkElement != NULL);
+
+	Log::Inst().log("turnOnAudioInWebRtcPipeline(): Getting the webrtc element from the pipeline.");
+
+        GstElement * webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
+        g_assert(webrtcElement != NULL);
+
+	gst_element_unlink(capsFilterElement, fakesinkElement);
+
+	gst_element_link(capsFilterElement, webrtcElement);
+
+	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_READY);
+	Log::Inst().log("turnOnAudioInWebRtcPipeline(): Readying the pipeline. <<%d>>", ret);
+
+	GArray *transceivers = NULL;
+        GstWebRTCRTPTransceiver *trans = NULL;
+        g_signal_emit_by_name (webrtcElement, "get-transceivers", &transceivers);
+        int I;
+        for ( I = 0; I < transceivers->len; I++ ) {
+                trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, I);
+		Log::Inst().log("turnOnAudioInWebRtcPipeline(): Got a transceiver. %d %d", trans->mline, trans->direction);
+	}
+
+	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PLAYING);
+	Log::Inst().log("turnOnAudioInWebRtcPipeline(): Starting the pipeline. %d", ret);
+
+	__audioIsTurnedOn = true;
+}
 
 
 

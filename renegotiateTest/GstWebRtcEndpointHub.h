@@ -34,6 +34,7 @@ typedef void (*ODISTYPE)(GstElement *, GstPad *, GstElement *);
 typedef void (*OSSMTYPE)(GstBus *, GstMessage *, gpointer);
 typedef void (*OEMTYPE)(GstBus *, GstMessage *, gpointer);
 typedef void (*OEOSMTYPE)(GstBus *, GstMessage *, gpointer);
+typedef void (*OPSCTYPE)(GstBus *, GstMessage *, gpointer);
 
 
 
@@ -87,6 +88,7 @@ public:
 	void onStreamStatusMessage(GstBus * bus, GstMessage * msg, gpointer userData);
 	void onErrorMessage(GstBus * bus, GstMessage * msg, gpointer userData);
 	void onEndOfStreamMessage(GstBus * bus, GstMessage * msg, gpointer userData);
+	void onPipelineStateChange(GstBus * bus, GstMessage * msg, gpointer userData);
 
 
 private:
@@ -98,6 +100,11 @@ private:
 	void sendSdpAnswerThroughWss(const char * sdp);
 
 	void constructWebRtcPipeline();
+
+	void replaceOfferForRenegotiation();
+	void turnOffAudioInWebRtcPipeline();
+	void turnOnAudioInWebRtcPipeline();
+
 
 	void startDroppingSomeFrames();
 	void stopDroppingFrames();
@@ -121,8 +128,10 @@ private:
 
 	// webrtc
 	GstElement * pipelineBinElement = NULL;
+	GstElement * webrtcElement = NULL;
 	std::string engagementOfferSdp;
 	bool negotiationDone;
+	bool firstAnswerHasBeenSent;
 
 	time_t lastPongReceived;
 	time_t connectionAttemptStartedAt;
@@ -132,6 +141,8 @@ private:
 	unsigned long long deadlineTimerTicks;
 
 	bool __initialized;
+
+	bool __audioIsTurnedOn;
 };
 
 }
