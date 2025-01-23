@@ -830,7 +830,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
 			//caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=VP9,clock-rate=90000");
 			// caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=VP9,payload=98,clock-rate=90000"); // MIKE VP9
-			//caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=H264,payload=104,clock-rate=90000,packetization-mode=(string)0,profile-level-id=(string)42001f");
+			// caps = gst_caps_from_string ("application/x-rtp,media=video,encoding-name=H264,payload=104,clock-rate=90000,packetization-mode=(string)0,profile-level-id=(string)42001f");
 			trans->codec_preferences = gst_caps_ref(caps);
 			gst_caps_unref(caps);
 			
@@ -853,7 +853,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 			// 	NULL);
 
 			//g_object_set(trans, "fec-type", GST_WEBRTC_FEC_TYPE_ULP_RED, "fec-percentage", 10, "do-nack", FALSE, NULL);
-			g_object_set(trans, "do-nack", FALSE, NULL);
+			g_object_set(trans, "do-nack", TRUE, NULL);
 			// trans->do_nack = FALSE;
 			//trans->fec_type = GST_WEBRTC_FEC_TYPE_ULP_RED;
 		} else if ( trans->mline == 20 ) {

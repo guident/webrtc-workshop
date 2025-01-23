@@ -207,6 +207,8 @@ void GstWebRtcEndpointHub::onWebsocketMessage(SoupWebsocketConnection * conn, So
 			engagementOfferSdp = std::string(offer);
 			Log::Inst().log("GstWebRtcEndpointHub::onWebsocketMessage(): Got a message, starts with: <<%s>>. Looks like an offer, going to construct the pipeline.", engagementOfferSdp.substr(0, 20).c_str());
 			this->__state->onOfferReceived();
+		} else if ( strncmp(offer, "RESTART", 7) == 0 ) {
+			restartPipeline();
 		} else {
 			Log::Inst().log("GstWebRtcEndpointHub::onWebsocketMessage(): Oops, this doesn't look like an SDP OFFER, starts with: <<%s>>.", engagementOfferSdp.substr(0, 20).c_str());
 		}
@@ -733,6 +735,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 	auto ont = [](GstElement * webrtc, GstWebRTCRTPTransceiver * trans, gpointer userData){ GstWebRtcEndpointHub::Instance()->onNewTransceiver(webrtc, trans, userData); };
         g_signal_connect (webrtcElement, "on-new-transceiver",  G_CALLBACK((ONTTYPE)ont), NULL);
 
+
         gst_element_set_state (pipelineBinElement, GST_STATE_READY);
 
 	Log::Inst().log("GstWebRtcEndpointHub::constructWebRtcPipeline(): Gstreamer pipeline constructed and set to READY state and all signals connected to callbacks.");
@@ -892,6 +895,21 @@ void GstWebRtcEndpointHub::onNegotiationNeededForRenegotiation(GstElement * webr
 
 
 
+void GstWebRtcEndpointHub::restartPipeline() {
+
+	GstStateChangeReturn ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PAUSED);
+	Log::Inst().log("restartPipeline(): Pausing the pipeline. <<%d>>", ret);
+
+	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_READY);
+	Log::Inst().log("restartPipeline(): Readying the pipeline. <<%d>>", ret);
+
+	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PLAYING);
+	Log::Inst().log("restartPipeline(): Starting the pipeline. %d", ret);
+
+}
+
+
+
 void GstWebRtcEndpointHub::turnOffAudioInWebRtcPipeline() {
 
 	GstStateChangeReturn ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PAUSED);
@@ -916,8 +934,8 @@ void GstWebRtcEndpointHub::turnOffAudioInWebRtcPipeline() {
 
 	gst_element_link(capsFilterElement, fakesinkElement);
 
-	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_READY);
-	Log::Inst().log("turnOffAudioInWebRtcPipeline(): Readying the pipeline. <<%d>>", ret);
+	//ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_READY);
+	//Log::Inst().log("turnOffAudioInWebRtcPipeline(): Readying the pipeline. <<%d>>", ret);
 
 	GArray *transceivers = NULL;
         GstWebRTCRTPTransceiver *trans = NULL;
@@ -959,10 +977,14 @@ void GstWebRtcEndpointHub::turnOnAudioInWebRtcPipeline() {
 
 	gst_element_unlink(capsFilterElement, fakesinkElement);
 
+	gst_element_set_state (fakesinkElement, GST_STATE_NULL);
+	gst_bin_remove (GST_BIN (pipelineBinElement), fakesinkElement);
+	g_object_unref(fakesinkElement);
+
 	gst_element_link(capsFilterElement, webrtcElement);
 
-	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_READY);
-	Log::Inst().log("turnOnAudioInWebRtcPipeline(): Readying the pipeline. <<%d>>", ret);
+	//ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_READY);
+	//Log::Inst().log("turnOnAudioInWebRtcPipeline(): Readying the pipeline. <<%d>>", ret);
 
 	GArray *transceivers = NULL;
         GstWebRTCRTPTransceiver *trans = NULL;

@@ -59,7 +59,7 @@ void GstEndpointEngagedState::onOfferReceived() {
 	}
 
 
-	//GstWebRtcEndpointHub::Instance()->replaceOfferForRenegotiation();
+	GstWebRtcEndpointHub::Instance()->replaceOfferForRenegotiation();
 
 }
 

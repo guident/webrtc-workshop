@@ -110,6 +110,8 @@ private:
 	void stopDroppingFrames();
 	void forceIdrFrame();
 
+	void restartPipeline();
+
 	void setTimer(unsigned long seconds);
 	void clearTimer();
 
