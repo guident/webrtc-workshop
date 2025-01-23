@@ -52,7 +52,7 @@ function onStartPressed() {
 
 	// onTrack - One-to-One connection between the Caller and Callee
 	pc.ontrack = function(ev) {
-		console.log("onStartPressed(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> " );
+		console.log("onStartPressed()::onTrack(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> " );
 		//console.log("onStartPressed(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> Streams length: <<" + ev.streams.length + ">> Stream Id: <<" + ev.streams[0].id + ">> #Tracks in stream: <<" + ev.streams[0].getTracks().length + ">>" );
 
 		//remoteAudioStream::1
@@ -62,7 +62,7 @@ function onStartPressed() {
                         	console.log("New stream id: <<" + remoteVideoStream1.id + ">> " + remoteVideoStream1.getTracks().length);
 			} else {
 				remoteVideoStream1.addTrack(ev.track);
-				pc.addTrack(ev.track, remoteVideoStream1);
+				//pc.addTrack(ev.track, remoteVideoStream1);
                         	console.log("Previous stream id: <<" + remoteVideoStream1.id + ">> " + remoteVideoStream1.getTracks().length);
 				}
 			}
@@ -73,45 +73,24 @@ function onStartPressed() {
                         	console.log("New stream id: <<" + remoteVideoStream1.id + ">> " + remoteVideoStream1.getTracks().length);
 			} else {
 				remoteVideoStream1.addTrack(ev.track);
-				pc.addTrack(ev.track, remoteVideoStream1);
+				//pc.addTrack(ev.track, remoteVideoStream1);
                         	console.log("Previous stream id: <<" + remoteVideoStream1.id + ">> " + remoteVideoStream1.getTracks().length);
 			}
                         document.getElementById("videoStream1").srcObject = remoteVideoStream1;
+
+			pc.getTransceivers().forEach( (t) => { console.log("onStartPressed()::onTrack(): Got a transceiver!!", t); });
+			console.log("onStartPressed()::onTrack():.... stream has %d tracks.", remoteVideoStream1.getTracks().length);
+			remoteVideoStream1.getTracks().forEach( (track) => {
+				console.log("Track: Kind: %s, Id: %s, Label: %s", track.kind, track.id, track.label);
+			});
                 } 
 	}
 
 	// Adding Transceivers for All the Streams
 	localMediaStreams.getTracks().forEach(track => pc.addTransceiver(track, { direction: "sendrecv" }));
 
+        //pc.addTransceiver("audio", { direction: "inactive" } );
         pc.addTransceiver("video", { direction: "recvonly" } );
-
-
-
-	// data channel stuff
-	// 
-	/*
-	remoteControlDataChannel = pc.createDataChannel("foo");
-	if ( remoteControlDataChannel != null ) {
-		remoteControlDataChannel.onopen = function(event) {
-			console.log("dataChannel.onopen(): The data channel is now open.");
-		};
-		remoteControlDataChannel.onmessage = function(event) {
-			console.log("dataChannel.onmessage(): The data channel has received a message: <<" + event.data + ">>.");
-		};
-		remoteControlDataChannel.onclose = function(event) {
-			console.log("dataChannel.onclose(): The data channel is now closed.");
-			remoteControlDataChannel = null;
-		};
-		remoteControlDataChannel.onerror = function(event) {
-			console.error("dataChannel.onerror(): Oops, the data channel has generated an error.");
-			event.channel.onopen = null;
-			event.channel.onmessage = null;
-			event.channel.onclose = null;
-			event.channel.onerror = null;
-			remoteControlDataChannel = null;
-		};
-	}
-	*/
 
 
 	// iceCandidate Discovery
@@ -139,7 +118,12 @@ function onStartPressed() {
 // Send OfferRequest to Callee
 function sendOfferToCallee() {
 	var msg = pc.localDescription.sdp;
-	console.log("sendOfferToCallee(): OFFER: <<" + msg + ">>");
+	var tmp = msg;
+	var lines = tmp.split("\r\n");
+	var count = 0;
+	lines.forEach( (v) => { if ( v.substring(0, 2) == "m=" ) count++; });
+	console.log("sendOfferToCallee(): Offer has %d lines, %d m= sections", lines.length, count);
+	//console.log("sendOfferToCallee(): OFFER: <<" + msg + ">>");
 	websocketConnection.send(msg);
 }
 
@@ -148,14 +132,20 @@ function sendOfferToCallee() {
 function onAnswerReceived(answer) {
 	console.log("onAnswerRecieved(): Setting the received answer toremote description.");
 	//console.log("onAnswerReceived(): <<" + JSON.stringify(answer) + ">>.");
+	var tmp = answer;
+	var lines = tmp.split("\r\n");
+	var count = 0;
+	lines.forEach( (v) => { if ( v.substring(0, 2) == "m=" ) count++; });
 	var obj = new Object();
 	obj.type = "answer";
 	obj.sdp = answer;
 	console.log("onAnswerReceived(): <<" + JSON.stringify(obj) + ">>.");
 	//console.log("onAnswerReceived(): <<" + answer + ">>.");
+	console.log("onAnswerReceived(): Answer has %d lines, %d m= sections", lines.length, count);
 	pc.setRemoteDescription(obj).then(function() {
 		console.log("OK, done!");
 	});
+
 }
 
 
@@ -179,15 +169,27 @@ function onRenegotiatePressed() {
 			//pc.addTransceiver("video", { "direction": "recvonly" } );
 			//pc.createOffer().then( (offer) => { console.log("renegotiate offer: <<%s>>.", offer.sdp); } ); 
 			pc.getTransceivers().forEach( (t) => { console.log("GGot a transceiver!!", t); });
+			pc.createOffer().then(function(description) {
+				pc.setLocalDescription(description).then( () => { 
+					console.log("done setting local description!!");
+					pc.getTransceivers().forEach( (t) => { console.log("AFTER SET LOCAL DESCRIPTION: Got a transceiver!!", t); });
+					sendOfferToCallee();
+				});
+			});
 		} catch(err) {
 			console.log("Oops!!!!");
 		}
 	}
 
 
-	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
+	/*
+	console.log("before removing sender.... stream has %d tracks.", remoteVideoStream1.getTracks().length);
+	remoteVideoStream1.getTracks().forEach( (track) => {
+		console.log("Track: Kind: %s, Id: %s, Label: %s", track.kind, track.id, track.label);
+	});
+	*/
 
-	//debugger;
+	pc.getTransceivers().forEach( (t) => { console.log("BEFORE REMOVE SENDER: Got a transceiver!!", t); });
 
 	if ( audioIsTurnedOn ) {
 		console.log("removing senders");
@@ -198,12 +200,20 @@ function onRenegotiatePressed() {
 				console.log("Done removing a sender track!!");
 			}
 		});
+	} else {
+		console.log("adding sender back in");
+		//pc.getTransceivers().forEach( (t) => { t.stop(); });
+		localMediaStreams.getTracks().forEach(track => pc.addTrack(track));
+		if ( pc.getTransceivers() .length > 3 ) {
+			pc.getTransceivers().forEach( (t) => { 
+				if ( t.mid == "0" ) t.stop();
+			});
+		}
 	}
 
-	console.log("after removing senders");
+	pc.getTransceivers().forEach( (t) => { console.log("AFTER REMOVE SENDER: Got a transceiver!!", t); });
 
-	pc.getTransceivers().forEach( (t) => { console.log("Got a transceiver!!", t); });
-
+	/*
 	pc.getTransceivers().forEach( (t) => { 
 		if ( t.mid == "0" ) {
 			if ( audioIsTurnedOn ) {
@@ -218,30 +228,46 @@ function onRenegotiatePressed() {
 			t.direction = "recvonly";
 		}
 	});
+	*/
 
 	audioIsTurnedOn = !audioIsTurnedOn;
 
-	/*
 	pc.ontrack = function(ev) {
 		console.log("onRenegotitatePressed(): Got a track! Id: <<" + ev.track.id + ">> Kind: <<" + ev.track.kind + ">> Mid: <<" + ev.transceiver.mid + ">> Label: <<" + ev.track.label + ">> " );
 
+		pc.getTransceivers().forEach( (t) => { console.log("ONTRACK BEFORE ADDTRACK Got a transceiver!!", t); });
+		console.log("before addtrack.... stream has %d tracks.", remoteVideoStream1.getTracks().length);
+		remoteVideoStream1.getTracks().forEach( (track) => {
+			console.log("Track: Kind: %s, Id: %s, Label: %s", track.kind, track.id, track.label);
+		});
+
 		if ( ev.transceiver.mid == "0" ) {
 			remoteVideoStream1.addTrack(ev.track);
-			pc.addTrack(ev.track, remoteVideoStream1);
+			//pc.addTrack(ev.track, remoteVideoStream1);
                         console.log("Previous stream id: <<" + remoteVideoStream1.id + ">> " + remoteVideoStream1.getTracks().length);
                         document.getElementById("videoStream1").srcObject = remoteVideoStream1;
                 } 
+
+		//pc.getTransceivers().forEach( (t) => { if ( t.mid == null ) { t.stop(); } });
+
+		pc.getTransceivers().forEach( (t) => { console.log("ONTRACK AFTER ADDTRACK Got a transceiver!!", t); });
+		console.log("after addtrack.... stream has %d tracks.", remoteVideoStream1.getTracks().length);
+		remoteVideoStream1.getTracks().forEach( (track) => {
+			console.log("Track: Kind: %s, Id: %s, Label: %s", track.kind, track.id, track.label);
+		});
 	}
-	*/
 
 
+	/*
 	pc.createOffer().then(function(description) {
-		console.log("Here is the new offer: <<%s>>.", description.sdp);
+		//console.log("Here is the new offer: <<%s>>.", description.sdp);
 		pc.setLocalDescription(description).then( () => { 
 			console.log("done setting local description!!");
+			pc.getTransceivers().forEach( (t) => { console.log("AFTER SET LOCAL DESCRIPTION: Got a transceiver!!", t); });
 			sendOfferToCallee();
 		});
 	})
+	*/
 
 	console.log("Bye!");
 }
