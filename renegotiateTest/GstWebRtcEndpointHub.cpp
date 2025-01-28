@@ -590,27 +590,53 @@ void GstWebRtcEndpointHub::onNewTransceiver(GstElement * webrtc, GstWebRTCRTPTra
 
 void GstWebRtcEndpointHub::onIncomingStream(GstElement * webrtc, GstPad * pad, GstElement * pipe) {
 
-	Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): A pad has been added to the webrtcbin module for an incoming RTP stream.");
+	Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): A pad named <<%s>> has been added to the webrtcbin module for an incoming RTP stream.", GST_PAD_NAME(pad));
 
         if (GST_PAD_DIRECTION (pad) != GST_PAD_SRC) {
 		Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): Huh?. This should not happen.");
                 return;
         }
 
-        GstElement * decodebin = NULL;
-        GstPad * sinkpad = NULL;
+	// get the incoming audio branch point, if it exists
+	
+	GstElement * incomingAudioBranchPoint = gst_bin_get_by_name(GST_BIN(pipe), "incomingAudioBranchPoint");
+	if ( incomingAudioBranchPoint == NULL ) {
 
-        decodebin = gst_element_factory_make ("decodebin", NULL);
-	auto odis = [](GstElement * decodebin, GstPad * pad, GstElement * pipe){ GstWebRtcEndpointHub::Instance()->onDecodedIncomingStream(decodebin, pad, pipe); };
-        g_signal_connect (decodebin, "pad-added", G_CALLBACK((ODISTYPE)odis), pipe);
-        gst_bin_add(GST_BIN (pipe), decodebin);
-        gst_element_sync_state_with_parent (decodebin);
+        	GstElement * decodebin = NULL;
+        	GstPad * sinkpad = NULL;
 
-        sinkpad = gst_element_get_static_pad (decodebin, "sink");
-        gst_pad_link (pad, sinkpad);
-        gst_object_unref (sinkpad);
+        	decodebin = gst_element_factory_make ("decodebin", "incomingAudioBranchPoint");
+		auto odis = [](GstElement * decodebin, GstPad * pad, GstElement * pipe){ GstWebRtcEndpointHub::Instance()->onDecodedIncomingStream(decodebin, pad, pipe); };
+        	g_signal_connect (decodebin, "pad-added", G_CALLBACK((ODISTYPE)odis), pipe);
+        	gst_bin_add(GST_BIN (pipe), decodebin);
+        	gst_element_sync_state_with_parent (decodebin);
 
-	Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): Linking pad to \"decodebin\" sink.");
+        	sinkpad = gst_element_get_static_pad (decodebin, "sink");
+        	gst_pad_link (pad, sinkpad);
+        	gst_object_unref (sinkpad);
+
+		Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): Linking pad to \"decodebin\" sink.");
+
+	} else {
+
+		GstStateChangeReturn sret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PAUSED);
+		Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): Pausing the pipeline. <<%d>>", sret);
+
+		Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): unlinking the former incoming audio branch.");
+		gst_element_unlink (webrtc, incomingAudioBranchPoint);
+		Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): done... getting the pad to relink.");
+
+		GstPad * qpad = gst_element_get_static_pad(incomingAudioBranchPoint, "sink");
+		g_assert_nonnull(qpad);
+		Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): linking the new branch of the pipeline.");
+
+		GstPadLinkReturn ret =  gst_pad_link(pad, qpad);
+		g_assert_cmphex(ret, ==, GST_PAD_LINK_OK);
+
+		sret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PLAYING);
+		Log::Inst().log("GstWebRtcEndpointHub::onIncomingStream(): Setting  the pipeline back to PLAYING STATE. <<%d>>", sret);
+
+	}
 }
 
 
@@ -641,6 +667,34 @@ void GstWebRtcEndpointHub::onDecodedIncomingStream(GstElement * decodebin, GstPa
         caps = gst_pad_get_current_caps (pad);
         name = gst_structure_get_name (gst_caps_get_structure (caps, 0));
 
+	if ( g_str_has_prefix(name, "audio") ) {
+		q = gst_element_factory_make("queue", "queue");
+		g_assert_nonnull(q);
+		conv = gst_element_factory_make("audioconvert", NULL);
+		g_assert_nonnull(conv);
+		resample = gst_element_factory_make("audioresample", NULL);
+		g_assert_nonnull(resample);
+		sink = gst_element_factory_make("alsasink", NULL);
+		g_assert_nonnull(sink);
+		g_object_set(G_OBJECT(sink), "device", "hw:2", NULL);
+
+		gst_bin_add_many(GST_BIN(pipe), q, conv, resample, sink, NULL);
+		gst_element_sync_state_with_parent(q);
+		gst_element_sync_state_with_parent(conv);
+		gst_element_sync_state_with_parent(resample);
+		gst_element_sync_state_with_parent(sink);
+
+		gst_element_link_many(q, conv, resample, sink, NULL);
+
+		qpad = gst_element_get_static_pad(q, "sink");
+		Log::Inst().log("GstWebRtcEndpointHub::onDecodedIncomingStream(): linking the new branch of the pipeline.");
+
+		gst_pad_link(pad, qpad);
+		g_assert_cmphex(ret, ==, GST_PAD_LINK_OK);
+	}
+
+
+	/*
 	fake = gst_element_factory_make("fakesink", NULL);
 
 	if ( fake != NULL ) {
@@ -664,7 +718,18 @@ void GstWebRtcEndpointHub::onDecodedIncomingStream(GstElement * decodebin, GstPa
 	} else {
 		Log::Inst().log("GstWebRtcEndpointHub::onDecodedIncomingStream(): Oops, error on gst_element_factory_create(fakesink, NULL).");
 	}
+	*/
 }
+
+
+
+void GstWebRtcEndpointHub::onStreamRemoved(GstElement * webrtc, GstPad * pad, GstElement * pipe) {
+	Log::Inst().log("GstWebRtcEndpointHub::onStreamRemoved(): HELLLOOOOO!!!!!!!!!.");
+}
+
+
+
+
 
 
 
@@ -690,6 +755,7 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 
 
          // VP9
+	 /*
 	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
                 "audiotestsrc is-live=true wave=red-noise volume=0.1 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
                 "queue ! capsfilter caps=" RTP_CAPS_OPUS " name=\"capsFilterBeforeWebRtcBin\" ! webrtcElement. "
@@ -698,7 +764,18 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
 		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
 		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
+	*/
+
         
+         // VP9
+	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
+                "alsasrc device=hw:2 ! audioconvert ! audioresample ! queue ! opusenc ! rtpopuspay ! "
+                "queue ! capsfilter caps=" RTP_CAPS_OPUS " name=\"capsFilterBeforeWebRtcBin\" ! webrtcElement. "
+		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
+		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
+		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
+		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
+		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
 
 
 
@@ -788,6 +865,10 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
 	auto ois = [](GstElement * webrtc, GstPad * pad, GstElement * pipe){ GstWebRtcEndpointHub::Instance()->onIncomingStream(webrtc, pad, pipe); };
         g_signal_connect (webrtcElement, "pad-added", G_CALLBACK((OISTYPE)ois), pipelineBinElement);
 
+	auto opr = [](GstElement * webrtc, GstPad * pad, GstElement * pipe){ GstWebRtcEndpointHub::Instance()->onStreamRemoved(webrtc, pad, pipe); };
+        g_signal_connect (webrtcElement, "pad-removed", G_CALLBACK((OISTYPE)ois), pipelineBinElement);
+
+
         /* Lifetime is the same as the pipeline itself */
         gst_object_unref (webrtcElement);
 
@@ -850,7 +931,7 @@ void GstWebRtcEndpointHub::replaceOfferForRenegotiation() {
         	Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Received SDP offer:\n%s", sdp_str);
         	g_free(sdp_str);
     	} else {
-        	Log::Inst().log("GstWebRtcEndpointHub::onNegotiationNeeded(): Failed to convert SDP message to text.");
+        	Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Failed to convert SDP message to text.");
     	}
         
         GstWebRTCSessionDescription *offer = NULL;
@@ -862,6 +943,7 @@ void GstWebRtcEndpointHub::replaceOfferForRenegotiation() {
         Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Setting received offer SDP with promise \"onOfferSet\" for when it's done.");
 
         /* Set remote description on our pipeline */
+
         {
 		auto oos = [](GstPromise * p, gpointer data){ GstWebRtcEndpointHub::Instance()->onOfferSet(p, data); };
 		GstElement * webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
@@ -870,28 +952,32 @@ void GstWebRtcEndpointHub::replaceOfferForRenegotiation() {
                 g_signal_emit_by_name (webrtcElement, "set-remote-description", offer, promise);
         }
         gst_webrtc_session_description_free (offer);
+	
 
         Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Done setting offer.");
 
 	/*
 	gchar * offerSdpCopy = NULL;
 	offerSdpCopy = g_strndup(engagementOfferSdp.c_str(), engagementOfferSdp.size());
-	auto onn = [](GstElement * webrtc, gpointer userData){ GstWebRtcEndpointHub::Instance()->onNegotiationNeeded(webrtc, userData); };
+	auto onn = [](GstElement * webrtc, gpointer userData){ GstWebRtcEndpointHub::Instance()->onNegotiationNeededForRenegotiation(webrtc, userData); };
 	GstElement * webrtcElement = gst_bin_get_by_name(GST_BIN(pipelineBinElement), "webrtcElement");
         g_assert_nonnull (webrtcElement);
 	g_signal_connect(webrtcElement, "on-negotiation-needed", G_CALLBACK((ONNTYPE)onn), offerSdpCopy);
+
+	Log::Inst().log("GstWebRtcEndpointHub::replaceOfferForRenegotiation(): Will wait for negotiation needed signal.");
 	*/
 
 }
 
 
 
-/*
 void GstWebRtcEndpointHub::onNegotiationNeededForRenegotiation(GstElement * webrtc, gpointer offerSdpFreeAfterUse) {
 
+        Log::Inst().log("GstWebRtcEndpointHub::OnNegotiationNeededForRenegotiation(): OK!!!!!!!.");
 
+
+	g_free(offerSdpFreeAfterUse);
 }
-*/
 
 
 
@@ -944,6 +1030,17 @@ void GstWebRtcEndpointHub::turnOffAudioInWebRtcPipeline() {
         for ( I = 0; I < transceivers->len; I++ ) {
                 trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, I);
 		Log::Inst().log("turnOffAudioInWebRtcPipeline(): Got a transceiver. %d %d", trans->mline, trans->direction);
+		/*
+		if ( trans->mline == 1 ) {
+			trans->direction = (GstWebRTCRTPTransceiverDirection)4;
+		} else {
+			trans->direction = (GstWebRTCRTPTransceiverDirection)1;
+		}
+		*/
+	}
+        for ( I = 0; I < transceivers->len; I++ ) {
+                trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, I);
+		Log::Inst().log("turnOffAudioInWebRtcPipeline(): Got a transceiver. %d %d", trans->mline, trans->direction);
 	}
 
 	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PLAYING);
@@ -993,7 +1090,28 @@ void GstWebRtcEndpointHub::turnOnAudioInWebRtcPipeline() {
         for ( I = 0; I < transceivers->len; I++ ) {
                 trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, I);
 		Log::Inst().log("turnOnAudioInWebRtcPipeline(): Got a transceiver. %d %d", trans->mline, trans->direction);
+		/*
+		if ( trans->mline == 1 ) {
+			trans->direction = (GstWebRTCRTPTransceiverDirection)4;
+		} else {
+			trans->direction = (GstWebRTCRTPTransceiverDirection)1;
+		}
+		*/
 	}
+	/*
+	if ( transceivers->len > 2 ) {
+                trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, transceivers->len - 1);
+		trans->direction = (GstWebRTCRTPTransceiverDirection)4;
+	} else {
+                trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, 0);
+		trans->direction = (GstWebRTCRTPTransceiverDirection)4;
+	}
+	*/
+        for ( I = 0; I < transceivers->len; I++ ) {
+                trans = g_array_index (transceivers, GstWebRTCRTPTransceiver *, I);
+		Log::Inst().log("turnOffAudioInWebRtcPipeline(): Got a transceiver. %d %d", trans->mline, trans->direction);
+	}
+
 
 	ret = gst_element_set_state ((GstElement *)pipelineBinElement, GST_STATE_PLAYING);
 	Log::Inst().log("turnOnAudioInWebRtcPipeline(): Starting the pipeline. %d", ret);

@@ -36,6 +36,7 @@ typedef void (*OEMTYPE)(GstBus *, GstMessage *, gpointer);
 typedef void (*OEOSMTYPE)(GstBus *, GstMessage *, gpointer);
 typedef void (*OPSCTYPE)(GstBus *, GstMessage *, gpointer);
 
+typedef void (*OPRTYPE)(GstElement *, GstPad *, GstElement *);
 
 
 namespace guident {
@@ -74,6 +75,7 @@ public:
 	void run();
 
         void onNegotiationNeeded(GstElement * element, gpointer offerSdpFreeAfterUse);
+        void onNegotiationNeededForRenegotiation(GstElement * element, gpointer offerSdpFreeAfterUse);
 	void onIceCandidate(GstElement * webrtc, guint mlineindex, gchar * candidate, gpointer userData);
         void onIceGatheringStateNotify(GstElement * webrtc, GParamSpec * pspec, gpointer userData);
         void onNewTransceiver(GstElement * webrtc, GstWebRTCRTPTransceiver * trans, gpointer userData);
@@ -90,6 +92,7 @@ public:
 	void onEndOfStreamMessage(GstBus * bus, GstMessage * msg, gpointer userData);
 	void onPipelineStateChange(GstBus * bus, GstMessage * msg, gpointer userData);
 
+	void onStreamRemoved(GstElement * webrtc, GstPad * pad, GstElement * pipe);
 
 private:
 

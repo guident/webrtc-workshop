@@ -58,8 +58,8 @@ void GstEndpointEngagedState::onOfferReceived() {
 		GstWebRtcEndpointHub::Instance()->turnOnAudioInWebRtcPipeline();
 	}
 
-
 	GstWebRtcEndpointHub::Instance()->replaceOfferForRenegotiation();
+
 
 }
 
