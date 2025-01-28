@@ -235,9 +235,6 @@ void GstWebRtcEndpointHub::sendSdpAnswerThroughWss(const char * sdp) {
 
 
 
-
-
-
 void GstWebRtcEndpointHub::onWebsocketPong(SoupWebsocketConnection * conn, GBytes * message, gpointer userData) {
 	Log::Inst().log("GstWebRtcEndpointHub::onWebsocketPong(): GOT A PONG!!!!");
         lastPongReceived = time(NULL);
@@ -528,14 +525,14 @@ void GstWebRtcEndpointHub::onIceGatheringStateNotify(GstElement * webrtc, GParam
                                 g_object_get(webrtc, "local-description", &answer, NULL);
 
                                 if ( answer != NULL ) {
-					char sdpAnswerBuffer[5000];
-					memset(sdpAnswerBuffer, 0, 5000);
-                                        strncpy(sdpAnswerBuffer, gst_sdp_message_as_text(answer->sdp), 4999);
-                                        sendSdpAnswerThroughWss((const char *)sdpAnswerBuffer);
+									char sdpAnswerBuffer[5000];
+									memset(sdpAnswerBuffer, 0, 5000);
+									strncpy(sdpAnswerBuffer, gst_sdp_message_as_text(answer->sdp), 4999);
+									sendSdpAnswerThroughWss((const char *)sdpAnswerBuffer);
 
-                                        gst_webrtc_session_description_free (answer);
+									gst_webrtc_session_description_free (answer);
 
-					this->__state->onEngaged();
+									this->__state->onEngaged();
 
                                 } else {
                                         Log::Inst().log("GstWebRtcEndpointHub::onIceGatheringStateNotify(): Ice gathering is complete, but oops, answer SDP cannot be retrieved.");
@@ -676,23 +673,23 @@ void GstWebRtcEndpointHub::constructWebRtcPipeline() {
     
 
          // VP9 iframeinterval=150 idrinterval=384
-	// pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
-    //             "audiotestsrc is-live=true wave=red-noise volume=0.1 name=audio_source ! audioconvert ! audioresample ! queue name=audio_queue ! opusenc ! rtpopuspay ! "
-    //             "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
-	// 	"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
-	// 	" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
-	// 	" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
-	// 	" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
-	// 	" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
-
-
-	// Video only vp9
 	pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
+                "audiotestsrc is-live=true wave=red-noise volume=0.1 name=audio_source ! audioconvert ! audioresample ! queue name=audio_queue ! opusenc ! rtpopuspay ! "
+                "queue ! " RTP_CAPS_OPUS " ! webrtcElement. "
 		"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
 		" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
 		" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
 		" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
+
+
+	// Video only vp9
+	// pipelineBinElement = gst_parse_launch ("webrtcbin bundle-policy=2 name=webrtcElement " 
+	// 	"tcambin name=cameraElement serial=\"" CAMERA_SERIAL_NUMBER "\" device-caps=\"video/x-bayer(memory:NVMM),format=pwl-rggb16H12,width=1920,height=1200,framerate=30/1\" conversion-element=3 ! "
+	// 	" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1200,framerate=(fraction)30/1 ! nvvidconv ! "
+	// 	" video/x-raw(memory:NVMM),format=(string)NV12,width=(int)1920,height=(int)1080,framerate=(fraction)30/1 ! "
+	// 	" nvv4l2vp9enc name=encoder iframeinterval=150 idrinterval=384 ! rtpvp9pay mtu=1300 pt=98 name=vp9payloader ! "
+	// 	" " RTP_CAPS_VP9 " ! webrtcElement. ", &error);
         
 
 	/*
