@@ -1436,7 +1436,7 @@ void WssStateMachine::constructWebRtcPipeline() {
     g_signal_connect(webrtcElement, "notify::ice-gathering-state", G_CALLBACK(WssStateMachine::onIceGatheringStateNotifyStatic), this);
     g_signal_connect(webrtcElement, "on-new-transceiver", G_CALLBACK(WssStateMachine::onNewTransceiverStatic), this);
     g_signal_connect(webrtcElement, "pad-added", G_CALLBACK(WssStateMachine::onIncomingStreamStatic), this);
-    g_signal_connect(webrtcElement, "pad-removed", G_CALLBACK(WssStateMachine::onRemoveStreamStatic), this);
+    //g_signal_connect(webrtcElement, "pad-removed", G_CALLBACK(WssStateMachine::onRemoveStreamStatic), this);
 
     // attach other callbacks
 
